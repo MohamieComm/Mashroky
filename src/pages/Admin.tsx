@@ -50,12 +50,76 @@ const recentBookings = [
 
 export default function Admin() {
   const [activeSection, setActiveSection] = useState("dashboard");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-muted flex" dir="rtl">
-      {/* Sidebar */}
-      <aside className={`${sidebarOpen ? "w-64" : "w-20"} bg-card border-l border-border transition-all duration-300 flex flex-col`}>
+    <div className="min-h-screen bg-muted flex overflow-x-hidden" dir="rtl">
+      {/* Mobile Sidebar Overlay */}
+      <div 
+        className={`fixed inset-0 z-40 lg:hidden transition-opacity duration-300 ${
+          mobileSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        <div 
+          className="absolute inset-0 bg-foreground/30 backdrop-blur-sm"
+          onClick={() => setMobileSidebarOpen(false)}
+        />
+        <aside className={`absolute top-0 right-0 h-full w-64 max-w-[80vw] bg-card shadow-2xl transform transition-transform duration-300 ease-out flex flex-col ${
+          mobileSidebarOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}>
+          {/* Logo */}
+          <div className="p-4 border-b border-border flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 hero-gradient rounded-xl flex items-center justify-center">
+                <Plane className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <span className="text-xl font-bold text-gradient">مشروك</span>
+            </div>
+            <button onClick={() => setMobileSidebarOpen(false)} className="p-2 hover:bg-muted rounded-lg">
+              <ChevronLeft className="w-5 h-5 rotate-180" />
+            </button>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+            {sidebarItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeSection === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveSection(item.id);
+                    setMobileSidebarOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                    isActive
+                      ? "hero-gradient text-primary-foreground shadow-soft"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <span>{item.name}</span>
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Logout */}
+          <div className="p-4 border-t border-border">
+            <a href="/">
+              <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all">
+                <LogOut className="w-5 h-5 flex-shrink-0" />
+                <span>العودة للموقع</span>
+              </button>
+            </a>
+          </div>
+        </aside>
+      </div>
+
+      {/* Desktop Sidebar */}
+      <aside className={`hidden lg:flex ${sidebarOpen ? "w-64" : "w-20"} bg-card border-l border-border transition-all duration-300 flex-col`}>
         {/* Logo */}
         <div className="p-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -105,9 +169,12 @@ export default function Admin() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="bg-card border-b border-border px-6 py-4 flex items-center justify-between">
+        <header className="bg-card border-b border-border px-4 lg:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button className="lg:hidden p-2 hover:bg-muted rounded-lg">
+            <button 
+              className="lg:hidden p-2 hover:bg-muted rounded-lg"
+              onClick={() => setMobileSidebarOpen(true)}
+            >
               <Menu className="w-5 h-5" />
             </button>
             <h1 className="text-xl font-bold">
