@@ -96,54 +96,72 @@ export function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Navigation Overlay */}
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-40 md:hidden"
-            onClick={() => setIsOpen(false)}
-          />
+      {/* Mobile Navigation - Using Sheet/Drawer pattern */}
+      <div 
+        className={`fixed inset-0 z-40 md:hidden transition-opacity duration-300 ${
+          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        {/* Backdrop */}
+        <div 
+          className="absolute inset-0 bg-foreground/30 backdrop-blur-sm"
+          onClick={() => setIsOpen(false)}
+        />
+        
+        {/* Slide-in Menu */}
+        <div 
+          className={`absolute top-0 right-0 h-full w-72 max-w-[80vw] bg-card shadow-2xl transform transition-transform duration-300 ease-out ${
+            isOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
+          {/* Close button inside menu */}
+          <div className="flex items-center justify-between p-4 border-b border-border">
+            <span className="font-bold text-lg text-gradient">مشروك</span>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="p-2 rounded-lg hover:bg-muted transition-colors"
+              aria-label="إغلاق القائمة"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
           
-          {/* Slide-in Menu */}
-          <div className="fixed top-0 right-0 h-full w-72 max-w-[85vw] bg-card z-50 md:hidden shadow-xl overflow-y-auto">
-            <div className="pt-20 px-4 pb-6">
-              <div className="flex flex-col gap-2">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = location.pathname === item.path;
-                  return (
-                    <Link 
-                      key={item.path} 
-                      to={item.path}
-                      onClick={() => setIsOpen(false)}
+          <div className="p-4 overflow-y-auto h-[calc(100%-60px)]">
+            <div className="flex flex-col gap-2">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.path;
+                return (
+                  <Link 
+                    key={item.path} 
+                    to={item.path}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Button
+                      variant={isActive ? "default" : "ghost"}
+                      className="w-full justify-start gap-3"
                     >
-                      <Button
-                        variant={isActive ? "default" : "ghost"}
-                        className="w-full justify-start gap-3"
-                      >
-                        <Icon className="w-5 h-5" />
-                        {item.name}
-                      </Button>
-                    </Link>
-                  );
-                })}
-                <div className="h-px bg-border my-2" />
-                <Link to="/admin" onClick={() => setIsOpen(false)}>
-                  <Button variant="outline" className="w-full justify-start gap-3">
-                    <Shield className="w-5 h-5" />
-                    لوحة التحكم
-                  </Button>
-                </Link>
-                <Button variant="hero" className="w-full justify-start gap-3 mt-2">
-                  <MessageCircle className="w-5 h-5" />
-                  تواصل معنا
+                      <Icon className="w-5 h-5" />
+                      {item.name}
+                    </Button>
+                  </Link>
+                );
+              })}
+              <div className="h-px bg-border my-2" />
+              <Link to="/admin" onClick={() => setIsOpen(false)}>
+                <Button variant="outline" className="w-full justify-start gap-3">
+                  <Shield className="w-5 h-5" />
+                  لوحة التحكم
                 </Button>
-              </div>
+              </Link>
+              <Button variant="hero" className="w-full justify-start gap-3 mt-2">
+                <MessageCircle className="w-5 h-5" />
+                تواصل معنا
+              </Button>
             </div>
           </div>
-        </>
-      )}
+        </div>
+      </div>
     </>
   );
 }
