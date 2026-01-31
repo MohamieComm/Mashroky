@@ -14,16 +14,203 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          booking_date: string
+          contact_phone: string | null
+          created_at: string
+          id: string
+          num_travelers: number
+          payment_status: string
+          special_requests: string | null
+          status: string
+          total_price: number
+          travel_date: string
+          trip_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          booking_date?: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          num_travelers?: number
+          payment_status?: string
+          special_requests?: string | null
+          status?: string
+          total_price: number
+          travel_date: string
+          trip_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          booking_date?: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          num_travelers?: number
+          payment_status?: string
+          special_requests?: string | null
+          status?: string
+          total_price?: number
+          travel_date?: string
+          trip_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      trips: {
+        Row: {
+          best_season: string | null
+          country: string
+          created_at: string
+          description: string | null
+          destination: string
+          duration_days: number
+          end_date: string | null
+          id: string
+          image_url: string | null
+          included_services: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          original_price: number | null
+          price: number
+          rating: number | null
+          reviews_count: number | null
+          start_date: string | null
+          title: string
+          travel_procedures: string | null
+          updated_at: string
+          visa_info: string | null
+          visa_required: boolean | null
+        }
+        Insert: {
+          best_season?: string | null
+          country: string
+          created_at?: string
+          description?: string | null
+          destination: string
+          duration_days?: number
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          included_services?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          original_price?: number | null
+          price: number
+          rating?: number | null
+          reviews_count?: number | null
+          start_date?: string | null
+          title: string
+          travel_procedures?: string | null
+          updated_at?: string
+          visa_info?: string | null
+          visa_required?: boolean | null
+        }
+        Update: {
+          best_season?: string | null
+          country?: string
+          created_at?: string
+          description?: string | null
+          destination?: string
+          duration_days?: number
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          included_services?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          original_price?: number | null
+          price?: number
+          rating?: number | null
+          reviews_count?: number | null
+          start_date?: string | null
+          title?: string
+          travel_procedures?: string | null
+          updated_at?: string
+          visa_info?: string | null
+          visa_required?: boolean | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +337,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
