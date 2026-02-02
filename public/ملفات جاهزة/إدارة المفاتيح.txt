@@ -1,0 +1,342 @@
+
+MongoDB + Prisma + Auth + API Keys + Dashboard إدارة مفاتيح.
+
+1. **Prisma + MongoDB**
+2. **Repository Layer حقيقي**
+3. **لوحة إدارة API Keys (أزرق داكن)**
+
+---
+
+### 1. إعداد Prisma مع MongoDB
+
+#### 1.1 `schema.prisma`
+
+في جذر المشروع:
+
+```prisma
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String           @id @default(auto()) @map("_id") @db.ObjectId
+  email        String           @unique
+  passwordHash String
+  apiKey       String           @unique
+  createdAt    DateTime         @default(now())
+  sessions     RefreshSession[]
+}
+
+model RefreshSession {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String   @db.ObjectId
+  user         User     @relation(fields: [userId], references: [id])
+  refreshToken String   @unique
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+}
+```
+
+#### 1.2 تثبيت Prisma و MongoDB
+
+```bash
+npm install prisma @prisma/client
+npx prisma init
+```
+
+في `.env`:
+
+```env
+DATABASE_URL="mongodb+srv://user:pass@cluster/dbname"
+```
+
+ثم:
+
+```bash
+npx prisma db push
+```
+
+#### 1.3 Prisma Client
+
+```ts
+// src/lib/prisma.ts
+import { PrismaClient } from "@prisma/client";
+
+export const prisma = new PrismaClient();
+```
+
+---
+
+### 2. Repository Layer حقيقي
+
+#### 2.1 `src/repositories/userRepo.ts`
+
+```ts
+import { prisma } from "../lib/prisma.js";
+import { generateApiKey } from "../services/apiKeyService.js";
+
+export const findUserByEmail = (email: string) =>
+  prisma.user.findUnique({ where: { email } });
+
+export const findUserByApiKey = (apiKey: string) =>
+  prisma.user.findUnique({ where: { apiKey } });
+
+export const createUser = async (params: { email: string; passwordHash: string }) => {
+  const apiKey = generateApiKey();
+  return prisma.user.create({
+    data: {
+      email: params.email,
+      passwordHash: params.passwordHash,
+      apiKey
+    }
+  });
+};
+
+export const rotateApiKey = async (userId: string) => {
+  const apiKey = generateApiKey();
+  return prisma.user.update({
+    where: { id: userId },
+    data: { apiKey }
+  });
+};
+```
+
+#### 2.2 `src/repositories/authRepo.ts`
+
+```ts
+import { prisma } from "../lib/prisma.js";
+
+export const saveRefreshSession = async (userId: string, refreshToken: string, expiresAt: Date) =>
+  prisma.refreshSession.create({
+    data: { userId, refreshToken, expiresAt }
+  });
+
+export const findSessionByToken = (refreshToken: string) =>
+  prisma.refreshSession.findUnique({ where: { refreshToken } });
+
+export const deleteSession = (refreshToken: string) =>
+  prisma.refreshSession.delete({ where: { refreshToken } });
+```
+
+> الآن كل ما استخدمناه سابقًا في `authRoutes` و `apiKeyAuth` أصبح حقيقي ومربوط بـ MongoDB.
+
+---
+
+### 3. ربط Auth + API Keys مع Prisma
+
+#### 3.1 تحديث `authRoutes.ts` لاستخدام الـ Repos
+
+```ts
+// src/routes/authRoutes.ts
+import { Router, Request, Response } from "express";
+import bcrypt from "bcryptjs";
+import {
+  signAccessToken,
+  signRefreshToken,
+  verifyRefreshToken
+} from "../services/jwtService.js";
+import {
+  findUserByEmail,
+  createUser
+} from "../repositories/userRepo.js";
+import {
+  saveRefreshSession,
+  findSessionByToken,
+  deleteSession
+} from "../repositories/authRepo.js";
+
+const router = Router();
+
+router.post("/register", async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+  const existing = await findUserByEmail(email);
+  if (existing) return res.status(400).json({ message: "المستخدم موجود" });
+
+  const passwordHash = await bcrypt.hash(password, 10);
+  const user = await createUser({ email, passwordHash });
+
+  res.status(201).json({ message: "تم إنشاء المستخدم", userId: user.id, apiKey: user.apiKey });
+});
+
+router.post("/login", async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+  const user = await findUserByEmail(email);
+  if (!user) return res.status(401).json({ message: "بيانات الدخول غير صحيحة" });
+
+  const ok = await bcrypt.compare(password, user.passwordHash);
+  if (!ok) return res.status(401).json({ message: "بيانات الدخول غير صحيحة" });
+
+  const accessToken = signAccessToken(user.id);
+  const refreshToken = signRefreshToken(user.id);
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  await saveRefreshSession(user.id, refreshToken, expiresAt);
+
+  res.json({ accessToken, refreshToken, apiKey: user.apiKey });
+});
+
+router.post("/refresh", async (req: Request, res: Response) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) return res.status(400).json({ message: "refreshToken مفقود" });
+
+  const session = await findSessionByToken(refreshToken);
+  if (!session) return res.status(401).json({ message: "جلسة غير صالحة" });
+
+  const payload = verifyRefreshToken(refreshToken);
+  const accessToken = signAccessToken(payload.userId);
+
+  res.json({ accessToken });
+});
+
+router.post("/logout", async (req: Request, res: Response) => {
+  const { refreshToken } = req.body;
+  if (refreshToken) await deleteSession(refreshToken);
+  res.json({ message: "تم تسجيل الخروج" });
+});
+
+export default router;
+```
+
+#### 3.2 Middleware API Key مع Prisma
+
+```ts
+// src/middleware/apiKeyAuth.ts
+import { Request, Response, NextFunction } from "express";
+import { findUserByApiKey } from "../repositories/userRepo.js";
+
+export const apiKeyAuth = async (req: Request, res: Response, next: NextFunction) => {
+  const apiKey = req.header("X-API-Key");
+  if (!apiKey) return res.status(401).json({ message: "API Key مفقود" });
+
+  const user = await findUserByApiKey(apiKey);
+  if (!user) return res.status(401).json({ message: "API Key غير صالح" });
+
+  (req as any).user = user;
+  next();
+};
+```
+
+ثم:
+
+```ts
+app.use("/api", apiKeyAuth); // قبل /api/travel و /api/flights ...
+```
+
+---
+
+### 4. لوحة إدارة API Keys (أزرق داكن)
+
+الفكرة:  
+Endpoint لإدارة الـ API Key + واجهة Dashboard بنفس روح مشروع السفر (أزرق داكن).
+
+#### 4.1 Endpoints إدارة API Key
+
+```ts
+// src/routes/apiKeyRoutes.ts
+import { Router, Request, Response } from "express";
+import { rotateApiKey } from "../repositories/userRepo.js";
+
+const router = Router();
+
+// GET /account/api-key
+router.get("/api-key", (req: Request, res: Response) => {
+  const user = (req as any).user;
+  res.json({ apiKey: user.apiKey });
+});
+
+// POST /account/api-key/rotate
+router.post("/api-key/rotate", async (req: Request, res: Response) => {
+  const user = (req as any).user;
+  const updated = await rotateApiKey(user.id);
+  res.json({ apiKey: updated.apiKey });
+});
+
+export default router;
+```
+
+ثم في `server.ts`:
+
+```ts
+import apiKeyRoutes from "./routes/apiKeyRoutes.js";
+
+app.use("/account", apiKeyAuth, apiKeyRoutes);
+```
+
+#### 4.2 واجهة Dashboard (HTML بسيط أزرق داكن)
+
+```html
+<!-- public/api-keys-dashboard.html -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>إدارة مفاتيح API - مشروع السفر</title>
+  <style>
+    body { margin:0; font-family:system-ui; background:#020617; color:#e5e7eb; }
+    header { padding:20px 32px; background:#0b1120; border-bottom:1px solid #1f2937; display:flex; justify-content:space-between; align-items:center; }
+    .brand { font-size:22px; font-weight:600; color:#e5e7eb; }
+    .brand span { color:#38bdf8; }
+    main { max-width:900px; margin:32px auto; padding:0 24px; }
+    .card { background:#020617; border:1px solid #1f2937; border-radius:16px; padding:20px 22px; }
+    .label { font-size:13px; color:#9ca3af; margin-bottom:4px; }
+    .api-key-box { background:#020617; border:1px dashed #1f2937; padding:12px; border-radius:10px; font-family:monospace; font-size:13px; word-break:break-all; }
+    button { margin-top:12px; padding:8px 16px; border-radius:999px; border:none; background:#1d4ed8; color:white; cursor:pointer; font-size:13px; }
+    button:hover { background:#2563eb; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">لوحة <span>مشروع السفر</span></div>
+  </header>
+  <main>
+    <h2>إدارة مفتاح API</h2>
+    <div class="card">
+      <div class="label">مفتاح API الحالي</div>
+      <div id="apiKey" class="api-key-box">••••••••••••••••••••••••••••••••</div>
+      <button onclick="rotate()">تدوير مفتاح جديد</button>
+    </div>
+  </main>
+
+  <script>
+    const baseUrl = "http://localhost:4000";
+    const accessToken = ""; // ضع الـ JWT هنا (من الـ frontend الفعلي)
+
+    async function loadKey() {
+      const res = await fetch(baseUrl + "/account/api-key", {
+        headers: {
+          "Authorization": "Bearer " + accessToken
+        }
+      });
+      const data = await res.json();
+      document.getElementById("apiKey").textContent = data.apiKey;
+    }
+
+    async function rotate() {
+      const res = await fetch(baseUrl + "/account/api-key/rotate", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + accessToken
+        }
+      });
+      const data = await res.json();
+      document.getElementById("apiKey").textContent = data.apiKey;
+    }
+
+    loadKey();
+  </script>
+</body>
+</html>
+```
+
+ثم:
+
+```ts
+app.use("/dashboard", express.static("public"));
+```
+
+---

@@ -1,0 +1,372 @@
+
+
+Backend API Gateway
+
+ **Backend API Gateway ** لكل خدمات السفر .
+---
+
+### الهيكل العام للمشروع
+
+```bash
+travel-backend/
+  package.json
+  .env
+  src/
+    server.js
+    config/
+      axiosClient.js
+      providersConfig.js
+    services/
+      amadeusService.js
+      googleMapsService.js
+      openWeatherService.js
+      geoDbService.js
+      unifiedTravelService.js
+    routes/
+      travelRoutes.js
+```
+
+---
+
+### 1. ملف `package.json`
+
+```json
+{
+  "name": "travel-backend",
+  "version": "1.0.0",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.0",
+    "express": "^4.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
+```
+
+---
+
+### 2. ملف البيئة `.env` (تعدّل القيم فقط)
+
+```env
+PORT=4000
+
+AMADEUS_API_KEY=your_amadeus_key
+AMADEUS_API_SECRET=your_amadeus_secret
+
+GOOGLE_MAPS_API_KEY=your_google_maps_key
+OPENWEATHER_API_KEY=your_openweather_key
+GEODB_API_KEY=your_geodb_key
+```
+
+---
+
+### 3. إعداد Axios موحّد `src/config/axiosClient.js`
+
+```js
+import axios from "axios";
+
+export const createClient = (baseURL, headers = {}) => {
+  const client = axios.create({
+    baseURL,
+    headers,
+    timeout: 10000
+  });
+
+  client.interceptors.response.use(
+    (res) => res,
+    (err) => {
+      console.error("API Error:", err.response?.data || err.message);
+      throw err;
+    }
+  );
+
+  return client;
+};
+```
+
+---
+
+### 4. إعداد مزودي الخدمات `src/config/providersConfig.js`
+
+```js
+import "dotenv/config.js";
+
+export const amadeusConfig = {
+  clientId: process.env.AMADEUS_API_KEY,
+  clientSecret: process.env.AMADEUS_API_SECRET,
+  baseURL: "https://test.api.amadeus.com"
+};
+
+export const googleMapsConfig = {
+  apiKey: process.env.GOOGLE_MAPS_API_KEY,
+  baseURL: "https://maps.googleapis.com/maps/api"
+};
+
+export const openWeatherConfig = {
+  apiKey: process.env.OPENWEATHER_API_KEY,
+  baseURL: "https://api.openweathermap.org/data/2.5"
+};
+
+export const geoDbConfig = {
+  apiKey: process.env.GEODB_API_KEY,
+  baseURL: "https://wft-geo-db.p.rapidapi.com/v1/geo"
+};
+```
+
+---
+
+### 5. خدمة Amadeus `src/services/amadeusService.js`
+
+> هنا عامل مثال مبسّط لبحث رحلات فقط، وتقدر توسّع لاحقًا.
+
+```js
+import qs from "querystring";
+import axios from "axios";
+import { amadeusConfig } from "../config/providersConfig.js";
+
+let amadeusToken = null;
+let tokenExpiresAt = 0;
+
+const getToken = async () => {
+  const now = Date.now();
+  if (amadeusToken && now < tokenExpiresAt) return amadeusToken;
+
+  const res = await axios.post(
+    `${amadeusConfig.baseURL}/v1/security/oauth2/token`,
+    qs.stringify({
+      grant_type: "client_credentials",
+      client_id: amadeusConfig.clientId,
+      client_secret: amadeusConfig.clientSecret
+    }),
+    { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+  );
+
+  amadeusToken = res.data.access_token;
+  tokenExpiresAt = now + res.data.expires_in * 1000 - 60000;
+  return amadeusToken;
+};
+
+export const searchFlights = async ({ origin, destination, departureDate }) => {
+  const token = await getToken();
+
+  const res = await axios.get(
+    `${amadeusConfig.baseURL}/v2/shopping/flight-offers`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      params: {
+        originLocationCode: origin,
+        destinationLocationCode: destination,
+        departureDate,
+        adults: 1,
+        currencyCode: "USD",
+        max: 10
+      }
+    }
+  );
+
+  return res.data;
+};
+```
+
+---
+
+### 6. خدمة Google Maps `src/services/googleMapsService.js`
+
+```js
+import axios from "axios";
+import { googleMapsConfig } from "../config/providersConfig.js";
+
+const client = axios.create({
+  baseURL: googleMapsConfig.baseURL,
+  timeout: 8000
+});
+
+export const searchPlaces = async ({ query, language = "en" }) => {
+  const res = await client.get("/place/textsearch/json", {
+    params: {
+      query,
+      key: googleMapsConfig.apiKey,
+      language
+    }
+  });
+
+  return res.data;
+};
+```
+
+---
+
+### 7. خدمة OpenWeather `src/services/openWeatherService.js`
+
+```js
+import axios from "axios";
+import { openWeatherConfig } from "../config/providersConfig.js";
+
+const client = axios.create({
+  baseURL: openWeatherConfig.baseURL,
+  timeout: 8000
+});
+
+export const getCityWeather = async ({ lat, lon, units = "metric" }) => {
+  const res = await client.get("/weather", {
+    params: {
+      lat,
+      lon,
+      appid: openWeatherConfig.apiKey,
+      units
+    }
+  });
+
+  return res.data;
+};
+```
+
+---
+
+### 8. خدمة GeoDB Cities `src/services/geoDbService.js`
+
+```js
+import axios from "axios";
+import { geoDbConfig } from "../config/providersConfig.js";
+
+const client = axios.create({
+  baseURL: geoDbConfig.baseURL,
+  timeout: 8000,
+  headers: {
+    "X-RapidAPI-Key": geoDbConfig.apiKey
+  }
+});
+
+export const searchCities = async ({ namePrefix, limit = 10 }) => {
+  const res = await client.get("/cities", {
+    params: {
+      namePrefix,
+      limit
+    }
+  });
+
+  return res.data;
+};
+```
+
+---
+
+### 9. خدمة موحّدة `src/services/unifiedTravelService.js`
+
+هذه هي الطبقة اللي تخلي الـ frontend يتعامل مع **API واحد موحّد** بدل كل مزود على حدة.
+
+```js
+import { searchFlights } from "./amadeusService.js";
+import { searchPlaces } from "./googleMapsService.js";
+import { getCityWeather } from "./openWeatherService.js";
+import { searchCities } from "./geoDbService.js";
+
+export const unifiedSearch = async ({ origin, destination, date }) => {
+  const [flights, destinationPlaces, destinationCities] = await Promise.all([
+    searchFlights({
+      origin,
+      destination,
+      departureDate: date
+    }),
+    searchPlaces({ query: destination }),
+    searchCities({ namePrefix: destination })
+  ]);
+
+  let weather = null;
+  try {
+    const city = destinationCities.data?.[0];
+    if (city) {
+      weather = await getCityWeather({
+        lat: city.latitude,
+        lon: city.longitude
+      });
+    }
+  } catch (e) {
+    console.warn("Weather fetch failed:", e.message);
+  }
+
+  return {
+    flights,
+    destinationPlaces,
+    destinationCities,
+    weather
+  };
+};
+```
+
+---
+
+### 10. الراوت الموحد `src/routes/travelRoutes.js`
+
+```js
+import { Router } from "express";
+import { unifiedSearch } from "../services/unifiedTravelService.js";
+
+const router = Router();
+
+// GET /api/travel/search?origin=RUH&destination=DXB&date=2025-02-10
+router.get("/search", async (req, res) => {
+  try {
+    const { origin, destination, date } = req.query;
+
+    if (!origin || !destination || !date) {
+      return res.status(400).json({
+        message: "origin, destination, date مطلوبة"
+      });
+    }
+
+    const data = await unifiedSearch({ origin, destination, date });
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "حدث خطأ أثناء جلب بيانات السفر",
+      error: err.message
+    });
+  }
+});
+
+export default router;
+```
+
+---
+
+### 11. ملف السيرفر `src/server.js`
+
+```js
+import "dotenv/config.js";
+import express from "express";
+import cors from "cors";
+import travelRoutes from "./routes/travelRoutes.js";
+
+const app = express();
+const port = process.env.PORT || 4000;
+
+app.use(cors());
+app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.json({ status: "Travel API Gateway running" });
+});
+
+app.use("/api/travel", travelRoutes);
+
+app.listen(port, () => {
+  console.log(`Server listening on http://0.0.0.0:${port}`);
+});
+```
+
+---
+
+لو حاب، في الخطوة الجاية أقدر:
+- أضيف **Endpoints منفصلة**: `/flights`, `/places`, `/weather` لكل خدمة.
+- أو أجهز لك **نسخة TypeScript كاملة** مع types وطبقة Domain تناسب مستوى التوثيق اللي تحبه في mohamie.

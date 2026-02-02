@@ -1,0 +1,176 @@
+
+ملف OpenAPI جاهز
+
+openapi.yaml
+
+
+ `openapi.yaml` في جذر المشروع:
+
+```yaml
+openapi: 3.0.3
+info:
+  title: Travel API Gateway (TypeScript)
+  version: 1.0.0
+  description: >
+    Unified Travel API Gateway يجمع بين:
+    Amadeus (رحلات)، Google Maps (أماكن)، OpenWeather (طقس)، GeoDB (مدن)
+    عبر Endpoint موحّد مناسب لتطبيق سفر وسياحة احترافي.
+
+servers:
+  - url: http://localhost:4000
+    description: Local development server
+
+paths:
+  /api/travel/search:
+    get:
+      tags:
+        - Travel
+      summary: Unified travel search
+      description: >
+        يبحث عن الرحلات، الأماكن السياحية، المدن، والطقس لوجهة معينة
+        عبر مزودي خدمات متعددين (Amadeus, Google Maps, OpenWeather, GeoDB).
+      parameters:
+        - name: origin
+          in: query
+          required: true
+          description: >
+            رمز مطار الإقلاع (IATA)، مثل RUH أو DXB.
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 5
+            example: RUH
+        - name: destination
+          in: query
+          required: true
+          description: >
+            رمز مطار أو مدينة الوجهة (IATA أو اسم مدينة)، مثل DXB أو Dubai.
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 50
+            example: DXB
+        - name: date
+          in: query
+          required: true
+          description: >
+            تاريخ الرحلة بصيغة YYYY-MM-DD.
+          schema:
+            type: string
+            format: date
+            example: 2025-02-10
+      responses:
+        "200":
+          description: Unified travel search result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnifiedSearchResult"
+        "400":
+          description: Validation error in query parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        "500":
+          description: Internal server error while fetching travel data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    UnifiedSearchResult:
+      type: object
+      description: >
+        نتيجة موحّدة لبحث السفر، تحتوي على بيانات الرحلات، الأماكن، المدن، والطقس.
+      properties:
+        flights:
+          description: Raw response from Amadeus flight offers API.
+          type: object
+        destinationPlaces:
+          description: Raw response from Google Maps Places Text Search API.
+          type: object
+        destinationCities:
+          description: Raw response from GeoDB Cities API.
+          type: object
+        weather:
+          description: Raw response from OpenWeather current weather API (قد تكون null).
+          nullable: true
+          type: object
+      example:
+        flights:
+          data: []
+        destinationPlaces:
+          results: []
+        destinationCities:
+          data: []
+        weather:
+          main:
+            temp: 30
+            humidity: 40
+          weather:
+            - description: clear sky
+
+    ValidationErrorResponse:
+      type: object
+      description: >
+        استجابة عند فشل التحقق من المدخلات (Zod Validation).
+      properties:
+        message:
+          type: string
+          example: "خطأ في البيانات المدخلة"
+        errors:
+          type: object
+          description: Zod flattened error object.
+      example:
+        message: "خطأ في البيانات المدخلة"
+        errors:
+          fieldErrors:
+            origin:
+              - "رمز المطار origin يجب أن يكون 2 أحرف على الأقل"
+            date:
+              - "صيغة التاريخ يجب أن تكون YYYY-MM-DD"
+
+    ErrorResponse:
+      type: object
+      description: استجابة خطأ عام من السيرفر.
+      properties:
+        message:
+          type: string
+          example: "حدث خطأ أثناء جلب بيانات السفر"
+        error:
+          type: string
+          example: "Upstream provider timeout"
+```
+
+---
+
+## دمج Swagger UI (اختياري وسريع)
+
+لو حاب تشوفه كـ UI مباشرة:
+
+1. ثبّت:
+
+```bash
+npm install swagger-ui-express yamljs
+```
+
+2. أضف في `src/server.ts`:
+
+```ts
+import path from "path";
+import swaggerUi from "swagger-ui-express";
+import YAML from "yamljs";
+
+const swaggerDocument = YAML.load(path.join(__dirname, "../openapi.yaml"));
+
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+```
+
+ثم افتح:
+
+```text
+http://localhost:4000/docs
+```

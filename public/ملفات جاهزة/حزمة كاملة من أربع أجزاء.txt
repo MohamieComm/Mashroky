@@ -1,0 +1,209 @@
+ 
+حزمة كاملة من أربع أجزاء
+
+1. **Postman Collection جاهز**
+2. **صفحة وثائق HTML جاهزة للعرض**
+3. **دمج Swagger UI داخل مشروع TypeScript**
+4. **إضافة Security (API Keys + Bearer Tokens) داخل ملف OpenAPI**
+
+---
+
+# 1) 🔥 Postman Collection جاهز — `travel-api.postman_collection.json`
+
+انسخه كما هو في ملف JSON:
+
+```json
+{
+  "info": {
+    "name": "Travel API Gateway",
+    "_postman_id": "travel-api-gateway-collection",
+    "description": "Unified Travel API Gateway for flights, places, weather, and cities.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Unified Search",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:4000/api/travel/search?origin=RUH&destination=DXB&date=2025-02-10",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "4000",
+          "path": ["api", "travel", "search"],
+          "query": [
+            { "key": "origin", "value": "RUH" },
+            { "key": "destination", "value": "DXB" },
+            { "key": "date", "value": "2025-02-10" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Flights Search",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:4000/api/flights/search?origin=RUH&destination=DXB&date=2025-02-10"
+      }
+    },
+    {
+      "name": "Places Search",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:4000/api/places/search?query=Dubai attractions"
+      }
+    },
+    {
+      "name": "Weather Current",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:4000/api/weather/current?lat=25.276987&lon=55.296249"
+      }
+    },
+    {
+      "name": "Cities Search",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:4000/api/cities/search?namePrefix=Dub&limit=10"
+      }
+    }
+  ]
+}
+```
+
+جاهز للاستيراد في Postman مباشرة.
+
+---
+
+# 2) 📄 صفحة وثائق HTML جاهزة — `docs.html`
+
+انسخ هذا الملف كما هو:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Travel API Gateway Documentation</title>
+  <style>
+    body { font-family: Arial; margin: 40px; background: #f7f7f7; }
+    h1 { color: #333; }
+    .endpoint { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+    .method { font-weight: bold; color: #007bff; }
+    .url { font-family: monospace; }
+  </style>
+</head>
+<body>
+  <h1>Travel API Gateway — Documentation</h1>
+
+  <div class="endpoint">
+    <h2>Unified Search</h2>
+    <p class="method">GET</p>
+    <p class="url">/api/travel/search?origin=RUH&destination=DXB&date=2025-02-10</p>
+  </div>
+
+  <div class="endpoint">
+    <h2>Flights Search</h2>
+    <p class="method">GET</p>
+    <p class="url">/api/flights/search?origin=RUH&destination=DXB&date=2025-02-10</p>
+  </div>
+
+  <div class="endpoint">
+    <h2>Places Search</h2>
+    <p class="method">GET</p>
+    <p class="url">/api/places/search?query=Dubai attractions</p>
+  </div>
+
+  <div class="endpoint">
+    <h2>Weather Current</h2>
+    <p class="method">GET</p>
+    <p class="url">/api/weather/current?lat=25.276987&lon=55.296249</p>
+  </div>
+
+  <div class="endpoint">
+    <h2>Cities Search</h2>
+    <p class="method">GET</p>
+    <p class="url">/api/cities/search?namePrefix=Dub&limit=10</p>
+  </div>
+
+</body>
+</html>
+```
+
+جاهز للعرض في أي متصفح أو رفعه على GitHub Pages.
+
+---
+
+# 3) 🚀 دمج Swagger UI داخل مشروع TypeScript
+
+### ثبّت المكتبات:
+
+```bash
+npm install swagger-ui-express yamljs
+```
+
+### أضف هذا في `src/server.ts`:
+
+```ts
+import path from "path";
+import swaggerUi from "swagger-ui-express";
+import YAML from "yamljs";
+
+const swaggerDocument = YAML.load(path.join(__dirname, "../openapi.yaml"));
+
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+```
+
+### الآن افتح:
+
+```
+http://localhost:4000/docs
+```
+
+ستظهر واجهة Swagger كاملة.
+
+---
+
+# 4) 🔐 إضافة Security (API Keys + Bearer Tokens) داخل OpenAPI
+
+أضفت لك قسم Security كامل داخل ملف OpenAPI:
+
+### داخل `components:` أضف:
+
+```yaml
+securitySchemes:
+  ApiKeyAuth:
+    type: apiKey
+    in: header
+    name: X-API-Key
+
+  BearerAuth:
+    type: http
+    scheme: bearer
+    bearerFormat: JWT
+```
+
+### ثم أضف Security عالمي:
+
+```yaml
+security:
+  - ApiKeyAuth: []
+  - BearerAuth: []
+```
+
+### ويمكنك إضافته لكل Endpoint:
+
+```yaml
+security:
+  - ApiKeyAuth: []
+```
+
+أو:
+
+```yaml
+security:
+  - BearerAuth: []
+```
+
+---

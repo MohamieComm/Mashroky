@@ -1,0 +1,130 @@
+
+1-  AUTH & SECURITY
+
+JWT_SECRET=your_jwt_secret_key_here
+TOKEN_EXPIRES_IN=7d
+
+2- SERVER
+
+PORT=8080
+BASE_URL=https://mashrukt.up.railway.app
+
+
+3- DATABASE (MongoDB Atlas)
+
+MONGO_URI=mongodb+srv://USERNAME:PASSWORD@cluster.mongodb.net/mashrouk
+MONGO_DB_NAME=mashrouk
+
+
+4- AI (ChatGPT + Ollama)
+
+OPENAI_KEY=your_openai_api_key_here
+AI_DEFAULT_MODEL=gpt-4o
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=qwen2.5-coder:7b
+
+5- PAYMENTS — MOYASAR
+
+MOYASAR_PUBLIC_KEY=pk_test_xxxxxxxxxxxxx
+MOYASAR_SECRET_KEY=sk_test_xxxxxxxxxxxxx
+PAYMENT_CALLBACK_URL=https://mashrukt.up.railway.app/payments/webhook/moyasar
+
+
+6- PAYMENTS — HYPERPAY
+
+HYPERPAY_ENTITY_ID=8ac7a4xxxxxxxxxxxxxx
+HYPERPAY_BEARER_TOKEN=Bearer xxxxxxxxxxxxxxxxxxxxx
+HYPERPAY_CALLBACK_URL=https://mashrukt.up.railway.app/payments/webhook/hyperpay
+
+
+7- PAYMENTS — SAMSUNG PAY
+
+SAMSUNG_PAY_MERCHANT_ID=your_merchant_id
+SAMSUNG_PAY_SERVICE_ID=your_service_id
+
+
+8- PAYMENTS — APPLE PAY
+
+APPLE_PAY_MERCHANT_ID=merchant.com.mashrouk
+APPLE_PAY_CERTIFICATE_PATH=certs/apple_pay_cert.pem
+APPLE_PAY_CERTIFICATE_KEY_PATH=certs/apple_pay_key.pem
+
+9-  MEDIA (Promo Video Upload)
+
+UPLOADS_DIR=uploads/promo
+
+
+10- ANALYTICS
+
+STATS_CACHE_TTL=300
+
+
+11-AFFILIATE INTEGRATIONS
+
+AFFILIATE_DEFAULT_PROVIDER=impact
+AFFILIATE_API_KEY=your_affiliate_api_key_here
+
+
+
+---------------------------------------------
+
+
+30- إعداد MongoDB — أفضل إعداد لـ Railway
+
+Railway لا يوفر MongoDB داخليًا، لذلك نستخدم:
+
+
+&-  MongoDB Atlas (مجاني + سريع + آمن)
+
+## 1) أنشئ Cluster مجاني  
+من: https://www.mongodb.com/atlas
+
+## 2) أنشئ مستخدم قاعدة بيانات  
+اسم المستخدم:  
+```
+mashrouk_admin
+```
+
+كلمة المرور:  
+```
+اختر كلمة قوية
+```
+
+## 3) اربط IP  
+اختر:  
+```
+Allow access from anywhere
+```
+
+## 4) انسخ رابط الاتصال:
+
+سيكون مثل:
+
+```
+mongodb+srv://mashrouk_admin:YOUR_PASSWORD@cluster0.xxxxx.mongodb.net/mashrouk
+```
+
+## 5) ضعه داخل `.env`:
+
+```
+MONGO_URI=mongodb+srv://mashrouk_admin:YOUR_PASSWORD@cluster0.xxxxx.mongodb.net/mashrouk
+MONGO_DB_NAME=mashrouk
+```
+
+## 6) Railway Environment Variables
+
+في Railway:
+
+- افتح الخدمة  
+- Environment  
+- أضف:
+
+```
+MONGO_URI=...
+MONGO_DB_NAME=mashrouk
+
+
+
+
+
+
