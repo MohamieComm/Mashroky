@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   preview: {
-    allowedHosts: "all",
+    allowedHosts: ["mashroky-production.up.railway.app", ".up.railway.app"],
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
