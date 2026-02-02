@@ -2,8 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Trips from "./pages/Trips";
 import TripDetails from "./pages/TripDetails";
@@ -30,6 +30,14 @@ import Cookies from "./pages/Cookies";
 import Refund from "./pages/Refund";
 
 const queryClient = new QueryClient();
+
+const AdminRoute = ({ children }: { children: JSX.Element }) => {
+  const { user, profile, loading } = useAuth();
+  if (loading) return null;
+  if (!user) return <Navigate to="/auth" replace />;
+  if (profile?.role !== "admin") return <Navigate to="/" replace />;
+  return children;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -61,7 +69,14 @@ const App = () => (
             <Route path="/usage" element={<Usage />} />
             <Route path="/cookies" element={<Cookies />} />
             <Route path="/refund" element={<Refund />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <Admin />
+                </AdminRoute>
+              }
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

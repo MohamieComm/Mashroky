@@ -45,6 +45,7 @@ export function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
+  const isAdmin = profile?.role === "admin";
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
@@ -99,12 +100,14 @@ export function Navbar() {
                   تسجيل جديد
                 </Button>
               </Link>
-              <Link to="/admin">
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Shield className="w-4 h-4" />
-                  لوحة التحكم
-                </Button>
-              </Link>
+              {isAdmin && (
+                <Link to="/admin">
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Shield className="w-4 h-4" />
+                    لوحة التحكم
+                  </Button>
+                </Link>
+              )}
               {user ? (
                 <>
                   <Link to="/profile">
@@ -189,12 +192,14 @@ export function Navbar() {
                 تسجيل جديد
               </Button>
             </Link>
-            <Link to="/admin" onClick={() => setIsOpen(false)}>
-              <Button variant="outline" className="w-full justify-start gap-3">
-                <Shield className="w-5 h-5" />
-                لوحة التحكم
-              </Button>
-            </Link>
+            {isAdmin && (
+              <Link to="/admin" onClick={() => setIsOpen(false)}>
+                <Button variant="outline" className="w-full justify-start gap-3">
+                  <Shield className="w-5 h-5" />
+                  لوحة التحكم
+                </Button>
+              </Link>
+            )}
 
             {user ? (
               <>

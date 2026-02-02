@@ -9,6 +9,7 @@ interface Profile {
   phone: string | null;
   avatar_url: string | null;
   address: string | null;
+  role?: string | null;
 }
 
 interface AuthContextType {
