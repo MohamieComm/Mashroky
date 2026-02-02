@@ -65,12 +65,12 @@ export function Navbar() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-lg border-b border-border">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center gap-3">
-              <img src="/logo.png" alt="مشروك" className="w-12 h-12 object-contain" />
-              <div className="leading-tight">
-                <span className="text-lg font-bold font-changa text-gradient block">مشروك</span>
-                <span className="text-xs text-muted-foreground">للسفر والسياحة</span>
-              </div>
+            <Link to="/" className="flex items-center">
+              <img
+                src="/logo.png"
+                alt="مشروك"
+                className="w-12 h-12 object-contain shrink-0"
+              />
             </Link>
 
             <div className="hidden md:flex items-center gap-1">
