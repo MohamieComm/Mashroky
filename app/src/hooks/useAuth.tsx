@@ -9,13 +9,13 @@ interface Profile {
   phone: string | null;
   avatar_url: string | null;
   address: string | null;
-  role?: string | null;
 }
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
+  role: "admin" | "user" | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
@@ -29,39 +29,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [role, setRole] = useState<"admin" | "user" | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const hydrateUser = async (sessionUser: User | null) => {
+    if (!sessionUser) {
+      setProfile(null);
+      setRole(null);
+      return;
+    }
+
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", sessionUser.id)
+      .single();
+
+    if (profileData) {
+      setProfile(profileData);
+    } else {
+      const { data: inserted } = await supabase
+        .from("profiles")
+        .insert({
+          user_id: sessionUser.id,
+          full_name: sessionUser.user_metadata?.full_name ?? null,
+        })
+        .select("*")
+        .single();
+      setProfile(inserted ?? null);
+    }
+
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _role: "admin",
+      _user_id: sessionUser.id,
+    });
+    setRole(isAdmin ? "admin" : "user");
+  };
+
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-
-      if (session?.user) {
-        supabase
-          .from("profiles")
-          .select("*")
-          .eq("user_id", session.user.id)
-          .single()
-          .then(({ data }) => setProfile(data));
-      } else {
-        setProfile(null);
-      }
+      await hydrateUser(session?.user ?? null);
       setLoading(false);
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-
-      if (session?.user) {
-        supabase
-          .from("profiles")
-          .select("*")
-          .eq("user_id", session.user.id)
-          .single()
-          .then(({ data }) => setProfile(data));
-      }
-      setLoading(false);
+      hydrateUser(session?.user ?? null).finally(() => setLoading(false));
     });
 
     return () => subscription.unsubscribe();
@@ -73,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -81,11 +99,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         data: { full_name: fullName },
       },
     });
+    if (!error && data.user) {
+      await supabase.from("profiles").upsert({
+        user_id: data.user.id,
+        full_name: fullName,
+      });
+    }
     return { error };
   };
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setRole(null);
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
@@ -100,6 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     session,
     profile,
+    role,
     loading,
     signIn,
     signUp,
