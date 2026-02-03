@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export type Flight = {
   id: string;
@@ -777,95 +778,464 @@ export const defaultAdminData: AdminData = {
   promoVideoUrl: "",
 };
 
-const STORAGE_KEY = "mashrouk_admin_data";
-
 const isBrowser = typeof window !== "undefined";
 
-const mergeCollection = <T,>(stored: T[] | undefined, fallback: T[]) =>
-  Array.isArray(stored) && stored.length ? stored : fallback;
+type CollectionKey =
+  | "flights"
+  | "hotels"
+  | "offers"
+  | "activities"
+  | "articles"
+  | "destinations"
+  | "partners"
+  | "airlines"
+  | "apiKeys"
+  | "users"
+  | "pages";
 
-export const loadAdminData = (): AdminData => {
-  if (!isBrowser) return defaultAdminData;
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultAdminData;
-    const parsed = JSON.parse(raw) as Partial<AdminData>;
-    return {
-      flights: mergeCollection(parsed.flights, defaultFlights),
-      hotels: mergeCollection(parsed.hotels, defaultHotels),
-      offers: mergeCollection(parsed.offers, defaultOffers),
-      activities: mergeCollection(parsed.activities, defaultActivities),
-      articles: mergeCollection(parsed.articles, defaultArticles),
-      destinations: mergeCollection(parsed.destinations, defaultDestinations),
-      partners: mergeCollection(parsed.partners, defaultPartners),
-      airlines: mergeCollection(parsed.airlines, defaultAirlines),
-      apiKeys: mergeCollection(parsed.apiKeys, defaultApiKeys),
-      users: mergeCollection(parsed.users, defaultUsers),
-      pages: mergeCollection(parsed.pages, defaultPages),
-      promoVideoUrl: parsed.promoVideoUrl ?? "",
-    };
-  } catch {
-    return defaultAdminData;
-  }
+type CollectionConfig<T> = {
+  table: string;
+  fromDb: (row: Record<string, any>) => T;
+  toDb: (item: T) => Record<string, any>;
 };
 
-export const saveAdminData = (data: AdminData) => {
-  if (!isBrowser) return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  window.dispatchEvent(new Event("admin-data-updated"));
+const collectionConfigs: Record<CollectionKey, CollectionConfig<any>> = {
+  flights: {
+    table: "flights",
+    fromDb: (row) => ({
+      id: row.id,
+      from: row.from ?? "",
+      to: row.to ?? "",
+      airline: row.airline ?? "",
+      departTime: row.depart_time ?? row.departTime ?? "",
+      arriveTime: row.arrive_time ?? row.arriveTime ?? "",
+      duration: row.duration ?? "",
+      price: row.price ?? "",
+      stops: row.stops ?? "",
+      rating: Number(row.rating ?? 0),
+      image: row.image ?? "",
+    }),
+    toDb: (item: Flight) => ({
+      id: item.id,
+      from: item.from,
+      to: item.to,
+      airline: item.airline,
+      depart_time: item.departTime,
+      arrive_time: item.arriveTime,
+      duration: item.duration,
+      price: item.price,
+      stops: item.stops,
+      rating: item.rating,
+      image: item.image,
+    }),
+  },
+  hotels: {
+    table: "hotels",
+    fromDb: (row) => ({
+      id: row.id,
+      name: row.name ?? "",
+      location: row.location ?? "",
+      image: row.image ?? "",
+      rating: Number(row.rating ?? 0),
+      reviews: Number(row.reviews ?? 0),
+      price: row.price ?? "",
+      priceNote: row.price_note ?? row.priceNote ?? "",
+      description: row.description ?? "",
+      amenities: Array.isArray(row.amenities) ? row.amenities : [],
+      distances: Array.isArray(row.distances) ? row.distances : row.distances ?? [],
+      cuisine: row.cuisine ?? "",
+      tag: row.tag ?? "",
+    }),
+    toDb: (item: HotelItem) => ({
+      id: item.id,
+      name: item.name,
+      location: item.location,
+      image: item.image,
+      rating: item.rating,
+      reviews: item.reviews,
+      price: item.price,
+      price_note: item.priceNote,
+      description: item.description,
+      amenities: item.amenities,
+      distances: item.distances,
+      cuisine: item.cuisine,
+      tag: item.tag,
+    }),
+  },
+  offers: {
+    table: "offers",
+    fromDb: (row) => ({
+      id: row.id,
+      title: row.title ?? "",
+      description: row.description ?? "",
+      image: row.image ?? "",
+      discount: Number(row.discount ?? 0),
+      validUntil: row.valid_until ?? row.validUntil ?? "",
+      originalPrice: row.original_price ?? row.originalPrice ?? "",
+      newPrice: row.new_price ?? row.newPrice ?? "",
+      season: row.season ?? "",
+      includes: Array.isArray(row.includes) ? row.includes : [],
+      tips: Array.isArray(row.tips) ? row.tips : [],
+    }),
+    toDb: (item: OfferItem) => ({
+      id: item.id,
+      title: item.title,
+      description: item.description,
+      image: item.image,
+      discount: item.discount,
+      valid_until: item.validUntil,
+      original_price: item.originalPrice,
+      new_price: item.newPrice,
+      season: item.season,
+      includes: item.includes,
+      tips: item.tips,
+    }),
+  },
+  activities: {
+    table: "activities",
+    fromDb: (row) => ({
+      id: row.id,
+      title: row.title ?? "",
+      location: row.location ?? "",
+      category: row.category ?? "",
+      price: row.price ?? "",
+      image: row.image ?? "",
+    }),
+    toDb: (item: ActivityItem) => ({
+      id: item.id,
+      title: item.title,
+      location: item.location,
+      category: item.category,
+      price: item.price,
+      image: item.image,
+    }),
+  },
+  articles: {
+    table: "articles",
+    fromDb: (row) => ({
+      id: row.id,
+      title: row.title ?? "",
+      category: row.category ?? "",
+      date: row.date ?? "",
+      image: row.image ?? "",
+    }),
+    toDb: (item: ArticleItem) => ({
+      id: item.id,
+      title: item.title,
+      category: item.category,
+      date: item.date,
+      image: item.image,
+    }),
+  },
+  destinations: {
+    table: "destinations",
+    fromDb: (row) => ({
+      id: row.id,
+      title: row.title ?? "",
+      country: row.country ?? "",
+      region: row.region ?? "",
+      tag: row.tag ?? "",
+      duration: row.duration ?? "",
+      priceFrom: row.price_from ?? row.priceFrom ?? "",
+      description: row.description ?? "",
+      image: row.image ?? "",
+    }),
+    toDb: (item: DestinationItem) => ({
+      id: item.id,
+      title: item.title,
+      country: item.country,
+      region: item.region,
+      tag: item.tag,
+      duration: item.duration,
+      price_from: item.priceFrom,
+      description: item.description,
+      image: item.image,
+    }),
+  },
+  partners: {
+    table: "partners",
+    fromDb: (row) => ({
+      id: row.id,
+      name: row.name ?? "",
+      type: row.type ?? "",
+      website: row.website ?? "",
+      commission: row.commission ?? "",
+    }),
+    toDb: (item: PartnerItem) => ({
+      id: item.id,
+      name: item.name,
+      type: item.type,
+      website: item.website,
+      commission: item.commission,
+    }),
+  },
+  airlines: {
+    table: "airlines",
+    fromDb: (row) => ({
+      id: row.id,
+      name: row.name ?? "",
+      code: row.code ?? "",
+      website: row.website ?? "",
+      phone: row.phone ?? "",
+      logo: row.logo ?? "",
+    }),
+    toDb: (item: AirlineItem) => ({
+      id: item.id,
+      name: item.name,
+      code: item.code,
+      website: item.website,
+      phone: item.phone,
+      logo: item.logo ?? "",
+    }),
+  },
+  apiKeys: {
+    table: "api_keys",
+    fromDb: (row) => ({
+      id: row.id,
+      name: row.name ?? "",
+      provider: row.provider ?? "",
+      key: row.key ?? "",
+      status: row.status ?? "disabled",
+    }),
+    toDb: (item: ApiKeyItem) => ({
+      id: item.id,
+      name: item.name,
+      provider: item.provider,
+      key: item.key,
+      status: item.status,
+    }),
+  },
+  users: {
+    table: "users_admin",
+    fromDb: (row) => ({
+      id: row.id,
+      name: row.name ?? "",
+      email: row.email ?? "",
+      role: row.role ?? "user",
+      status: row.status ?? "active",
+    }),
+    toDb: (item: ManagedUserItem) => ({
+      id: item.id,
+      name: item.name,
+      email: item.email,
+      role: item.role,
+      status: item.status,
+    }),
+  },
+  pages: {
+    table: "pages",
+    fromDb: (row) => ({
+      id: row.id,
+      title: row.title ?? "",
+      slug: row.slug ?? "",
+      summary: row.summary ?? "",
+    }),
+    toDb: (item: PageItem) => ({
+      id: item.id,
+      title: item.title,
+      slug: item.slug,
+      summary: item.summary,
+    }),
+  },
 };
 
-export const useAdminData = (): [AdminData, (value: AdminData) => void] => {
-  const [data, setData] = useState<AdminData>(() => loadAdminData());
+const emptyOrFallback = <T,>(items: T[] | null | undefined, fallback: T[]) =>
+  Array.isArray(items) && items.length ? items : fallback;
 
-  useEffect(() => {
-    saveAdminData(data);
-  }, [data]);
-
-  return [data, setData];
+const fetchPromoVideoUrl = async (): Promise<string> => {
+  if (!isBrowser) return "";
+  const { data } = await supabase
+    .from("admin_settings")
+    .select("promo_video_url, updated_at")
+    .order("updated_at", { ascending: false })
+    .limit(1);
+  return data?.[0]?.promo_video_url ?? "";
 };
 
-export const useAdminCollection = <K extends keyof AdminData>(
+export const savePromoVideoUrl = async (url: string, userId?: string | null) => {
+  await supabase.from("admin_settings").insert({
+    promo_video_url: url,
+    updated_by: userId ?? null,
+  });
+  if (isBrowser) window.dispatchEvent(new Event("admin-data-updated"));
+};
+
+const fetchAdminCollection = async <K extends CollectionKey>(
+  key: K,
+  fallback: AdminData[K]
+): Promise<AdminData[K]> => {
+  if (!isBrowser) return fallback;
+  const config = collectionConfigs[key];
+  const { data, error } = await supabase.from(config.table).select("*");
+  if (error) return fallback;
+  const mapped = (data || []).map(config.fromDb);
+  return emptyOrFallback(mapped, fallback as any) as AdminData[K];
+};
+
+export const useAdminCollection = <K extends CollectionKey>(
   key: K,
   fallback: AdminData[K]
 ): AdminData[K] => {
-  const [collection, setCollection] = useState<AdminData[K]>(() =>
-    getAdminCollection(key, fallback)
-  );
+  const [collection, setCollection] = useState<AdminData[K]>(fallback);
 
   useEffect(() => {
-    const handleUpdate = () => {
-      setCollection(getAdminCollection(key, fallback));
+    let active = true;
+    const load = async () => {
+      const data = await fetchAdminCollection(key, fallback);
+      if (active) setCollection(data);
     };
-    handleUpdate();
-    if (typeof window !== "undefined") {
+    load();
+    const handleUpdate = () => load();
+    if (isBrowser) {
       window.addEventListener("admin-data-updated", handleUpdate);
-      window.addEventListener("storage", handleUpdate);
       return () => {
+        active = false;
         window.removeEventListener("admin-data-updated", handleUpdate);
-        window.removeEventListener("storage", handleUpdate);
       };
     }
-    return undefined;
+    return () => {
+      active = false;
+    };
   }, [key, fallback]);
 
   return collection;
 };
 
-export const getAdminCollection = <K extends keyof AdminData>(
-  key: K,
-  fallback: AdminData[K]
-): AdminData[K] => {
-  if (!isBrowser) return fallback;
-  const data = loadAdminData();
-  const value = data[key];
-  if (Array.isArray(fallback)) {
-    return (Array.isArray(value) && value.length ? value : fallback) as AdminData[K];
-  }
-  return (value ?? fallback) as AdminData[K];
+const upsertItemInList = <T extends { id: string }>(items: T[], item: T) => {
+  const index = items.findIndex((entry) => entry.id === item.id);
+  if (index === -1) return [...items, item];
+  const next = [...items];
+  next[index] = item;
+  return next;
 };
 
-export const getPromoVideoUrl = (): string => {
-  if (!isBrowser) return "";
-  return loadAdminData().promoVideoUrl || "";
+export const useAdminData = () => {
+  const [data, setData] = useState<AdminData>(defaultAdminData);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = async () => {
+    setLoading(true);
+    const [
+      flights,
+      hotels,
+      offers,
+      activities,
+      articles,
+      destinations,
+      partners,
+      airlines,
+      apiKeys,
+      users,
+      pages,
+      promoVideoUrl,
+    ] = await Promise.all([
+      fetchAdminCollection("flights", defaultFlights),
+      fetchAdminCollection("hotels", defaultHotels),
+      fetchAdminCollection("offers", defaultOffers),
+      fetchAdminCollection("activities", defaultActivities),
+      fetchAdminCollection("articles", defaultArticles),
+      fetchAdminCollection("destinations", defaultDestinations),
+      fetchAdminCollection("partners", defaultPartners),
+      fetchAdminCollection("airlines", defaultAirlines),
+      fetchAdminCollection("apiKeys", defaultApiKeys),
+      fetchAdminCollection("users", defaultUsers),
+      fetchAdminCollection("pages", defaultPages),
+      fetchPromoVideoUrl(),
+    ]);
+
+    setData({
+      flights,
+      hotels,
+      offers,
+      activities,
+      articles,
+      destinations,
+      partners,
+      airlines,
+      apiKeys,
+      users,
+      pages,
+      promoVideoUrl,
+    });
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      await refresh();
+      if (!active) return;
+    };
+    load();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const upsertItem = async <K extends CollectionKey>(
+    key: K,
+    item: AdminData[K][number]
+  ) => {
+    const config = collectionConfigs[key];
+    const { data: saved, error } = await supabase
+      .from(config.table)
+      .upsert(config.toDb(item))
+      .select("*")
+      .maybeSingle();
+    if (error || !saved) return null;
+    const mapped = config.fromDb(saved);
+    setData((prev) => ({
+      ...prev,
+      [key]: upsertItemInList(prev[key] as any, mapped),
+    }));
+    if (isBrowser) window.dispatchEvent(new Event("admin-data-updated"));
+    return mapped;
+  };
+
+  const deleteItem = async <K extends CollectionKey>(key: K, id: string) => {
+    const config = collectionConfigs[key];
+    await supabase.from(config.table).delete().eq("id", id);
+    setData((prev) => ({
+      ...prev,
+      [key]: (prev[key] as any).filter((entry: { id: string }) => entry.id !== id),
+    }));
+    if (isBrowser) window.dispatchEvent(new Event("admin-data-updated"));
+  };
+
+  const updatePromoVideoUrl = async (url: string, userId?: string | null) => {
+    await savePromoVideoUrl(url, userId);
+    setData((prev) => ({ ...prev, promoVideoUrl: url }));
+  };
+
+  return {
+    data,
+    loading,
+    refresh,
+    upsertItem,
+    deleteItem,
+    updatePromoVideoUrl,
+  };
 };
+
+export const usePromoVideoUrl = () => {
+  const [url, setUrl] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      const value = await fetchPromoVideoUrl();
+      if (active) setUrl(value);
+    };
+    load();
+    const handleUpdate = () => load();
+    if (isBrowser) window.addEventListener("admin-data-updated", handleUpdate);
+    return () => {
+      active = false;
+      if (isBrowser) window.removeEventListener("admin-data-updated", handleUpdate);
+    };
+  }, []);
+
+  return url;
+};
+
+export const getPromoVideoUrl = () => "";

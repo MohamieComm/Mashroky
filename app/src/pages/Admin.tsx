@@ -294,14 +294,22 @@ const parseNumber = (value: string) => {
 };
 
 export default function Admin() {
-  const { isAdmin, loading, user, profile } = useAuth();
+  const { isAdmin, loading: authLoading, user, profile } = useAuth();
   const [activeSection, setActiveSection] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [adminData, setAdminData] = useAdminData();
+  const {
+    data: adminData,
+    loading: adminLoading,
+    upsertItem,
+    deleteItem,
+    updatePromoVideoUrl,
+  } = useAdminData();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Record<string, string>>({});
+  const [promoDraft, setPromoDraft] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const isPageLoading = authLoading || adminLoading;
 
   const activeConfig = sectionConfigs[activeSection];
 
@@ -315,6 +323,10 @@ export default function Admin() {
     setEditingId(null);
     setSearchTerm("");
   }, [activeSection]);
+
+  useEffect(() => {
+    setPromoDraft(adminData.promoVideoUrl || "");
+  }, [adminData.promoVideoUrl]);
 
   const stats = useMemo(
     () => [
@@ -356,23 +368,12 @@ export default function Admin() {
     return nextItem;
   };
 
-  const handleSaveItem = () => {
+  const handleSaveItem = async () => {
     if (!activeConfig) return;
     const nextItem = buildItemFromDraft();
     if (!nextItem) return;
-    const items = [...(adminData[activeConfig.listKey] as Record<string, unknown>[])];
-
-    if (editingId) {
-      const updated = items.map((item) =>
-        String(item.id) === editingId ? nextItem : item
-      );
-      setAdminData({ ...adminData, [activeConfig.listKey]: updated });
-    } else {
-      setAdminData({
-        ...adminData,
-        [activeConfig.listKey]: [...items, nextItem],
-      });
-    }
+    const saved = await upsertItem(activeConfig.listKey, nextItem as any);
+    if (!saved) return;
 
     const resetDraft = activeConfig.fields.reduce<Record<string, string>>((acc, field) => {
       acc[field.key] = "";
@@ -401,11 +402,9 @@ export default function Admin() {
     setEditingId(String(item.id ?? ""));
   };
 
-  const handleDeleteItem = (id: string) => {
+  const handleDeleteItem = async (id: string) => {
     if (!activeConfig) return;
-    const items = adminData[activeConfig.listKey] as Record<string, unknown>[];
-    const updated = items.filter((item) => String(item.id) !== id);
-    setAdminData({ ...adminData, [activeConfig.listKey]: updated });
+    await deleteItem(activeConfig.listKey, id);
   };
 
   const filteredItems = useMemo(() => {
@@ -420,7 +419,18 @@ export default function Admin() {
     );
   }, [adminData, activeConfig, searchTerm]);
 
-  if (!loading && !isAdmin) {
+  if (isPageLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted px-4">
+        <div className="bg-card rounded-2xl p-10 shadow-card text-center max-w-lg">
+          <h2 className="text-2xl font-bold mb-3">جاري التحقق من الصلاحيات</h2>
+          <p className="text-muted-foreground">يرجى الانتظار لحظات...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted px-4">
         <div className="bg-card rounded-2xl p-10 shadow-card text-center max-w-lg">
@@ -606,12 +616,15 @@ export default function Admin() {
                 <div className="flex flex-col md:flex-row gap-4">
                   <Input
                     placeholder="https://example.com/promo.mp4"
-                    value={adminData.promoVideoUrl}
-                    onChange={(event) =>
-                      setAdminData({ ...adminData, promoVideoUrl: event.target.value })
-                    }
+                    value={promoDraft}
+                    onChange={(event) => setPromoDraft(event.target.value)}
                   />
-                  <Button variant="hero">حفظ الرابط</Button>
+                  <Button
+                    variant="hero"
+                    onClick={() => updatePromoVideoUrl(promoDraft, user?.id)}
+                  >
+                    حفظ الرابط
+                  </Button>
                 </div>
               </div>
             </div>

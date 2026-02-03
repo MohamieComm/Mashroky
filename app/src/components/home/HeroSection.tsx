@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,20 +11,14 @@ import {
   PlayCircle,
 } from "lucide-react";
 import { stats } from "@/data/content";
-import { getPromoVideoUrl } from "@/data/adminStore";
+import { usePromoVideoUrl } from "@/data/adminStore";
 
 export function HeroSection() {
   const [searchType, setSearchType] = useState<"flights" | "hotels">("flights");
-  const [localPromoUrl, setLocalPromoUrl] = useState(getPromoVideoUrl());
+  const supabasePromoUrl = usePromoVideoUrl();
   const promoVideoUrl =
-    (import.meta.env.VITE_PROMO_VIDEO_URL as string | undefined) || localPromoUrl;
+    (import.meta.env.VITE_PROMO_VIDEO_URL as string | undefined) || supabasePromoUrl;
   const showVideo = Boolean(promoVideoUrl);
-
-  useEffect(() => {
-    const handleUpdate = () => setLocalPromoUrl(getPromoVideoUrl());
-    window.addEventListener("admin-data-updated", handleUpdate);
-    return () => window.removeEventListener("admin-data-updated", handleUpdate);
-  }, []);
 
   const searchLabel = useMemo(
     () => (searchType === "flights" ? "رحلات الطيران" : "الفنادق"),

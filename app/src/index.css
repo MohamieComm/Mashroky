@@ -20,6 +20,7 @@
 
     --secondary: 267 62% 45%;
     --secondary-foreground: 0 0% 100%;
+    --secondary-text: 32 92% 58%;
 
     --muted: 210 14% 96%;
     --muted-foreground: 215 15% 42%;
@@ -70,6 +71,7 @@
 
     --secondary: 268 70% 55%;
     --secondary-foreground: 0 0% 100%;
+    --secondary-text: 32 90% 60%;
 
     --muted: 220 20% 18%;
     --muted-foreground: 40 15% 65%;
@@ -192,6 +194,10 @@
 
   .animate-pulse-soft {
     animation: pulseSoft 2s ease-in-out infinite;
+  }
+
+  .text-secondary {
+    color: hsl(var(--secondary-text));
   }
 
   @keyframes float {

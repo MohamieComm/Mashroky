@@ -32,3 +32,7 @@ pnpm-debug.log*
 
 # Coverage
 coverage/
+Payy/
+# Node backend for payments (placeholder)
+/server
+/server/node_modules
