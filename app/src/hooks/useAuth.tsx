@@ -9,13 +9,13 @@ interface Profile {
   phone: string | null;
   avatar_url: string | null;
   address: string | null;
+  role?: string | null;
 }
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
-  role: "admin" | "user" | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
@@ -29,13 +29,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [role, setRole] = useState<"admin" | "user" | null>(null);
   const [loading, setLoading] = useState(true);
 
   const hydrateUser = async (sessionUser: User | null) => {
     if (!sessionUser) {
       setProfile(null);
-      setRole(null);
       return;
     }
 
@@ -53,17 +51,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .insert({
           user_id: sessionUser.id,
           full_name: sessionUser.user_metadata?.full_name ?? null,
+          role: "user",
         })
         .select("*")
         .single();
       setProfile(inserted ?? null);
     }
-
-    const { data: isAdmin } = await supabase.rpc("has_role", {
-      _role: "admin",
-      _user_id: sessionUser.id,
-    });
-    setRole(isAdmin ? "admin" : "user");
   };
 
   useEffect(() => {
@@ -103,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await supabase.from("profiles").upsert({
         user_id: data.user.id,
         full_name: fullName,
+        role: "user",
       });
     }
     return { error };
@@ -110,7 +104,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    setRole(null);
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
@@ -125,7 +118,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     session,
     profile,
-    role,
     loading,
     signIn,
     signUp,

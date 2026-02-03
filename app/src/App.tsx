@@ -32,10 +32,10 @@ import Refund from "./pages/Refund";
 const queryClient = new QueryClient();
 
 const AdminRoute = ({ children }: { children: JSX.Element }) => {
-  const { user, role, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   if (loading) return null;
   if (!user) return <Navigate to="/auth" replace />;
-  if (role !== "admin") return <Navigate to="/" replace />;
+  if (profile?.role !== "admin") return <Navigate to="/" replace />;
   return children;
 };
 

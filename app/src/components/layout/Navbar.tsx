@@ -44,8 +44,8 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, profile, role, signOut } = useAuth();
-  const isAdmin = role === "admin";
+  const { user, profile, signOut } = useAuth();
+  const isAdmin = profile?.role === "admin";
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";

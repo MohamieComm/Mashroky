@@ -54,7 +54,7 @@ const bookingHistory = [
 ];
 
 export default function Profile() {
-  const { user, profile, updateProfile, signOut, role, loading } = useAuth();
+  const { user, profile, updateProfile, signOut, loading } = useAuth();
   const { toast } = useToast();
   const [activeSection, setActiveSection] = useState<
     "info" | "bookings" | "payments" | "notifications" | "settings"
@@ -117,7 +117,7 @@ export default function Profile() {
                     <User className="w-12 h-12 text-primary-foreground" />
                   </div>
                   <h2 className="text-xl font-bold">{displayName}</h2>
-                  <p className="text-muted-foreground">{role === "admin" ? "مسؤول" : "عضو"}</p>
+                  <p className="text-muted-foreground">{profile?.role === "admin" ? "مسؤول" : "عضو"}</p>
                 </div>
 
                 {/* Navigation */}
@@ -162,7 +162,7 @@ export default function Profile() {
                     <Settings className="w-5 h-5" />
                     الإعدادات
                   </Button>
-                  {role === "admin" && (
+                  {profile?.role === "admin" && (
                     <div className="rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm">
                       <div className="flex items-center gap-2 text-primary">
                         <Shield className="w-4 h-4" />
