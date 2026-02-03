@@ -92,6 +92,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    let isMounted = true;
+    const forceTimeout = window.setTimeout(() => {
+      if (isMounted) setLoading(false);
+    }, 8000);
+
+    const stopLoading = () => {
+      if (!isMounted) return;
+      window.clearTimeout(forceTimeout);
+      setLoading(false);
+    };
+
     const safeHydrate = async (sessionUser: User | null) => {
       try {
         await hydrateUser(sessionUser);
@@ -107,16 +118,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       await safeHydrate(session?.user ?? null);
-      setLoading(false);
+      stopLoading();
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      safeHydrate(session?.user ?? null).finally(() => setLoading(false));
+      safeHydrate(session?.user ?? null).finally(() => stopLoading());
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      window.clearTimeout(forceTimeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
