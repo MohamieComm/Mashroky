@@ -53,6 +53,7 @@ export default function TripDetails() {
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const [activeTab, setActiveTab] = useState<"details" | "description">("description");
 
   const [bookingData, setBookingData] = useState({
     travelDate: "",
@@ -150,6 +151,36 @@ export default function TripDetails() {
     ? Math.round(((trip.original_price - trip.price) / trip.original_price) * 100)
     : 0;
 
+  const detailSummary = [
+    { label: "المدة", value: `${trip.duration_days} أيام / ${trip.duration_days + 1} ليالٍ` },
+    { label: "عدد الأفراد", value: "شخصان بالغين (قابل للتخصيص)" },
+    { label: "نوع الإقامة", value: "فندق 4 نجوم مع إفطار" },
+    { label: "المواصلات", value: "تنقلات داخلية مع سائق" },
+    { label: "المدينة", value: trip.destination },
+  ];
+
+  const offerBenefits = [
+    "إقامة مريحة تشمل إفطار يومي فاخر",
+    "وجبة إفطار يومية",
+    "تنقلات خاصة حديثة مع سائق",
+    "تأمين سفر شامل",
+    "تصاريح دخول للمعالم السياحية",
+    "برنامج مناسب للعائلات والأزواج",
+  ];
+
+  const priceIncludes = [
+    "تذاكر الطيران",
+    "الفندق والإقامة",
+    "المواصلات الداخلية",
+    "برنامج الأنشطة الترفيهية",
+  ];
+
+  const priceExcludes = [
+    "رسوم التأشيرة إن وجدت",
+    "الوجبات غير المذكورة",
+    "المصاريف الشخصية",
+  ];
+
   return (
     <Layout>
       <section className="relative h-[50vh] min-h-[400px]">
@@ -211,8 +242,87 @@ export default function TripDetails() {
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
               <div className="bg-card rounded-2xl p-6 shadow-card">
-                <h2 className="text-xl font-bold mb-4">عن الرحلة</h2>
-                <p className="text-muted-foreground leading-relaxed">{trip.description}</p>
+                <div className="flex items-center gap-4 border-b border-border pb-4 mb-6">
+                  <button
+                    onClick={() => setActiveTab("details")}
+                    className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
+                      activeTab === "details"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    التفاصيل
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("description")}
+                    className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
+                      activeTab === "description"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    الوصف
+                  </button>
+                </div>
+
+                {activeTab === "description" ? (
+                  <div className="space-y-4">
+                    <h2 className="text-xl font-bold">الوصف</h2>
+                    <p className="text-muted-foreground leading-relaxed">{trip.description}</p>
+                    <div className="bg-muted rounded-xl p-4 text-sm text-muted-foreground">
+                      هذه الباقة قابلة للتخصيص وإضافة خدمات إضافية مثل الفندق والأنشطة.
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <h2 className="text-xl font-bold">تفاصيل الرحلة</h2>
+                    <div className="grid md:grid-cols-2 gap-3">
+                      {detailSummary.map((item) => (
+                        <div key={item.label} className="flex items-center justify-between bg-muted p-3 rounded-xl">
+                          <span className="text-sm text-muted-foreground">{item.label}</span>
+                          <span className="font-semibold">{item.value}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div>
+                      <h3 className="font-bold mb-3">مزايا العرض</h3>
+                      <ul className="space-y-2 text-sm text-muted-foreground">
+                        {offerBenefits.map((benefit) => (
+                          <li key={benefit} className="flex items-start gap-2">
+                            <Check className="w-4 h-4 text-primary mt-0.5" />
+                            <span>{benefit}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="bg-muted rounded-xl p-4">
+                        <h4 className="font-semibold mb-2">السعر يشمل</h4>
+                        <ul className="space-y-2 text-sm text-muted-foreground">
+                          {priceIncludes.map((item) => (
+                            <li key={item} className="flex items-center gap-2">
+                              <Check className="w-4 h-4 text-primary" />
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="bg-muted rounded-xl p-4">
+                        <h4 className="font-semibold mb-2">السعر لا يشمل</h4>
+                        <ul className="space-y-2 text-sm text-muted-foreground">
+                          {priceExcludes.map((item) => (
+                            <li key={item} className="flex items-center gap-2">
+                              <AlertTriangle className="w-4 h-4 text-destructive" />
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {trip.included_services && trip.included_services.length > 0 && (

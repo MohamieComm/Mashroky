@@ -165,6 +165,12 @@
     background-image: radial-gradient(hsl(0 0% 100% / 0.35) 1px, transparent 1px);
     background-size: 18px 18px;
   }
+
+  .phone-field {
+    direction: ltr;
+    unicode-bidi: plaintext;
+    text-align: left;
+  }
 }
 
 @layer utilities {

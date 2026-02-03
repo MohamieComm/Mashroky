@@ -1,10 +1,10 @@
 import { CalendarDays, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { defaultArticles, getAdminCollection } from "@/data/adminStore";
+import { defaultArticles, useAdminCollection } from "@/data/adminStore";
 
 export function LatestArticles() {
-  const latestArticles = getAdminCollection("articles", defaultArticles).slice(0, 6);
+  const latestArticles = useAdminCollection("articles", defaultArticles).slice(0, 6);
 
   return (
     <section className="py-20 bg-muted">

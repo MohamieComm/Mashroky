@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAdminData } from "@/data/adminStore";
+import { useAuth } from "@/hooks/useAuth";
 import {
   LayoutDashboard,
   Plane,
@@ -145,6 +146,16 @@ const sectionConfigs: Record<string, SectionConfig> = {
     fields: [
       { key: "title", label: "الوجهة" },
       { key: "country", label: "الدولة أو المدينة" },
+      {
+        key: "region",
+        label: "التصنيف",
+        type: "select",
+        options: [
+          { label: "داخل السعودية", value: "saudi" },
+          { label: "الشرق الأوسط", value: "middleeast" },
+          { label: "وجهات عالمية", value: "international" },
+        ],
+      },
       { key: "tag", label: "وسم" },
       { key: "duration", label: "المدة" },
       { key: "priceFrom", label: "السعر يبدأ من" },
@@ -189,6 +200,7 @@ const sectionConfigs: Record<string, SectionConfig> = {
       { key: "code", label: "الكود" },
       { key: "website", label: "الموقع" },
       { key: "phone", label: "رقم التواصل" },
+      { key: "logo", label: "رابط الشعار" },
     ],
   },
   api: {
@@ -282,6 +294,7 @@ const parseNumber = (value: string) => {
 };
 
 export default function Admin() {
+  const { isAdmin, loading } = useAuth();
   const [activeSection, setActiveSection] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -406,6 +419,22 @@ export default function Admin() {
       )
     );
   }, [adminData, activeConfig, searchTerm]);
+
+  if (!loading && !isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted px-4">
+        <div className="bg-card rounded-2xl p-10 shadow-card text-center max-w-lg">
+          <h2 className="text-2xl font-bold mb-3">الوصول مقيّد</h2>
+          <p className="text-muted-foreground mb-6">
+            هذه الصفحة مخصّصة لحسابات الإدارة فقط. تأكد من تسجيل الدخول بحساب يمتلك صلاحيات الإدارة.
+          </p>
+          <a href="/auth" className="inline-flex items-center justify-center h-12 px-6 rounded-xl hero-gradient text-primary-foreground">
+            تسجيل الدخول
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-muted flex overflow-x-hidden" dir="rtl">

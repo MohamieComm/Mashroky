@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,8 @@ import {
   Camera,
   FileText
 } from "lucide-react";
-import { defaultFlights, getAdminCollection } from "@/data/adminStore";
+import { defaultAirlines, defaultDestinations, defaultFlights, useAdminCollection } from "@/data/adminStore";
+import { adminBenefitCards, popularDestinationsByRegion } from "@/data/content";
 
 const bookingNotes = [
   "يرجى الحضور إلى المطار قبل 3 ساعات من الإقلاع.",
@@ -43,7 +44,27 @@ const additionalServices = [
 
 export default function Trips() {
   const [tripType, setTripType] = useState<"roundtrip" | "oneway">("roundtrip");
-  const flights = getAdminCollection("flights", defaultFlights);
+  const [destinationTab, setDestinationTab] = useState<"saudi" | "international" | "middleeast">("saudi");
+  const flights = useAdminCollection("flights", defaultFlights);
+  const destinations = useAdminCollection("destinations", defaultDestinations);
+  const airlines = useAdminCollection("airlines", defaultAirlines);
+
+  const destinationList = useMemo(() => {
+    const fromAdmin = destinations
+      .filter((dest) => dest.region === destinationTab)
+      .map((dest) => dest.title);
+    const fallback = popularDestinationsByRegion[destinationTab];
+    const merged = Array.from(new Set([...fromAdmin, ...fallback]));
+    return merged;
+  }, [destinations, destinationTab]);
+
+  const destinationColumns = useMemo(() => {
+    const columns = 3;
+    const chunkSize = Math.ceil(destinationList.length / columns);
+    return Array.from({ length: columns }, (_, index) =>
+      destinationList.slice(index * chunkSize, (index + 1) * chunkSize)
+    ).filter((col) => col.length);
+  }, [destinationList]);
 
   return (
     <Layout>
@@ -134,6 +155,78 @@ export default function Trips() {
         </div>
       </section>
 
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="flex items-start justify-between gap-6 flex-wrap mb-8">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold">أشهر الوجهات</h2>
+              <p className="text-muted-foreground mt-2">
+                اختر وجهتك بسرعة من أكثر الوجهات طلبًا حسب المنطقة.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  { id: "saudi", label: "أشهر الوجهات الداخلية" },
+                  { id: "international", label: "أشهر الوجهات الدولية" },
+                  { id: "middleeast", label: "أشهر الوجهات في الشرق الأوسط" },
+                ] as const
+              ).map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setDestinationTab(tab.id)}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
+                    destinationTab === tab.id
+                      ? "hero-gradient text-primary-foreground border-transparent shadow-soft"
+                      : "bg-muted text-muted-foreground border-border hover:bg-accent"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 text-sm">
+            {destinationColumns.map((column, index) => (
+              <ul key={index} className="space-y-2 text-muted-foreground">
+                {column.map((item) => (
+                  <li key={item} className="flex items-center gap-2">
+                    <span className="text-primary">•</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-12 bg-muted">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
+            <h3 className="text-xl md:text-2xl font-bold">أشهر شركات الطيران</h3>
+            <Button variant="outline">عرض الكل</Button>
+          </div>
+          <div className="flex flex-wrap items-center gap-4">
+            {airlines.map((airline) => (
+              <div
+                key={airline.id}
+                className="bg-card rounded-xl px-4 py-3 shadow-card flex items-center gap-3"
+              >
+                {airline.logo ? (
+                  <img src={airline.logo} alt={airline.name} className="w-20 h-8 object-contain" />
+                ) : (
+                  <div className="w-20 h-8 flex items-center justify-center text-sm font-semibold">
+                    {airline.name}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Popular Flights */}
       <section className="py-16">
         <div className="container mx-auto px-4">
@@ -198,6 +291,23 @@ export default function Trips() {
                     <Button variant="hero" className="w-full mt-4">احجز الآن</Button>
                   </div>
                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-3 gap-6">
+            {adminBenefitCards.map((item, index) => (
+              <div
+                key={item.title}
+                className="bg-card rounded-2xl p-6 shadow-card animate-fade-up"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <h4 className="text-lg font-bold mb-2">{item.title}</h4>
+                <p className="text-sm text-muted-foreground">{item.description}</p>
               </div>
             ))}
           </div>

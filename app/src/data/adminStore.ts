@@ -65,6 +65,7 @@ export type DestinationItem = {
   id: string;
   title: string;
   country: string;
+  region: string;
   tag: string;
   duration: string;
   priceFrom: string;
@@ -86,6 +87,7 @@ export type AirlineItem = {
   code: string;
   website: string;
   phone: string;
+  logo?: string;
 };
 
 export type ApiKeyItem = {
@@ -512,6 +514,7 @@ export const defaultDestinations: DestinationItem[] = [
     id: "dest-1",
     title: "جورجيا",
     country: "تبليسي وباتومي",
+    region: "international",
     tag: "شتوية",
     duration: "5 أيام",
     priceFrom: "2,600",
@@ -522,6 +525,7 @@ export const defaultDestinations: DestinationItem[] = [
     id: "dest-2",
     title: "كابادوكيا",
     country: "تركيا",
+    region: "international",
     tag: "رومانسية",
     duration: "4 أيام",
     priceFrom: "3,150",
@@ -532,6 +536,7 @@ export const defaultDestinations: DestinationItem[] = [
     id: "dest-3",
     title: "المالديف",
     country: "المحيط الهندي",
+    region: "international",
     tag: "فاخر",
     duration: "6 أيام",
     priceFrom: "6,900",
@@ -542,6 +547,7 @@ export const defaultDestinations: DestinationItem[] = [
     id: "dest-4",
     title: "الرياض والدرعية",
     country: "السعودية",
+    region: "saudi",
     tag: "تراث",
     duration: "3 أيام",
     priceFrom: "1,200",
@@ -552,6 +558,7 @@ export const defaultDestinations: DestinationItem[] = [
     id: "dest-5",
     title: "أذربيجان",
     country: "باكو وقوبا",
+    region: "international",
     tag: "عائلي",
     duration: "5 أيام",
     priceFrom: "3,400",
@@ -562,11 +569,78 @@ export const defaultDestinations: DestinationItem[] = [
     id: "dest-6",
     title: "صلالة",
     country: "سلطنة عمان",
+    region: "middleeast",
     tag: "صيفية",
     duration: "4 أيام",
     priceFrom: "2,100",
     description: "خريف صلالة، شلالات وضباب وجولات طبيعية منعشة.",
     image: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1200",
+  },
+  {
+    id: "dest-7",
+    title: "العُلا",
+    country: "السعودية",
+    region: "saudi",
+    tag: "تراث",
+    duration: "3 أيام",
+    priceFrom: "1,450",
+    description: "مغامرات صحراوية ومواقع تراث عالمي وتجارب ثقافية حية.",
+    image: "https://images.unsplash.com/photo-1547234934-7b6dff7f1f48?w=1200",
+  },
+  {
+    id: "dest-8",
+    title: "جدة",
+    country: "السعودية",
+    region: "saudi",
+    tag: "بحرية",
+    duration: "3 أيام",
+    priceFrom: "980",
+    description: "كورنيش ساحر وأسواق تاريخية وتجارب بحرية ممتعة.",
+    image: "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?w=1200",
+  },
+  {
+    id: "dest-9",
+    title: "دبي",
+    country: "الإمارات",
+    region: "middleeast",
+    tag: "عائلي",
+    duration: "4 أيام",
+    priceFrom: "2,350",
+    description: "تجارب تسوق وترفيه ومطاعم عالمية تناسب العائلة.",
+    image: "https://images.unsplash.com/photo-1518684079-3c830dcef090?w=1200",
+  },
+  {
+    id: "dest-10",
+    title: "الدوحة",
+    country: "قطر",
+    region: "middleeast",
+    tag: "ثقافية",
+    duration: "3 أيام",
+    priceFrom: "1,950",
+    description: "متاحف عالمية وأسواق تقليدية وإطلالة بحرية أنيقة.",
+    image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200",
+  },
+  {
+    id: "dest-11",
+    title: "لندن",
+    country: "المملكة المتحدة",
+    region: "international",
+    tag: "تعليم",
+    duration: "6 أيام",
+    priceFrom: "4,750",
+    description: "مدينة ثقافية مناسبة للدراسة والخدمات المتنوعة.",
+    image: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1200",
+  },
+  {
+    id: "dest-12",
+    title: "باريس",
+    country: "فرنسا",
+    region: "international",
+    tag: "رومانسية",
+    duration: "5 أيام",
+    priceFrom: "4,200",
+    description: "تجارب فنية ومطاعم راقية ومعالم تاريخية خلابة.",
+    image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1200",
   },
 ];
 
@@ -594,6 +668,7 @@ export const defaultAirlines: AirlineItem[] = [
     code: "SV",
     website: "https://www.saudia.com",
     phone: "+966 920022222",
+    logo: "https://logo.clearbit.com/saudia.com",
   },
   {
     id: "airline-2",
@@ -601,6 +676,47 @@ export const defaultAirlines: AirlineItem[] = [
     code: "XY",
     website: "https://www.flynas.com",
     phone: "+966 920001234",
+    logo: "https://logo.clearbit.com/flynas.com",
+  },
+  {
+    id: "airline-3",
+    name: "طيران الإمارات",
+    code: "EK",
+    website: "https://www.emirates.com",
+    phone: "+971 600555555",
+    logo: "https://logo.clearbit.com/emirates.com",
+  },
+  {
+    id: "airline-4",
+    name: "الخطوط القطرية",
+    code: "QR",
+    website: "https://www.qatarairways.com",
+    phone: "+974 40230000",
+    logo: "https://logo.clearbit.com/qatarairways.com",
+  },
+  {
+    id: "airline-5",
+    name: "مصر للطيران",
+    code: "MS",
+    website: "https://www.egyptair.com",
+    phone: "+202 2598 0000",
+    logo: "https://logo.clearbit.com/egyptair.com",
+  },
+  {
+    id: "airline-6",
+    name: "العربية للطيران",
+    code: "G9",
+    website: "https://www.airarabia.com",
+    phone: "+971 600508001",
+    logo: "https://logo.clearbit.com/airarabia.com",
+  },
+  {
+    id: "airline-7",
+    name: "flyadeal",
+    code: "F3",
+    website: "https://www.flyadeal.com",
+    phone: "+966 920000212",
+    logo: "https://logo.clearbit.com/flyadeal.com",
   },
 ];
 
@@ -707,6 +823,33 @@ export const useAdminData = (): [AdminData, (value: AdminData) => void] => {
   }, [data]);
 
   return [data, setData];
+};
+
+export const useAdminCollection = <K extends keyof AdminData>(
+  key: K,
+  fallback: AdminData[K]
+): AdminData[K] => {
+  const [collection, setCollection] = useState<AdminData[K]>(() =>
+    getAdminCollection(key, fallback)
+  );
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setCollection(getAdminCollection(key, fallback));
+    };
+    handleUpdate();
+    if (typeof window !== "undefined") {
+      window.addEventListener("admin-data-updated", handleUpdate);
+      window.addEventListener("storage", handleUpdate);
+      return () => {
+        window.removeEventListener("admin-data-updated", handleUpdate);
+        window.removeEventListener("storage", handleUpdate);
+      };
+    }
+    return undefined;
+  }, [key, fallback]);
+
+  return collection;
 };
 
 export const getAdminCollection = <K extends keyof AdminData>(

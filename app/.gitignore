@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local design references
+src/main/add/
+src/main/res/drawable/Logo 2.PNG

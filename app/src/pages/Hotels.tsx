@@ -16,7 +16,7 @@ import {
   CreditCard,
   Filter
 } from "lucide-react";
-import { defaultHotels, getAdminCollection } from "@/data/adminStore";
+import { defaultHotels, useAdminCollection } from "@/data/adminStore";
 
 const hotelNotes = [
   "وقت تسجيل الدخول 3:00 مساءً وتسجيل الخروج 12:00 ظهرًا.",
@@ -35,7 +35,7 @@ const amenityIcons: Record<string, { icon: React.ComponentType<{ className?: str
 };
 
 export default function Hotels() {
-  const hotels = getAdminCollection("hotels", defaultHotels);
+  const hotels = useAdminCollection("hotels", defaultHotels);
 
   return (
     <Layout>

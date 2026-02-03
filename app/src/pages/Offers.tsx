@@ -9,11 +9,11 @@ import {
   CreditCard,
   Calendar
 } from "lucide-react";
-import { defaultOffers, getAdminCollection } from "@/data/adminStore";
+import { defaultOffers, useAdminCollection } from "@/data/adminStore";
 
 
 export default function Offers() {
-  const offers = getAdminCollection("offers", defaultOffers);
+  const offers = useAdminCollection("offers", defaultOffers);
 
   return (
     <Layout>

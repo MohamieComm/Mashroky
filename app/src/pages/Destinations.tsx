@@ -1,6 +1,8 @@
+import { useMemo, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { defaultDestinations, getAdminCollection } from "@/data/adminStore";
+import { defaultAirlines, defaultDestinations, useAdminCollection } from "@/data/adminStore";
+import { adminBenefitCards, popularDestinationsByRegion } from "@/data/content";
 import { ArrowLeft, MapPin, Sparkles, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -14,12 +16,31 @@ const tagStyles: Record<string, string> = {
 };
 
 export default function Destinations() {
-  const destinations = getAdminCollection("destinations", defaultDestinations);
+  const [activeTab, setActiveTab] = useState<"saudi" | "international" | "middleeast">("saudi");
+  const destinations = useAdminCollection("destinations", defaultDestinations);
+  const airlines = useAdminCollection("airlines", defaultAirlines);
+
+  const destinationList = useMemo(() => {
+    const fromAdmin = destinations
+      .filter((dest) => dest.region === activeTab)
+      .map((dest) => dest.title);
+    const fallback = popularDestinationsByRegion[activeTab];
+    return Array.from(new Set([...fromAdmin, ...fallback]));
+  }, [destinations, activeTab]);
+
+  const destinationColumns = useMemo(() => {
+    const columns = 3;
+    const chunkSize = Math.ceil(destinationList.length / columns);
+    return Array.from({ length: columns }, (_, index) =>
+      destinationList.slice(index * chunkSize, (index + 1) * chunkSize)
+    ).filter((col) => col.length);
+  }, [destinationList]);
 
   return (
     <Layout>
       <section className="relative overflow-hidden py-20">
         <div className="absolute inset-0 bg-gradient-to-br from-amber-50 via-emerald-50 to-sky-50" />
+        <div className="absolute inset-0 opacity-40 dot-pattern" />
         <div className="absolute -top-24 -left-16 w-64 h-64 bg-secondary/20 rounded-full blur-3xl" />
         <div className="absolute -bottom-20 right-0 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
         <div className="container mx-auto px-4 relative z-10 text-center">
@@ -46,6 +67,65 @@ export default function Destinations() {
 
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
+          <div className="flex items-start justify-between gap-6 flex-wrap mb-10">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold">أشهر الوجهات</h2>
+              <p className="text-muted-foreground mt-2">
+                اختر من القوائم المميزة حسب المنطقة لتخطيط رحلتك بسرعة.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  { id: "saudi", label: "أشهر الوجهات الداخلية" },
+                  { id: "international", label: "أشهر الوجهات الدولية" },
+                  { id: "middleeast", label: "أشهر الوجهات في الشرق الأوسط" },
+                ] as const
+              ).map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
+                    activeTab === tab.id
+                      ? "hero-gradient text-primary-foreground border-transparent shadow-soft"
+                      : "bg-muted text-muted-foreground border-border hover:bg-accent"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 text-sm mb-12">
+            {destinationColumns.map((column, index) => (
+              <ul key={index} className="space-y-2 text-muted-foreground">
+                {column.map((item) => (
+                  <li key={item} className="flex items-center gap-2">
+                    <span className="text-primary">•</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between flex-wrap gap-4 mb-8">
+            <h3 className="text-2xl font-bold">أشهر شركات الطيران</h3>
+            <Button variant="outline">عرض الكل</Button>
+          </div>
+          <div className="flex flex-wrap items-center gap-4 mb-16">
+            {airlines.map((airline) => (
+              <div key={airline.id} className="bg-card rounded-xl px-4 py-3 shadow-card flex items-center gap-3">
+                {airline.logo ? (
+                  <img src={airline.logo} alt={airline.name} className="w-20 h-8 object-contain" />
+                ) : (
+                  <span className="text-sm font-semibold">{airline.name}</span>
+                )}
+              </div>
+            ))}
+          </div>
+
           <div className="flex items-end justify-between flex-wrap gap-6 mb-10">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold">وجهات موصى بها لهذا الموسم</h2>
@@ -104,20 +184,7 @@ export default function Destinations() {
       <section className="py-16 bg-muted">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                title: "تجارب موسمية",
-                description: "نقترح لك الوجهات التي تناسب المناخ والفعاليات الحالية.",
-              },
-              {
-                title: "أسعار شفافة",
-                description: "باقات واضحة تشمل الطيران والإقامة والأنشطة الأساسية.",
-              },
-              {
-                title: "دعم محلي",
-                description: "فريقنا يساعدك في التخطيط ويقدم توصيات مخصصة لكل رحلة.",
-              },
-            ].map((item, index) => (
+            {adminBenefitCards.map((item, index) => (
               <div key={item.title} className="bg-card rounded-2xl p-6 shadow-card">
                 <div className="w-12 h-12 rounded-xl hero-gradient flex items-center justify-center text-primary-foreground mb-4">
                   <Star className="w-6 h-6" />

@@ -1,10 +1,10 @@
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { CalendarCheck, Ticket, MapPin, Users } from "lucide-react";
-import { defaultActivities, getAdminCollection } from "@/data/adminStore";
+import { defaultActivities, useAdminCollection } from "@/data/adminStore";
 
 export default function Activities() {
-  const activities = getAdminCollection("activities", defaultActivities);
+  const activities = useAdminCollection("activities", defaultActivities);
 
   return (
     <Layout>

@@ -17,6 +17,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
+  isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -138,6 +139,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session,
     profile,
     loading,
+    isAdmin:
+      (profile?.role ?? "").toLowerCase() === "admin" ||
+      Boolean(user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase())),
     signIn,
     signUp,
     signOut,
