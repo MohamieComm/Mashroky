@@ -34,7 +34,16 @@ const queryClient = new QueryClient();
 
 const AdminRoute = ({ children }: { children: JSX.Element }) => {
   const { user, isAdmin, loading } = useAuth();
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted px-4">
+        <div className="bg-card rounded-2xl p-8 shadow-card text-center max-w-md">
+          <h2 className="text-xl font-bold mb-2">جاري التحقق من الصلاحيات</h2>
+          <p className="text-muted-foreground text-sm">يرجى الانتظار لحظات...</p>
+        </div>
+      </div>
+    );
+  }
   if (!user) return <Navigate to="/auth" replace />;
   if (!isAdmin) return <Navigate to="/" replace />;
   return children;

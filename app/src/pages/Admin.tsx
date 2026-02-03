@@ -294,7 +294,7 @@ const parseNumber = (value: string) => {
 };
 
 export default function Admin() {
-  const { isAdmin, loading } = useAuth();
+  const { isAdmin, loading, user, profile } = useAuth();
   const [activeSection, setActiveSection] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -553,6 +553,12 @@ export default function Admin() {
             </h1>
           </div>
           <div className="flex items-center gap-4">
+            <div className="hidden md:flex flex-col text-right">
+              <span className="text-sm text-muted-foreground">{user?.email ?? ""}</span>
+              <span className="text-xs text-primary">
+                {isAdmin ? "مدير" : profile?.role ? "مستخدم" : "غير مسجل"}
+              </span>
+            </div>
             <div className="relative hidden md:block">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input placeholder="بحث سريع..." className="pr-10 w-64" />
