@@ -1,5 +1,6 @@
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { 
   Clock, 
   Percent, 
@@ -51,7 +52,7 @@ export default function Offers() {
                 <div className="flex flex-col lg:flex-row">
                   {/* Image */}
                   <div className="lg:w-2/5 h-72 lg:h-auto relative">
-                    <img
+                    <ImageWithFallback
                       src={offer.image}
                       alt={offer.title}
                       className="w-full h-full object-cover"

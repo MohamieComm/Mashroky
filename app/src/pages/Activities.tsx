@@ -1,5 +1,6 @@
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { CalendarCheck, Ticket, MapPin, Users } from "lucide-react";
 import { defaultActivities, useAdminCollection } from "@/data/adminStore";
 
@@ -41,7 +42,11 @@ export default function Activities() {
             {activities.map((activity) => (
               <div key={activity.id} className="bg-card rounded-2xl overflow-hidden shadow-card">
                 <div className="h-48 overflow-hidden">
-                  <img src={activity.image} alt={activity.title} className="w-full h-full object-cover" />
+                  <ImageWithFallback
+                    src={activity.image}
+                    alt={activity.title}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div className="p-5">
                   <span className="text-xs text-secondary font-semibold">{activity.category}</span>

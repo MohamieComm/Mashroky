@@ -25,7 +25,7 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAILS ?? "ibrahemest@outlook.sa,ish959@gmail.com")
+const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAILS || "ibrahemest@outlook.sa,ish959@gmail.com")
   .split(",")
   .map((email) => email.trim().toLowerCase())
   .filter(Boolean);
@@ -42,11 +42,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const { data: profileData } = await supabase
+    const { data: profileData, error: profileError } = await supabase
       .from("profiles")
       .select("*")
       .eq("user_id", sessionUser.id)
-      .single();
+      .maybeSingle();
 
     const shouldBeAdmin = Boolean(
       sessionUser.email && ADMIN_EMAILS.includes(sessionUser.email.toLowerCase())
@@ -59,13 +59,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .update({ role: "admin" })
           .eq("user_id", sessionUser.id)
           .select("*")
-          .single();
+          .maybeSingle();
         setProfile(updated ?? profileData);
         return;
       }
       setProfile(profileData);
     } else {
-      const { data: inserted } = await supabase
+      const { data: inserted, error: insertError } = await supabase
         .from("profiles")
         .insert({
           user_id: sessionUser.id,
@@ -73,25 +73,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           role: shouldBeAdmin ? "admin" : "user",
         })
         .select("*")
-        .single();
+        .maybeSingle();
+
+      if (insertError || profileError) {
+        setProfile({
+          id: sessionUser.id,
+          user_id: sessionUser.id,
+          full_name: sessionUser.user_metadata?.full_name ?? null,
+          phone: null,
+          avatar_url: null,
+          address: null,
+          role: shouldBeAdmin ? "admin" : "user",
+        });
+        return;
+      }
       setProfile(inserted ?? null);
     }
   };
 
   useEffect(() => {
+    const safeHydrate = async (sessionUser: User | null) => {
+      try {
+        await hydrateUser(sessionUser);
+      } catch (error) {
+        console.error("Failed to hydrate auth profile", error);
+        setProfile(null);
+      }
+    };
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      await hydrateUser(session?.user ?? null);
+      await safeHydrate(session?.user ?? null);
       setLoading(false);
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      hydrateUser(session?.user ?? null).finally(() => setLoading(false));
+      safeHydrate(session?.user ?? null).finally(() => setLoading(false));
     });
 
     return () => subscription.unsubscribe();

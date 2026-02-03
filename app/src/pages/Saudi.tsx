@@ -1,5 +1,6 @@
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { MapPin, Star } from "lucide-react";
 import { saudiHighlights, saudiHeritage } from "@/data/content";
 
@@ -75,7 +76,11 @@ export default function Saudi() {
             {saudiHighlights.map((dest) => (
               <div key={dest.title} className="bg-card rounded-2xl overflow-hidden shadow-card">
                 <div className="h-48 overflow-hidden">
-                  <img src={dest.image} alt={dest.title} className="w-full h-full object-cover" />
+                  <ImageWithFallback
+                    src={dest.image}
+                    alt={dest.title}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div className="p-5">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">

@@ -1,6 +1,7 @@
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { GraduationCap, Globe, CheckCircle } from "lucide-react";
 import { studyOffers, studyDestinations, topUniversities } from "@/data/content";
 
@@ -53,10 +54,14 @@ export default function Study() {
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {studyOffers.map((offer) => (
-              <div key={offer.id} className="bg-card rounded-2xl overflow-hidden shadow-card">
-                <div className="h-44 overflow-hidden">
-                  <img src={offer.image} alt={offer.title} className="w-full h-full object-cover" />
-                </div>
+                <div key={offer.id} className="bg-card rounded-2xl overflow-hidden shadow-card">
+                  <div className="h-44 overflow-hidden">
+                  <ImageWithFallback
+                    src={offer.image}
+                    alt={offer.title}
+                    className="w-full h-full object-cover"
+                  />
+                  </div>
                 <div className="p-5">
                   <h3 className="font-bold mb-1">{offer.title}</h3>
                   <p className="text-sm text-muted-foreground">{offer.location} • {offer.duration}</p>

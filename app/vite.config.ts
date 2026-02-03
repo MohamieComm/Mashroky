@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => ({
       ".up.railway.app",
       "mashrok.online",
       "www.mashrok.online",
+      ".mashrok.online",
     ],
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),

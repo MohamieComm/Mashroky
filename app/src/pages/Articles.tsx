@@ -1,6 +1,7 @@
 import { Layout } from "@/components/layout/Layout";
 import { CalendarDays, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { defaultArticles, useAdminCollection } from "@/data/adminStore";
 import { travelGuideSections } from "@/data/content";
 
@@ -47,7 +48,7 @@ export default function Articles() {
                 <div className="space-y-4">
                   {latestArticles.slice(0, 6).map((article) => (
                     <div key={article.id} className="flex items-start gap-3">
-                      <img
+                      <ImageWithFallback
                         src={article.image}
                         alt={article.title}
                         className="w-16 h-16 rounded-xl object-cover"
@@ -86,7 +87,11 @@ export default function Articles() {
             {latestArticles.map((article) => (
               <div key={article.id} className="bg-card rounded-2xl overflow-hidden shadow-card">
                 <div className="h-52 overflow-hidden">
-                  <img src={article.image} alt={article.title} className="w-full h-full object-cover" />
+                  <ImageWithFallback
+                    src={article.image}
+                    alt={article.title}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div className="p-6">
                   <span className="text-xs text-secondary font-semibold">{article.category}</span>

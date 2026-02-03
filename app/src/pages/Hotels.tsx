@@ -1,6 +1,7 @@
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { 
   Hotel, 
   MapPin, 
@@ -109,7 +110,7 @@ export default function Hotels() {
                 <div className="flex flex-col lg:flex-row">
                   {/* Image */}
                   <div className="lg:w-96 h-64 lg:h-auto relative">
-                    <img
+                    <ImageWithFallback
                       src={hotel.image}
                       alt={hotel.name}
                       className="w-full h-full object-cover"

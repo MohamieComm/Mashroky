@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { defaultAirlines, defaultDestinations, useAdminCollection } from "@/data/adminStore";
 import { adminBenefitCards, popularDestinationsByRegion } from "@/data/content";
 import { ArrowLeft, MapPin, Sparkles, Star } from "lucide-react";
@@ -117,11 +118,17 @@ export default function Destinations() {
           <div className="flex flex-wrap items-center gap-4 mb-16">
             {airlines.map((airline) => (
               <div key={airline.id} className="bg-card rounded-xl px-4 py-3 shadow-card flex items-center gap-3">
-                {airline.logo ? (
-                  <img src={airline.logo} alt={airline.name} className="w-20 h-8 object-contain" />
-                ) : (
-                  <span className="text-sm font-semibold">{airline.name}</span>
+                {airline.logo && (
+                  <img
+                    src={airline.logo}
+                    alt={airline.name}
+                    className="w-20 h-8 object-contain"
+                    onError={(event) => {
+                      event.currentTarget.style.display = "none";
+                    }}
+                  />
                 )}
+                <span className="text-sm font-semibold">{airline.name}</span>
               </div>
             ))}
           </div>
@@ -149,7 +156,11 @@ export default function Destinations() {
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="relative h-56 overflow-hidden">
-                  <img src={dest.image} alt={dest.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <ImageWithFallback
+                    src={dest.image}
+                    alt={dest.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 to-transparent" />
                   <span className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold ${tagStyles[dest.tag] || "bg-white/80 text-foreground"}`}>
                     {dest.tag}

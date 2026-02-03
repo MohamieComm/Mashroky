@@ -1,5 +1,6 @@
 import { GraduationCap, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { Link } from "react-router-dom";
 import { studyOffers } from "@/data/content";
 
@@ -31,7 +32,7 @@ export function WeeklyOffers() {
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <div className="relative h-48 overflow-hidden">
-                <img
+                <ImageWithFallback
                   src={offer.image}
                   alt={offer.title}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"

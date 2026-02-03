@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { 
   Plane, 
   MapPin, 
@@ -214,13 +215,17 @@ export default function Trips() {
                 key={airline.id}
                 className="bg-card rounded-xl px-4 py-3 shadow-card flex items-center gap-3"
               >
-                {airline.logo ? (
-                  <img src={airline.logo} alt={airline.name} className="w-20 h-8 object-contain" />
-                ) : (
-                  <div className="w-20 h-8 flex items-center justify-center text-sm font-semibold">
-                    {airline.name}
-                  </div>
+                {airline.logo && (
+                  <img
+                    src={airline.logo}
+                    alt={airline.name}
+                    className="w-20 h-8 object-contain"
+                    onError={(event) => {
+                      event.currentTarget.style.display = "none";
+                    }}
+                  />
                 )}
+                <div className="text-sm font-semibold">{airline.name}</div>
               </div>
             ))}
           </div>
@@ -242,7 +247,7 @@ export default function Trips() {
                 <div className="flex flex-col lg:flex-row gap-6">
                   {/* Flight Image */}
                   <div className="lg:w-48 h-32 rounded-xl overflow-hidden">
-                    <img
+                    <ImageWithFallback
                       src={flight.image}
                       alt={`${flight.from} إلى ${flight.to}`}
                       className="w-full h-full object-cover"
