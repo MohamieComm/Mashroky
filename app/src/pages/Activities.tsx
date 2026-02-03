@@ -1,43 +1,11 @@
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { CalendarCheck, Ticket, MapPin, Users } from "lucide-react";
-
-const activities = [
-  {
-    id: 1,
-    title: "مهرجان البحر الأحمر",
-    location: "جدة",
-    category: "مهرجانات",
-    price: "450",
-    image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1200",
-  },
-  {
-    id: 2,
-    title: "سباق الصحارى",
-    location: "العُلا",
-    category: "مغامرات",
-    price: "650",
-    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200",
-  },
-  {
-    id: 3,
-    title: "كرنفال الرياض",
-    location: "الرياض",
-    category: "فعاليات",
-    price: "300",
-    image: "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?w=1200",
-  },
-  {
-    id: 4,
-    title: "رحلة غوص خاصة",
-    location: "البحر الأحمر",
-    category: "أنشطة بحرية",
-    price: "900",
-    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200",
-  },
-];
+import { defaultActivities, getAdminCollection } from "@/data/adminStore";
 
 export default function Activities() {
+  const activities = getAdminCollection("activities", defaultActivities);
+
   return (
     <Layout>
       <section className="hero-gradient py-20">

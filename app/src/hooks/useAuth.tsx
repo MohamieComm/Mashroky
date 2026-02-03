@@ -24,6 +24,10 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAILS ?? "ibrahemest@outlook.sa,ish959@gmail.com")
+  .split(",")
+  .map((email) => email.trim().toLowerCase())
+  .filter(Boolean);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -43,7 +47,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq("user_id", sessionUser.id)
       .single();
 
+    const shouldBeAdmin = Boolean(
+      sessionUser.email && ADMIN_EMAILS.includes(sessionUser.email.toLowerCase())
+    );
+
     if (profileData) {
+      if (shouldBeAdmin && profileData.role !== "admin") {
+        const { data: updated } = await supabase
+          .from("profiles")
+          .update({ role: "admin" })
+          .eq("user_id", sessionUser.id)
+          .select("*")
+          .single();
+        setProfile(updated ?? profileData);
+        return;
+      }
       setProfile(profileData);
     } else {
       const { data: inserted } = await supabase
@@ -51,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .insert({
           user_id: sessionUser.id,
           full_name: sessionUser.user_metadata?.full_name ?? null,
-          role: "user",
+          role: shouldBeAdmin ? "admin" : "user",
         })
         .select("*")
         .single();
@@ -93,10 +111,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     });
     if (!error && data.user) {
+      const shouldBeAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
       await supabase.from("profiles").upsert({
         user_id: data.user.id,
         full_name: fullName,
-        role: "user",
+        role: shouldBeAdmin ? "admin" : "user",
       });
     }
     return { error };

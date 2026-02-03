@@ -1,9 +1,11 @@
 import { Layout } from "@/components/layout/Layout";
-import { latestArticles } from "@/data/content";
 import { CalendarDays, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { defaultArticles, getAdminCollection } from "@/data/adminStore";
 
 export default function Articles() {
+  const latestArticles = getAdminCollection("articles", defaultArticles);
+
   return (
     <Layout>
       <section className="hero-gradient py-20">

@@ -149,6 +149,24 @@ export const studyOffers = [
     image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200",
     includes: ["سكن مشترك", "بطاقة نقل", "ورش محادثة"],
   },
+  {
+    id: 5,
+    title: "برنامج لغة في كوالالمبور",
+    location: "ماليزيا",
+    duration: "5 أسابيع",
+    price: "7,200",
+    image: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=1200",
+    includes: ["سكن طلابي", "أنشطة ثقافية", "تأمين صحي"],
+  },
+  {
+    id: 6,
+    title: "برنامج أكاديمي في بوسطن",
+    location: "الولايات المتحدة",
+    duration: "8 أسابيع",
+    price: "11,300",
+    image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200",
+    includes: ["قبول جامعي", "استقبال مطار", "دعم تأشيرة"],
+  },
 ];
 
 export const latestArticles = [
@@ -217,6 +235,16 @@ export const saudiHighlights = [
     description: "طبيعة جبلية، أجواء معتدلة، وأسواق شعبية تعكس هوية المنطقة.",
     image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200",
   },
+  {
+    title: "تبوك ونيوم",
+    description: "سواحل خلابة، جبال شاهقة، وتجارب سياحية مستقبلية على البحر الأحمر.",
+    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200",
+  },
+  {
+    title: "المدينة المنورة",
+    description: "تجارب روحانية وثقافية مع معالم تاريخية وأسواق تراثية.",
+    image: "https://images.unsplash.com/photo-1495195129352-a9d3c9469a46?w=1200",
+  },
 ];
 
 export const saudiHeritage = [
@@ -258,6 +286,18 @@ export const studyDestinations = [
     name: "أيرلندا",
     focus: "لغة إنجليزية بلمسة أوروبية",
     highlights: ["مدة دراسة مرنة", "مدن مريحة", "ثقافة ودودة"],
+  },
+  {
+    id: 6,
+    name: "ماليزيا",
+    focus: "برامج لغة بتكاليف مناسبة",
+    highlights: ["بيئة متعددة الثقافات", "معاهد معتمدة", "تكلفة معيشة منخفضة"],
+  },
+  {
+    id: 7,
+    name: "الإمارات",
+    focus: "برامج جامعية دولية في بيئة عربية",
+    highlights: ["جامعات عالمية", "سهولة التنقل", "بيئة آمنة"],
   },
 ];
 

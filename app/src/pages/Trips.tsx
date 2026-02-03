@@ -17,6 +17,7 @@ import {
   Camera,
   FileText
 } from "lucide-react";
+import { defaultFlights, getAdminCollection } from "@/data/adminStore";
 
 const bookingNotes = [
   "يرجى الحضور إلى المطار قبل 3 ساعات من الإقلاع.",
@@ -32,60 +33,6 @@ const ticketDetails = [
   { label: "موعد الوصول", value: "10:00 ص" },
 ];
 
-const flights = [
-  {
-    id: 1,
-    from: "الرياض",
-    to: "دبي",
-    airline: "الخطوط السعودية",
-    departTime: "08:00",
-    arriveTime: "10:00",
-    duration: "2 ساعة",
-    price: "650",
-    stops: "مباشر",
-    rating: 4.8,
-    image: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400",
-  },
-  {
-    id: 2,
-    from: "جدة",
-    to: "إسطنبول",
-    airline: "طيران ناس",
-    departTime: "14:30",
-    arriveTime: "19:00",
-    duration: "4.5 ساعة",
-    price: "1,200",
-    stops: "مباشر",
-    rating: 4.5,
-    image: "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?w=400",
-  },
-  {
-    id: 3,
-    from: "الرياض",
-    to: "القاهرة",
-    airline: "مصر للطيران",
-    departTime: "06:00",
-    arriveTime: "08:30",
-    duration: "2.5 ساعة",
-    price: "800",
-    stops: "مباشر",
-    rating: 4.6,
-    image: "https://images.unsplash.com/photo-1529074963764-98f45c47344b?w=400",
-  },
-  {
-    id: 4,
-    from: "الدمام",
-    to: "باريس",
-    airline: "الخطوط الفرنسية",
-    departTime: "22:00",
-    arriveTime: "06:00",
-    duration: "8 ساعات",
-    price: "3,500",
-    stops: "محطة واحدة",
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400",
-  },
-];
 
 const additionalServices = [
   { icon: Hotel, name: "حجز فندق", description: "أفضل الفنادق بأسعار مميزة" },
@@ -96,6 +43,7 @@ const additionalServices = [
 
 export default function Trips() {
   const [tripType, setTripType] = useState<"roundtrip" | "oneway">("roundtrip");
+  const flights = getAdminCollection("flights", defaultFlights);
 
   return (
     <Layout>

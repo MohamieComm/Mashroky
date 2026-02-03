@@ -53,6 +53,16 @@ const bookingHistory = [
   },
 ];
 
+const normalizePhone = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) return trimmed;
+  const cleaned = trimmed.replace(/\s+/g, "");
+  if (cleaned.startsWith("+")) return `+${cleaned.slice(1)}`;
+  if (cleaned.endsWith("+")) return `+${cleaned.slice(0, -1)}`;
+  if (cleaned.includes("+")) return `+${cleaned.replace(/\+/g, "")}`;
+  return cleaned;
+};
+
 export default function Profile() {
   const { user, profile, updateProfile, signOut, loading } = useAuth();
   const { toast } = useToast();
@@ -69,7 +79,7 @@ export default function Profile() {
   useEffect(() => {
     setFormState({
       fullName: profile?.full_name ?? "",
-      phone: profile?.phone ?? "",
+      phone: profile?.phone ? normalizePhone(profile.phone) : "",
       address: profile?.address ?? "",
     });
   }, [profile?.full_name, profile?.phone, profile?.address]);
@@ -85,7 +95,7 @@ export default function Profile() {
   const handleSave = async () => {
     const { error } = await updateProfile({
       full_name: formState.fullName || null,
-      phone: formState.phone || null,
+      phone: formState.phone ? normalizePhone(formState.phone) : null,
       address: formState.address || null,
     });
     if (error) {

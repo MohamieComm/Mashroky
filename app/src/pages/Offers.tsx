@@ -9,95 +9,12 @@ import {
   CreditCard,
   Calendar
 } from "lucide-react";
+import { defaultOffers, getAdminCollection } from "@/data/adminStore";
 
-const offers = [
-  {
-    id: 1,
-    title: "باقة العُلا التراثية",
-    description: "اكتشف مدائن صالح وتجارب الصحراء في برنامج شامل للطيران والإقامة والجولات.",
-    image: "https://images.unsplash.com/photo-1547234934-7b6dff7f1f48?w=800",
-    discount: 20,
-    validUntil: "حتى نهاية الموسم",
-    originalPrice: "4,200",
-    newPrice: "3,350",
-    season: "الشتاء والربيع",
-    includes: [
-      "طيران داخلي ذهاب وعودة",
-      "إقامة 3 ليالٍ",
-      "جولة أثرية في هِجرا",
-      "تنقلات داخلية",
-    ],
-    tips: [
-      "احجز مبكرًا لعروض المخيمات الفاخرة",
-      "يُفضل السفر في الصباح للاستفادة من الطقس",
-      "ارتدِ أحذية مريحة للأنشطة الصحراوية",
-    ],
-  },
-  {
-    id: 2,
-    title: "سحر البحر الأحمر",
-    description: "منتجعات شاطئية وأنشطة بحرية مع برنامج متكامل للعائلات.",
-    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
-    discount: 18,
-    validUntil: "حتى نهاية الموسم",
-    originalPrice: "5,600",
-    newPrice: "4,600",
-    season: "طوال العام",
-    includes: [
-      "إقامة 4 ليالٍ في منتجع بحري",
-      "أنشطة غوص ورياضات مائية",
-      "تنقلات خاصة",
-    ],
-    tips: [
-      "احجز غرفًا بإطلالة بحرية مبكرًا",
-      "اصطحب واقي شمس ومستلزمات الغوص",
-      "أضف رحلة بحرية خاصة عند الغروب",
-    ],
-  },
-  {
-    id: 3,
-    title: "دبي العائلية الشاملة",
-    description: "باقة تشمل الطيران والفندق والأنشطة الترفيهية والمواصلات.",
-    image: "https://images.unsplash.com/photo-1518684079-3c830dcef090?w=800",
-    discount: 30,
-    validUntil: "حتى نهاية الموسم",
-    originalPrice: "4,500",
-    newPrice: "3,150",
-    season: "الشتاء",
-    includes: [
-      "تذكرة طيران ذهاب وعودة",
-      "إقامة 4 ليالٍ",
-      "تذاكر أنشطة عائلية",
-      "تنقلات يومية",
-    ],
-    tips: [
-      "احجز تذاكر الفعاليات مسبقًا",
-      "اختر فندقًا قريبًا من المراكز الترفيهية",
-    ],
-  },
-  {
-    id: 4,
-    title: "استكشاف إسطنبول التاريخية",
-    description: "جولات ثقافية وأسواق تقليدية مع باقة اقتصادية شاملة.",
-    image: "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=800",
-    discount: 28,
-    validUntil: "حتى نهاية الموسم",
-    originalPrice: "5,000",
-    newPrice: "3,600",
-    season: "الربيع والخريف",
-    includes: [
-      "طيران + فندق 4 نجوم",
-      "جولة البوسفور",
-      "زيارة الأسواق التراثية",
-    ],
-    tips: [
-      "خصص يومًا لزيارة كابادوكيا إذا أمكن",
-      "جرب المطاعم المحلية بعيدًا عن الزحام",
-    ],
-  },
-];
 
 export default function Offers() {
+  const offers = getAdminCollection("offers", defaultOffers);
+
   return (
     <Layout>
       {/* Hero */}

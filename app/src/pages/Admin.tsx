@@ -1,78 +1,428 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-  LayoutDashboard, 
-  Plane, 
-  Hotel, 
+import { Textarea } from "@/components/ui/textarea";
+import { useAdminData } from "@/data/adminStore";
+import {
+  LayoutDashboard,
+  Plane,
+  Hotel,
   Tag,
   Users,
   Settings,
   Link2,
   Key,
-  BarChart3,
-  CreditCard,
-  ShieldCheck,
+  FileText,
   Plus,
   Search,
   Edit,
   Trash2,
-  Eye,
   ChevronLeft,
   LogOut,
   Bell,
-  Menu
+  Menu,
+  CalendarCheck,
+  MapPinned,
+  Newspaper,
+  PlayCircle,
 } from "lucide-react";
+
+type FieldType = "text" | "number" | "textarea" | "list" | "pairlist" | "select";
+
+type FieldConfig = {
+  key: string;
+  label: string;
+  type?: FieldType;
+  placeholder?: string;
+  options?: { label: string; value: string }[];
+};
+
+type SectionConfig = {
+  id: string;
+  title: string;
+  description: string;
+  listKey: "flights" | "hotels" | "offers" | "activities" | "articles" | "destinations" | "partners" | "airlines" | "apiKeys" | "users" | "pages";
+  fields: FieldConfig[];
+  primaryField?: string;
+};
 
 const sidebarItems = [
   { name: "لوحة التحكم", icon: LayoutDashboard, id: "dashboard" },
   { name: "الرحلات", icon: Plane, id: "trips" },
   { name: "الفنادق", icon: Hotel, id: "hotels" },
   { name: "العروض", icon: Tag, id: "offers" },
+  { name: "النشاطات", icon: CalendarCheck, id: "activities" },
+  { name: "الوجهات", icon: MapPinned, id: "destinations" },
+  { name: "المقالات", icon: Newspaper, id: "articles" },
   { name: "المشتركين", icon: Users, id: "users" },
-  { name: "المدفوعات", icon: CreditCard, id: "payments" },
-  { name: "الإحصائيات", icon: BarChart3, id: "stats" },
   { name: "الشركاء (Affiliate)", icon: Link2, id: "affiliate" },
+  { name: "خطوط الطيران", icon: Plane, id: "airlines" },
   { name: "API Keys", icon: Key, id: "api" },
-  { name: "الصلاحيات", icon: ShieldCheck, id: "roles" },
+  { name: "الصفحات", icon: FileText, id: "pages" },
   { name: "الإعدادات", icon: Settings, id: "settings" },
 ];
 
-const stats = [
-  { name: "إجمالي الحجوزات", value: "1,234", change: "+12%", color: "hero-gradient" },
-  { name: "المستخدمين الجدد", value: "456", change: "+8%", color: "gold-gradient" },
-  { name: "الإيرادات", value: "125,000 ر.س", change: "+23%", color: "hero-gradient" },
-  { name: "نسبة الرضا", value: "98%", change: "+2%", color: "gold-gradient" },
-];
+const sectionConfigs: Record<string, SectionConfig> = {
+  trips: {
+    id: "trips",
+    title: "إدارة الرحلات",
+    description: "إضافة وتعديل بيانات الرحلات المعروضة في صفحة الطيران.",
+    listKey: "flights",
+    primaryField: "from",
+    fields: [
+      { key: "from", label: "من" },
+      { key: "to", label: "إلى" },
+      { key: "airline", label: "شركة الطيران" },
+      { key: "departTime", label: "وقت المغادرة" },
+      { key: "arriveTime", label: "وقت الوصول" },
+      { key: "duration", label: "مدة الرحلة" },
+      { key: "price", label: "السعر" },
+      { key: "stops", label: "التوقفات" },
+      { key: "rating", label: "التقييم", type: "number" },
+      { key: "image", label: "صورة" },
+    ],
+  },
+  hotels: {
+    id: "hotels",
+    title: "إدارة الفنادق",
+    description: "تعديل بطاقات الفنادق ومزاياها وأسعارها.",
+    listKey: "hotels",
+    primaryField: "name",
+    fields: [
+      { key: "name", label: "اسم الفندق" },
+      { key: "location", label: "الموقع" },
+      { key: "image", label: "الصورة" },
+      { key: "rating", label: "التقييم", type: "number" },
+      { key: "reviews", label: "عدد التقييمات", type: "number" },
+      { key: "price", label: "السعر" },
+      { key: "priceNote", label: "ملاحظة السعر" },
+      { key: "description", label: "وصف الفندق", type: "textarea" },
+      { key: "amenities", label: "المزايا (افصل بفواصل)", type: "list" },
+      { key: "distances", label: "المسافات (سطر لكل عنصر: الاسم | المسافة)", type: "pairlist" },
+      { key: "cuisine", label: "المطاعم" },
+      { key: "tag", label: "وسم" },
+    ],
+  },
+  offers: {
+    id: "offers",
+    title: "إدارة العروض",
+    description: "تحديث الباقات الموسمية والخصومات.",
+    listKey: "offers",
+    primaryField: "title",
+    fields: [
+      { key: "title", label: "اسم العرض" },
+      { key: "description", label: "وصف العرض", type: "textarea" },
+      { key: "image", label: "الصورة" },
+      { key: "discount", label: "نسبة الخصم", type: "number" },
+      { key: "validUntil", label: "صالح حتى" },
+      { key: "originalPrice", label: "السعر قبل الخصم" },
+      { key: "newPrice", label: "السعر بعد الخصم" },
+      { key: "season", label: "الموسم" },
+      { key: "includes", label: "تشمل الباقة (افصل بفواصل)", type: "list" },
+      { key: "tips", label: "نصائح (افصل بفواصل)", type: "list" },
+    ],
+  },
+  activities: {
+    id: "activities",
+    title: "إدارة النشاطات",
+    description: "إضافة مسابقات ومهرجانات وأنشطة متنوعة.",
+    listKey: "activities",
+    primaryField: "title",
+    fields: [
+      { key: "title", label: "اسم النشاط" },
+      { key: "location", label: "المدينة" },
+      { key: "category", label: "التصنيف" },
+      { key: "price", label: "السعر" },
+      { key: "image", label: "الصورة" },
+    ],
+  },
+  destinations: {
+    id: "destinations",
+    title: "إدارة الوجهات السياحية",
+    description: "إضافة وجهات جديدة وتحديد الموسم والأسعار.",
+    listKey: "destinations",
+    primaryField: "title",
+    fields: [
+      { key: "title", label: "الوجهة" },
+      { key: "country", label: "الدولة أو المدينة" },
+      { key: "tag", label: "وسم" },
+      { key: "duration", label: "المدة" },
+      { key: "priceFrom", label: "السعر يبدأ من" },
+      { key: "description", label: "وصف مختصر", type: "textarea" },
+      { key: "image", label: "الصورة" },
+    ],
+  },
+  articles: {
+    id: "articles",
+    title: "إدارة المقالات",
+    description: "إضافة أخبار ومقالات سياحية محدثة.",
+    listKey: "articles",
+    primaryField: "title",
+    fields: [
+      { key: "title", label: "عنوان المقال" },
+      { key: "category", label: "التصنيف" },
+      { key: "date", label: "التاريخ" },
+      { key: "image", label: "الصورة" },
+    ],
+  },
+  affiliate: {
+    id: "affiliate",
+    title: "إدارة الشركاء",
+    description: "الشركات الشريكة ونسب العمولة.",
+    listKey: "partners",
+    primaryField: "name",
+    fields: [
+      { key: "name", label: "اسم الشريك" },
+      { key: "type", label: "النوع" },
+      { key: "website", label: "الموقع" },
+      { key: "commission", label: "نسبة العمولة" },
+    ],
+  },
+  airlines: {
+    id: "airlines",
+    title: "إدارة خطوط الطيران",
+    description: "تحديث بيانات خطوط الطيران ومعلومات التواصل.",
+    listKey: "airlines",
+    primaryField: "name",
+    fields: [
+      { key: "name", label: "اسم الشركة" },
+      { key: "code", label: "الكود" },
+      { key: "website", label: "الموقع" },
+      { key: "phone", label: "رقم التواصل" },
+    ],
+  },
+  api: {
+    id: "api",
+    title: "مفاتيح API",
+    description: "إدارة مفاتيح الربط مع Amadeus وGoogle وغير ذلك.",
+    listKey: "apiKeys",
+    primaryField: "name",
+    fields: [
+      { key: "name", label: "اسم المفتاح" },
+      { key: "provider", label: "المزود" },
+      { key: "key", label: "المفتاح" },
+      {
+        key: "status",
+        label: "الحالة",
+        type: "select",
+        options: [
+          { label: "مفعل", value: "enabled" },
+          { label: "معطل", value: "disabled" },
+        ],
+      },
+    ],
+  },
+  users: {
+    id: "users",
+    title: "إدارة المستخدمين",
+    description: "قائمة المستخدمين وحالة الحساب.",
+    listKey: "users",
+    primaryField: "name",
+    fields: [
+      { key: "name", label: "الاسم" },
+      { key: "email", label: "البريد الإلكتروني" },
+      {
+        key: "role",
+        label: "الصلاحية",
+        type: "select",
+        options: [
+          { label: "مستخدم", value: "user" },
+          { label: "مدير", value: "admin" },
+        ],
+      },
+      {
+        key: "status",
+        label: "الحالة",
+        type: "select",
+        options: [
+          { label: "نشط", value: "active" },
+          { label: "موقوف", value: "suspended" },
+        ],
+      },
+    ],
+  },
+  pages: {
+    id: "pages",
+    title: "إدارة الصفحات",
+    description: "صفحات تعريفية وسياسات الخدمة.",
+    listKey: "pages",
+    primaryField: "title",
+    fields: [
+      { key: "title", label: "عنوان الصفحة" },
+      { key: "slug", label: "المسار" },
+      { key: "summary", label: "ملخص الصفحة", type: "textarea" },
+    ],
+  },
+};
 
-const recentBookings = [
-  { id: 1, user: "أحمد العتيبي", type: "رحلة طيران", destination: "دبي", amount: "1,250 ر.س", status: "مؤكد" },
-  { id: 2, user: "سارة المطيري", type: "فندق", destination: "إسطنبول", amount: "3,500 ر.س", status: "قيد المراجعة" },
-  { id: 3, user: "محمد الشهري", type: "باقة", destination: "المالديف", amount: "8,000 ر.س", status: "مؤكد" },
-  { id: 4, user: "نورة القحطاني", type: "رحلة طيران", destination: "باريس", amount: "4,200 ر.س", status: "ملغي" },
-];
+const parseList = (value: string) =>
+  value
+    .split(/[,\n]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+const parsePairs = (value: string) =>
+  value
+    .split(/\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [name, distance] = line.split("|").map((part) => part.trim());
+      return { name: name || "", distance: distance || "" };
+    })
+    .filter((pair) => pair.name || pair.distance);
+
+const formatPairs = (pairs: { name: string; distance: string }[] | undefined) =>
+  (pairs || []).map((pair) => `${pair.name} | ${pair.distance}`).join("\n");
+
+const parseNumber = (value: string) => {
+  const cleaned = value.replace(/[^0-9.]/g, "");
+  if (!cleaned) return 0;
+  return Number.parseFloat(cleaned) || 0;
+};
 
 export default function Admin() {
   const [activeSection, setActiveSection] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [adminData, setAdminData] = useAdminData();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Record<string, string>>({});
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const activeConfig = sectionConfigs[activeSection];
+
+  useEffect(() => {
+    if (!activeConfig) return;
+    const nextDraft = activeConfig.fields.reduce<Record<string, string>>((acc, field) => {
+      acc[field.key] = "";
+      return acc;
+    }, {});
+    setDraft(nextDraft);
+    setEditingId(null);
+    setSearchTerm("");
+  }, [activeSection]);
+
+  const stats = useMemo(
+    () => [
+      { name: "العروض النشطة", value: adminData.offers.length.toString() },
+      { name: "الفنادق", value: adminData.hotels.length.toString() },
+      { name: "الوجهات", value: adminData.destinations.length.toString() },
+      { name: "المقالات", value: adminData.articles.length.toString() },
+    ],
+    [adminData]
+  );
+
+  const handleDraftChange = (key: string, value: string) => {
+    setDraft((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const buildItemFromDraft = () => {
+    if (!activeConfig) return null;
+    const nextItem: Record<string, unknown> = {
+      id: editingId ?? `${activeConfig.id}-${Date.now()}`,
+    };
+
+    activeConfig.fields.forEach((field) => {
+      const raw = draft[field.key] ?? "";
+      if (field.type === "list") {
+        nextItem[field.key] = parseList(raw);
+        return;
+      }
+      if (field.type === "pairlist") {
+        nextItem[field.key] = parsePairs(raw);
+        return;
+      }
+      if (field.type === "number") {
+        nextItem[field.key] = parseNumber(raw);
+        return;
+      }
+      nextItem[field.key] = raw;
+    });
+
+    return nextItem;
+  };
+
+  const handleSaveItem = () => {
+    if (!activeConfig) return;
+    const nextItem = buildItemFromDraft();
+    if (!nextItem) return;
+    const items = [...(adminData[activeConfig.listKey] as Record<string, unknown>[])];
+
+    if (editingId) {
+      const updated = items.map((item) =>
+        String(item.id) === editingId ? nextItem : item
+      );
+      setAdminData({ ...adminData, [activeConfig.listKey]: updated });
+    } else {
+      setAdminData({
+        ...adminData,
+        [activeConfig.listKey]: [...items, nextItem],
+      });
+    }
+
+    const resetDraft = activeConfig.fields.reduce<Record<string, string>>((acc, field) => {
+      acc[field.key] = "";
+      return acc;
+    }, {});
+    setDraft(resetDraft);
+    setEditingId(null);
+  };
+
+  const handleEditItem = (item: Record<string, unknown>) => {
+    if (!activeConfig) return;
+    const nextDraft = activeConfig.fields.reduce<Record<string, string>>((acc, field) => {
+      const value = item[field.key];
+      if (field.type === "list") {
+        acc[field.key] = Array.isArray(value) ? value.join(", ") : "";
+        return acc;
+      }
+      if (field.type === "pairlist") {
+        acc[field.key] = formatPairs(value as { name: string; distance: string }[] | undefined);
+        return acc;
+      }
+      acc[field.key] = value ? String(value) : "";
+      return acc;
+    }, {});
+    setDraft(nextDraft);
+    setEditingId(String(item.id ?? ""));
+  };
+
+  const handleDeleteItem = (id: string) => {
+    if (!activeConfig) return;
+    const items = adminData[activeConfig.listKey] as Record<string, unknown>[];
+    const updated = items.filter((item) => String(item.id) !== id);
+    setAdminData({ ...adminData, [activeConfig.listKey]: updated });
+  };
+
+  const filteredItems = useMemo(() => {
+    if (!activeConfig) return [];
+    const items = adminData[activeConfig.listKey] as Record<string, unknown>[];
+    if (!searchTerm) return items;
+    const term = searchTerm.toLowerCase();
+    return items.filter((item) =>
+      activeConfig.fields.some((field) =>
+        String(item[field.key] ?? "").toLowerCase().includes(term)
+      )
+    );
+  }, [adminData, activeConfig, searchTerm]);
 
   return (
     <div className="min-h-screen bg-muted flex overflow-x-hidden" dir="rtl">
-      {/* Mobile Sidebar Overlay */}
-      <div 
+      <div
         className={`fixed inset-0 z-40 lg:hidden transition-opacity duration-300 ${
-          mobileSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          mobileSidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       >
-        <div 
+        <div
           className="absolute inset-0 bg-foreground/30 backdrop-blur-sm"
           onClick={() => setMobileSidebarOpen(false)}
         />
-        <aside className={`absolute top-0 right-0 h-full w-64 max-w-[80vw] bg-card shadow-2xl transform transition-transform duration-300 ease-out flex flex-col ${
-          mobileSidebarOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}>
-          {/* Logo */}
+        <aside
+          className={`absolute top-0 right-0 h-full w-64 max-w-[80vw] bg-card shadow-2xl transform transition-transform duration-300 ease-out flex flex-col ${
+            mobileSidebarOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
           <div className="p-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img src="/logo.png" alt="مشروك" className="w-10 h-10 object-contain" />
@@ -83,7 +433,6 @@ export default function Admin() {
             </button>
           </div>
 
-          {/* Navigation */}
           <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
             {sidebarItems.map((item) => {
               const Icon = item.icon;
@@ -108,7 +457,6 @@ export default function Admin() {
             })}
           </nav>
 
-          {/* Logout */}
           <div className="p-4 border-t border-border">
             <a href="/">
               <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all">
@@ -120,9 +468,7 @@ export default function Admin() {
         </aside>
       </div>
 
-      {/* Desktop Sidebar */}
       <aside className={`hidden lg:flex ${sidebarOpen ? "w-64" : "w-20"} bg-card border-l border-border transition-all duration-300 flex-col`}>
-        {/* Logo */}
         <div className="p-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="مشروك" className="w-10 h-10 object-contain" />
@@ -133,7 +479,6 @@ export default function Admin() {
           </button>
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 p-4 space-y-2">
           {sidebarItems.map((item) => {
             const Icon = item.icon;
@@ -155,7 +500,6 @@ export default function Admin() {
           })}
         </nav>
 
-        {/* Logout */}
         <div className="p-4 border-t border-border">
           <a href="/">
             <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all">
@@ -166,25 +510,23 @@ export default function Admin() {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 flex flex-col">
-        {/* Header */}
         <header className="bg-card border-b border-border px-4 lg:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button 
+            <button
               className="lg:hidden p-2 hover:bg-muted rounded-lg"
               onClick={() => setMobileSidebarOpen(true)}
             >
               <Menu className="w-5 h-5" />
             </button>
             <h1 className="text-xl font-bold">
-              {sidebarItems.find(i => i.id === activeSection)?.name}
+              {sidebarItems.find((item) => item.id === activeSection)?.name}
             </h1>
           </div>
           <div className="flex items-center gap-4">
             <div className="relative hidden md:block">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input placeholder="بحث..." className="pr-10 w-64" />
+              <Input placeholder="بحث سريع..." className="pr-10 w-64" />
             </div>
             <button className="relative p-2 hover:bg-muted rounded-lg">
               <Bell className="w-5 h-5" />
@@ -196,257 +538,176 @@ export default function Admin() {
           </div>
         </header>
 
-        {/* Content */}
         <div className="flex-1 p-6 overflow-auto">
           {activeSection === "dashboard" && (
-            <div className="space-y-6">
-              {/* Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {stats.map((stat, index) => (
-                  <div key={index} className="bg-card rounded-2xl p-6 shadow-card">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-muted-foreground">{stat.name}</span>
-                      <span className="text-primary text-sm font-semibold">{stat.change}</span>
-                    </div>
-                    <p className="text-3xl font-bold">{stat.value}</p>
+            <div className="space-y-8">
+              <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
+                {stats.map((stat) => (
+                  <div key={stat.name} className="bg-card rounded-2xl p-6 shadow-card">
+                    <p className="text-sm text-muted-foreground">{stat.name}</p>
+                    <p className="text-3xl font-bold mt-2">{stat.value}</p>
                   </div>
                 ))}
               </div>
+              <div className="bg-card rounded-2xl p-8 shadow-card">
+                <h2 className="text-2xl font-bold mb-4">إدارة محتوى مشروك</h2>
+                <p className="text-muted-foreground">
+                  استخدم القائمة الجانبية لإضافة أو تعديل المحتوى. جميع التعديلات تُحفظ فوراً وتنعكس على صفحات الموقع.
+                </p>
+              </div>
+            </div>
+          )}
 
-              {/* Recent Bookings */}
-              <div className="bg-card rounded-2xl p-6 shadow-card">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-lg font-bold">آخر الحجوزات</h2>
-                  <Button variant="outline" size="sm">عرض الكل</Button>
+          {activeSection === "settings" && (
+            <div className="space-y-6">
+              <div className="bg-card rounded-2xl p-8 shadow-card">
+                <div className="flex items-center gap-3 mb-4">
+                  <PlayCircle className="w-6 h-6 text-secondary" />
+                  <h2 className="text-2xl font-bold">الفيديو التعريفي</h2>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-border">
-                        <th className="text-right py-3 px-4 text-muted-foreground font-medium">المستخدم</th>
-                        <th className="text-right py-3 px-4 text-muted-foreground font-medium">النوع</th>
-                        <th className="text-right py-3 px-4 text-muted-foreground font-medium">الوجهة</th>
-                        <th className="text-right py-3 px-4 text-muted-foreground font-medium">المبلغ</th>
-                        <th className="text-right py-3 px-4 text-muted-foreground font-medium">الحالة</th>
-                        <th className="text-right py-3 px-4 text-muted-foreground font-medium">إجراءات</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {recentBookings.map((booking) => (
-                        <tr key={booking.id} className="border-b border-border hover:bg-muted/50">
-                          <td className="py-4 px-4 font-medium">{booking.user}</td>
-                          <td className="py-4 px-4 text-muted-foreground">{booking.type}</td>
-                          <td className="py-4 px-4 text-muted-foreground">{booking.destination}</td>
-                          <td className="py-4 px-4 font-semibold text-primary">{booking.amount}</td>
-                          <td className="py-4 px-4">
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                              booking.status === "مؤكد" ? "bg-primary/10 text-primary" :
-                              booking.status === "قيد المراجعة" ? "bg-secondary/10 text-secondary" :
-                              "bg-destructive/10 text-destructive"
-                            }`}>
-                              {booking.status}
-                            </span>
-                          </td>
-                          <td className="py-4 px-4">
-                            <div className="flex gap-2">
-                              <button className="p-1.5 hover:bg-muted rounded"><Eye className="w-4 h-4" /></button>
-                              <button className="p-1.5 hover:bg-muted rounded"><Edit className="w-4 h-4" /></button>
-                              <button className="p-1.5 hover:bg-muted rounded text-destructive"><Trash2 className="w-4 h-4" /></button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <p className="text-sm text-muted-foreground mb-6">
+                  ضع رابط فيديو (MP4) ليظهر في الصفحة الرئيسية. يمكن تحديثه في أي وقت.
+                </p>
+                <div className="flex flex-col md:flex-row gap-4">
+                  <Input
+                    placeholder="https://example.com/promo.mp4"
+                    value={adminData.promoVideoUrl}
+                    onChange={(event) =>
+                      setAdminData({ ...adminData, promoVideoUrl: event.target.value })
+                    }
+                  />
+                  <Button variant="hero">حفظ الرابط</Button>
                 </div>
               </div>
             </div>
           )}
 
-          {activeSection === "api" && (
+          {activeConfig && (
             <div className="space-y-6">
-              <div className="bg-card rounded-2xl p-6 shadow-card">
-                <h2 className="text-lg font-bold mb-6">إدارة API Keys</h2>
-                <p className="text-muted-foreground mb-6">
-                  أضف مفاتيح API للربط مع خدمات السفر والخرائط والطقس والذكاء الاصطناعي والتخزين السحابي.
-                </p>
-                
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4 p-4 bg-muted rounded-xl">
-                    <div className="flex-1">
-                      <h3 className="font-semibold">Amadeus API</h3>
-                      <p className="text-sm text-muted-foreground">الرحلات والفنادق والوجهات</p>
-                    </div>
-                    <span className="text-sm text-primary">مُفعّل</span>
-                    <Button variant="outline" size="sm">تعديل</Button>
+              <div className="bg-card rounded-2xl p-8 shadow-card">
+                <div className="flex items-start justify-between flex-wrap gap-4">
+                  <div>
+                    <h2 className="text-2xl font-bold">{activeConfig.title}</h2>
+                    <p className="text-sm text-muted-foreground mt-2">{activeConfig.description}</p>
                   </div>
-                  
-                  <div className="flex items-center gap-4 p-4 bg-muted rounded-xl">
-                    <div className="flex-1">
-                      <h3 className="font-semibold">Google Maps Places</h3>
-                      <p className="text-sm text-muted-foreground">الأماكن السياحية والخرائط</p>
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        placeholder="بحث داخل القائمة"
+                        className="pr-9"
+                        value={searchTerm}
+                        onChange={(event) => setSearchTerm(event.target.value)}
+                      />
                     </div>
-                    <span className="text-sm text-muted-foreground">غير مُفعّل</span>
-                    <Button variant="outline" size="sm">إضافة</Button>
-                  </div>
-                  
-                  <div className="flex items-center gap-4 p-4 bg-muted rounded-xl">
-                    <div className="flex-1">
-                      <h3 className="font-semibold">OpenWeather</h3>
-                      <p className="text-sm text-muted-foreground">حالة الطقس وتوقعات السفر</p>
-                    </div>
-                    <span className="text-sm text-muted-foreground">غير مُفعّل</span>
-                    <Button variant="outline" size="sm">إضافة</Button>
-                  </div>
-
-                  <div className="flex items-center gap-4 p-4 bg-muted rounded-xl">
-                    <div className="flex-1">
-                      <h3 className="font-semibold">GeoDB Cities</h3>
-                      <p className="text-sm text-muted-foreground">معلومات المدن والوجهات</p>
-                    </div>
-                    <span className="text-sm text-muted-foreground">غير مُفعّل</span>
-                    <Button variant="outline" size="sm">إضافة</Button>
-                  </div>
-
-                  <div className="flex items-center gap-4 p-4 bg-muted rounded-xl">
-                    <div className="flex-1">
-                      <h3 className="font-semibold">نموذج الذكاء الاصطناعي</h3>
-                      <p className="text-sm text-muted-foreground">مساعد ذكي وتحليل بيانات</p>
-                    </div>
-                    <span className="text-sm text-muted-foreground">غير مُفعّل</span>
-                    <Button variant="outline" size="sm">إضافة</Button>
+                    <Button variant="hero" className="gap-2" onClick={handleSaveItem}>
+                      <Plus className="w-4 h-4" />
+                      {editingId ? "تحديث" : "إضافة"}
+                    </Button>
                   </div>
                 </div>
 
-                <Button variant="hero" className="mt-6 gap-2">
-                  <Plus className="w-4 h-4" />
-                  إضافة API جديد
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {activeSection === "affiliate" && (
-            <div className="space-y-6">
-              <div className="bg-card rounded-2xl p-6 shadow-card">
-                <h2 className="text-lg font-bold mb-6">الشركاء والتسويق بالعمولة</h2>
-                <p className="text-muted-foreground mb-6">
-                  أضف روابط الشركاء لربط الخدمات التي يتم تسويقها في الموقع.
-                </p>
-                
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="p-4 bg-muted rounded-xl">
-                    <h3 className="font-semibold mb-2">Booking.com Affiliate</h3>
-                    <p className="text-sm text-muted-foreground mb-4">حجوزات الفنادق</p>
-                    <Input placeholder="Affiliate ID" className="mb-2" />
-                    <Button variant="outline" size="sm" className="w-full">حفظ</Button>
-                  </div>
-                  
-                  <div className="p-4 bg-muted rounded-xl">
-                    <h3 className="font-semibold mb-2">Skyscanner Affiliate</h3>
-                    <p className="text-sm text-muted-foreground mb-4">تذاكر الطيران</p>
-                    <Input placeholder="Affiliate ID" className="mb-2" />
-                    <Button variant="outline" size="sm" className="w-full">حفظ</Button>
-                  </div>
-                </div>
-
-                <Button variant="hero" className="mt-6 gap-2">
-                  <Plus className="w-4 h-4" />
-                  إضافة شريك جديد
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {activeSection === "payments" && (
-            <div className="space-y-6">
-              <div className="bg-card rounded-2xl p-6 shadow-card">
-                <h2 className="text-lg font-bold mb-4">لوحة تحكم المدفوعات</h2>
-                <p className="text-muted-foreground mb-6">
-                  إدارة بوابات الدفع ومفاتيح الربط مع منصة ميسر وبطاقات الدفع.
-                </p>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="p-4 bg-muted rounded-xl">
-                    <h3 className="font-semibold mb-2">منصة ميسر</h3>
-                    <Input placeholder="API Key" className="mb-2" />
-                    <Input placeholder="Secret Key" className="mb-2" />
-                    <Button variant="outline" size="sm" className="w-full">حفظ</Button>
-                  </div>
-                  <div className="p-4 bg-muted rounded-xl">
-                    <h3 className="font-semibold mb-2">طرق الدفع</h3>
-                    <div className="space-y-2 text-sm text-muted-foreground">
-                      <div className="flex items-center justify-between">
-                        <span>Samsung Pay</span>
-                        <span className="text-primary">مفعّل</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>Apple Pay</span>
-                        <span className="text-primary">مفعّل</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>مدى / Visa / Mastercard</span>
-                        <span className="text-primary">مفعّل</span>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm" className="w-full mt-3">تعديل الإعدادات</Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeSection === "roles" && (
-            <div className="space-y-6">
-              <div className="bg-card rounded-2xl p-6 shadow-card">
-                <h2 className="text-lg font-bold mb-4">صلاحيات الإدارة</h2>
-                <p className="text-muted-foreground mb-6">
-                  تخصيص صلاحيات الفريق لإدارة البيانات والأقسام والأسعار والمشتركين.
-                </p>
-                <div className="space-y-4">
-                  {[
-                    "إدارة الرحلات والفنادق والعروض",
-                    "إدارة الأسعار والخصومات",
-                    "إدارة المشتركين والمستخدمين",
-                    "إدارة مفاتيح API والتكاملات",
-                    "إدارة المدفوعات والاسترجاع",
-                  ].map((item) => (
-                    <div key={item} className="flex items-center justify-between bg-muted rounded-xl px-4 py-3">
-                      <span>{item}</span>
-                      <button className="text-primary text-sm font-semibold">تفعيل</button>
+                <div className="mt-6 grid md:grid-cols-2 gap-4">
+                  {activeConfig.fields.map((field) => (
+                    <div key={field.key} className={field.type === "textarea" ? "md:col-span-2" : ""}>
+                      <label className="text-sm text-muted-foreground mb-2 block">{field.label}</label>
+                      {field.type === "textarea" ? (
+                        <Textarea
+                          value={draft[field.key] ?? ""}
+                          placeholder={field.placeholder}
+                          onChange={(event) => handleDraftChange(field.key, event.target.value)}
+                        />
+                      ) : field.type === "select" ? (
+                        <select
+                          className="h-12 w-full rounded-xl border border-input bg-background px-3 text-sm"
+                          value={draft[field.key] ?? ""}
+                          onChange={(event) => handleDraftChange(field.key, event.target.value)}
+                        >
+                          <option value="">اختر</option>
+                          {field.options?.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      ) : field.type === "list" || field.type === "pairlist" ? (
+                        <Textarea
+                          value={draft[field.key] ?? ""}
+                          placeholder={field.placeholder}
+                          onChange={(event) => handleDraftChange(field.key, event.target.value)}
+                        />
+                      ) : (
+                        <Input
+                          value={draft[field.key] ?? ""}
+                          placeholder={field.placeholder}
+                          onChange={(event) => handleDraftChange(field.key, event.target.value)}
+                        />
+                      )}
+                      {field.type === "list" && (
+                        <p className="text-xs text-muted-foreground mt-1">افصل العناصر بفاصلة أو سطر جديد.</p>
+                      )}
+                      {field.type === "pairlist" && (
+                        <p className="text-xs text-muted-foreground mt-1">مثال: المطار | 20 دقيقة</p>
+                      )}
                     </div>
                   ))}
                 </div>
-                <Button variant="hero" className="mt-6 gap-2">
-                  <Plus className="w-4 h-4" />
-                  إضافة دور جديد
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {(activeSection === "trips" || activeSection === "hotels" || activeSection === "offers" || activeSection === "users") && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="relative">
-                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input placeholder="بحث..." className="pr-10 w-80" />
-                </div>
-                <Button variant="hero" className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  إضافة جديد
-                </Button>
               </div>
 
-              <div className="bg-card rounded-2xl p-6 shadow-card">
-                <div className="text-center py-12 text-muted-foreground">
-                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                    {activeSection === "trips" && <Plane className="w-8 h-8" />}
-                    {activeSection === "hotels" && <Hotel className="w-8 h-8" />}
-                    {activeSection === "offers" && <Tag className="w-8 h-8" />}
-                    {activeSection === "users" && <Users className="w-8 h-8" />}
+              <div className="grid md:grid-cols-2 gap-4">
+                {filteredItems.map((item) => (
+                  <div key={String(item.id)} className="bg-card rounded-2xl p-6 shadow-card">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-bold">
+                        {String(item[activeConfig.primaryField || activeConfig.fields[0].key] ?? "عنصر")}
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleEditItem(item)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleDeleteItem(String(item.id))}
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="mt-4 space-y-2 text-sm text-muted-foreground">
+                      {activeConfig.fields.map((field) => {
+                        const value = item[field.key];
+                        if (!value) return null;
+                        if (field.type === "list" && Array.isArray(value)) {
+                          return (
+                            <p key={field.key}>
+                              <span className="font-semibold text-foreground">{field.label}: </span>
+                              {value.join("، ")}
+                            </p>
+                          );
+                        }
+                        if (field.type === "pairlist" && Array.isArray(value)) {
+                          return (
+                            <p key={field.key}>
+                              <span className="font-semibold text-foreground">{field.label}: </span>
+                              {value.map((pair) => `${pair.name} (${pair.distance})`).join("، ")}
+                            </p>
+                          );
+                        }
+                        return (
+                          <p key={field.key}>
+                            <span className="font-semibold text-foreground">{field.label}: </span>
+                            {String(value)}
+                          </p>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <p>اضغط على "إضافة جديد" لإضافة محتوى</p>
-                </div>
+                ))}
               </div>
             </div>
           )}

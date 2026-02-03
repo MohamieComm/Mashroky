@@ -16,6 +16,7 @@ import {
   CreditCard,
   Filter
 } from "lucide-react";
+import { defaultHotels, getAdminCollection } from "@/data/adminStore";
 
 const hotelNotes = [
   "وقت تسجيل الدخول 3:00 مساءً وتسجيل الخروج 12:00 ظهرًا.",
@@ -23,83 +24,6 @@ const hotelNotes = [
   "يمكن إضافة الطيران والمواصلات من نفس الصفحة.",
 ];
 
-const hotels = [
-  {
-    id: 1,
-    name: "فندق برج العرب جميرا",
-    location: "دبي، الإمارات العربية المتحدة",
-    image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800",
-    rating: 5.0,
-    reviews: 2450,
-    price: "3,500",
-    priceNote: "لليلة الواحدة",
-    description: "فندق 7 نجوم يقدم تجربة فاخرة لا مثيل لها مع إطلالات خلابة على الخليج العربي",
-    amenities: ["wifi", "parking", "breakfast", "gym", "pool", "restaurant"],
-    distances: [
-      { name: "المطار", distance: "25 دقيقة" },
-      { name: "دبي مول", distance: "15 دقيقة" },
-      { name: "برج خليفة", distance: "20 دقيقة" },
-    ],
-    cuisine: "مأكولات عالمية متنوعة - 9 مطاعم فاخرة",
-    tag: "الأكثر فخامة",
-  },
-  {
-    id: 2,
-    name: "فندق فور سيزونز البوسفور",
-    location: "إسطنبول، تركيا",
-    image: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800",
-    rating: 4.9,
-    reviews: 1890,
-    price: "1,800",
-    priceNote: "لليلة الواحدة",
-    description: "فندق تاريخي على ضفاف البوسفور يجمع بين الأصالة العثمانية والفخامة العصرية",
-    amenities: ["wifi", "parking", "breakfast", "gym", "pool"],
-    distances: [
-      { name: "المطار", distance: "40 دقيقة" },
-      { name: "البازار الكبير", distance: "10 دقائق" },
-      { name: "آيا صوفيا", distance: "5 دقائق" },
-    ],
-    cuisine: "مأكولات تركية وعالمية - 3 مطاعم",
-    tag: "إطلالة البوسفور",
-  },
-  {
-    id: 3,
-    name: "منتجع أنانتارا المالديف",
-    location: "جزر المالديف",
-    image: "https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=800",
-    rating: 5.0,
-    reviews: 980,
-    price: "5,200",
-    priceNote: "لليلة الواحدة",
-    description: "فيلات فاخرة فوق الماء مع مسابح خاصة وإطلالات لا تُنسى على المحيط الهندي",
-    amenities: ["wifi", "breakfast", "gym", "pool", "restaurant"],
-    distances: [
-      { name: "المطار المائي", distance: "30 دقيقة بالقارب" },
-      { name: "مركز الغوص", distance: "في المنتجع" },
-    ],
-    cuisine: "مأكولات آسيوية وعالمية - 4 مطاعم على الشاطئ",
-    tag: "شهر العسل",
-  },
-  {
-    id: 4,
-    name: "فندق ريتز كارلتون باريس",
-    location: "باريس، فرنسا",
-    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
-    rating: 4.8,
-    reviews: 1560,
-    price: "4,200",
-    priceNote: "لليلة الواحدة",
-    description: "فندق أسطوري في قلب باريس يجسد الأناقة الفرنسية والرفاهية الكلاسيكية",
-    amenities: ["wifi", "parking", "breakfast", "gym", "restaurant"],
-    distances: [
-      { name: "برج إيفل", distance: "10 دقائق" },
-      { name: "اللوفر", distance: "5 دقائق" },
-      { name: "الشانزليزيه", distance: "دقيقتان" },
-    ],
-    cuisine: "مأكولات فرنسية راقية - مطعم حائز على نجمة ميشلان",
-    tag: "كلاسيكي فاخر",
-  },
-];
 
 const amenityIcons: Record<string, { icon: React.ComponentType<{ className?: string }>; name: string }> = {
   wifi: { icon: Wifi, name: "واي فاي" },
@@ -111,6 +35,8 @@ const amenityIcons: Record<string, { icon: React.ComponentType<{ className?: str
 };
 
 export default function Hotels() {
+  const hotels = getAdminCollection("hotels", defaultHotels);
+
   return (
     <Layout>
       {/* Hero */}

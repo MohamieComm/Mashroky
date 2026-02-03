@@ -23,6 +23,7 @@ import Payments from "./pages/Payments";
 import Saudi from "./pages/Saudi";
 import Study from "./pages/Study";
 import Articles from "./pages/Articles";
+import Destinations from "./pages/Destinations";
 import Cart from "./pages/Cart";
 import Register from "./pages/Register";
 import Usage from "./pages/Usage";
@@ -59,6 +60,7 @@ const App = () => (
             <Route path="/saudi" element={<Saudi />} />
             <Route path="/study" element={<Study />} />
             <Route path="/articles" element={<Articles />} />
+            <Route path="/destinations" element={<Destinations />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/register" element={<Register />} />
             <Route path="/auth" element={<Auth />} />
