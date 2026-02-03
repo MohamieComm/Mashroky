@@ -160,7 +160,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut({ scope: "local" });
+    } catch (error) {
+      console.warn("Local sign out failed", error);
+    }
+    try {
+      await supabase.auth.signOut({ scope: "global" });
+    } catch (error) {
+      console.warn("Global sign out failed", error);
+    }
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+      const ref = supabaseUrl ? new URL(supabaseUrl).hostname.split(".")[0] : "";
+      Object.keys(localStorage || {}).forEach((key) => {
+        if (key.startsWith("sb-") && (!ref || key.includes(ref))) {
+          localStorage.removeItem(key);
+        }
+      });
+    } catch (error) {
+      console.warn("Failed to clear auth storage", error);
+    }
+    setUser(null);
+    setSession(null);
+    setProfile(null);
+    if (typeof window !== "undefined") {
+      window.location.assign("/auth");
+    }
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
