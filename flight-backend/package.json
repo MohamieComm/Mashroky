@@ -11,7 +11,7 @@
     "amadeus": "^8.0.0",
     "axios": "^1.7.0",
     "cors": "^2.8.5",
-    "duffel-api": "^0.0.2",
+    "@duffel/api": "^2.8.1",
     "dotenv": "^16.4.0",
     "express": "^4.19.0"
   },
