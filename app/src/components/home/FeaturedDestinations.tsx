@@ -22,10 +22,7 @@ export function FeaturedDestinations() {
       <div className="container mx-auto px-4">
         <div className="flex items-end justify-between mb-12 flex-wrap gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 bg-secondary/10 rounded-full px-4 py-2 mb-4">
-              <Sparkles className="w-4 h-4 text-secondary" />
-              <span className="text-secondary font-semibold text-sm">عروض الموسم</span>
-            </div>
+            {/* Removed colored badge above title (empty/visual only) */}
             <h2 className="text-3xl md:text-4xl font-bold mt-2">
               أفضل ستة عروض لأكثر الوجهات سياحة
             </h2>

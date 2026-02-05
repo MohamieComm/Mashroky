@@ -54,6 +54,7 @@ const sidebarItems = [
   { name: "الرحلات", icon: Plane, id: "trips" },
   { name: "الفنادق", icon: Hotel, id: "hotels" },
   { name: "العروض", icon: Tag, id: "offers" },
+  { name: "مواسم", icon: CalendarCheck, id: "seasons" },
   { name: "النشاطات", icon: CalendarCheck, id: "activities" },
   { name: "الوجهات", icon: MapPinned, id: "destinations" },
   { name: "المقالات", icon: Newspaper, id: "articles" },
@@ -67,6 +68,25 @@ const sidebarItems = [
 ];
 
 const sectionConfigs: Record<string, SectionConfig> = {
+    seasons: {
+      id: "seasons",
+      title: "عروض مواسم",
+      description: "إضافة عروض موسمية مثل رمضان، الحج، والصيف (دراسة بالخارج).",
+      listKey: "seasons",
+      primaryField: "title",
+      fields: [
+        { key: "title", label: "اسم العرض" },
+        { key: "season", label: "الموسم", type: "select", options: [
+          { label: "رمضان", value: "ramadan" },
+          { label: "الحج", value: "hajj" },
+          { label: "الصيف", value: "summer" },
+        ] },
+        { key: "description", label: "وصف العرض", type: "textarea" },
+        { key: "image", label: "صورة العرض" },
+        { key: "price", label: "السعر" },
+        { key: "options", label: "خيارات (سكن، مواصلات، دراسة)", type: "list" },
+      ],
+    },
   trips: {
     id: "trips",
     title: "إدارة الرحلات",
@@ -208,13 +228,14 @@ const sectionConfigs: Record<string, SectionConfig> = {
   },
   api: {
     id: "api",
-    title: "مفاتيح API",
-    description: "إدارة مفاتيح الربط مع Amadeus وGoogle وغير ذلك.",
+    title: "مفاتيح API والمدفوعات",
+    description: "إدارة مفاتيح الربط مع Amadeus وGoogle وMoyasar وغير ذلك.",
     listKey: "apiKeys",
     primaryField: "name",
     fields: [
       { key: "name", label: "اسم المفتاح" },
       { key: "provider", label: "المزود" },
+      { key: "key", label: "قيمة المفتاح" },
       {
         key: "status",
         label: "الحالة",
@@ -633,12 +654,12 @@ export default function Admin() {
               <div className="bg-card rounded-2xl p-8 shadow-card">
                 <div className="flex items-center gap-3 mb-4">
                   <PlayCircle className="w-6 h-6 text-secondary" />
-                  <h2 className="text-2xl font-bold">الفيديو التعريفي</h2>
+                  <h2 className="text-2xl font-bold">الفيديو التعريفي أو صورة إعلان</h2>
                 </div>
                 <p className="text-sm text-muted-foreground mb-6">
-                  ضع رابط فيديو (MP4) ليظهر في الصفحة الرئيسية. يمكن تحديثه في أي وقت.
+                  ضع رابط فيديو (MP4) أو صورة إعلان جذابة (JPG/PNG) ليظهر في الصفحة الرئيسية. يمكن تحديثه في أي وقت.
                 </p>
-                <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex flex-col md:flex-row gap-4 mb-4">
                   <Input
                     placeholder="https://example.com/promo.mp4"
                     value={promoDraft}
@@ -650,6 +671,35 @@ export default function Admin() {
                   >
                     حفظ الرابط
                   </Button>
+                </div>
+                <div className="flex flex-col md:flex-row gap-4 mb-4">
+                  <input
+                    type="file"
+                    accept="image/*,video/*"
+                    onChange={async (event) => {
+                      const file = event.target.files?.[0];
+                      if (!file) return;
+                      // رفع الملف إلى Supabase Storage
+                      const fileName = `promo/${Date.now()}-${file.name}`;
+                      const { data, error } = await supabase.storage.from("promo").upload(fileName, file);
+                      if (error) {
+                        alert("فشل رفع الملف: " + error.message);
+                        return;
+                      }
+                      const url = supabase.storage.from("promo").getPublicUrl(fileName).publicUrl;
+                      setPromoDraft(url);
+                      await updatePromoVideoUrl(url, user?.id);
+                    }}
+                  />
+                  <Button variant="secondary" onClick={() => setPromoDraft("")}>مسح الملف</Button>
+                </div>
+                <div className="mt-6 flex gap-6">
+                  {adminData.promoImageUrl && (
+                    <img src={adminData.promoImageUrl} alt="صورة إعلان" className="rounded-xl shadow-card w-64 h-40 object-cover" />
+                  )}
+                  {promoDraft && (
+                    <video src={promoDraft} controls className="rounded-xl shadow-card w-64 h-40 object-cover" />
+                  )}
                 </div>
               </div>
             </div>
@@ -741,7 +791,34 @@ export default function Admin() {
                   {activeConfig.fields.map((field) => (
                     <div key={field.key} className={field.type === "textarea" ? "md:col-span-2" : ""}>
                       <label className="text-sm text-muted-foreground mb-2 block">{field.label}</label>
-                      {field.type === "textarea" ? (
+                      {(field.key === "image" || field.key === "logo") ? (
+                        <div className="flex flex-col gap-2">
+                          <Input
+                            value={draft[field.key] ?? ""}
+                            placeholder={field.placeholder}
+                            onChange={(event) => handleDraftChange(field.key, event.target.value)}
+                          />
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={async (event) => {
+                              const file = event.target.files?.[0];
+                              if (!file) return;
+                              const fileName = `${field.key}/${Date.now()}-${file.name}`;
+                              const { data, error } = await supabase.storage.from("public").upload(fileName, file);
+                              if (error) {
+                                alert("فشل رفع الصورة: " + error.message);
+                                return;
+                              }
+                              const url = supabase.storage.from("public").getPublicUrl(fileName).publicUrl;
+                              handleDraftChange(field.key, url);
+                            }}
+                          />
+                          {draft[field.key] && (
+                            <img src={draft[field.key]} alt="صورة" className="rounded-xl shadow-card w-40 h-24 object-cover mt-2" />
+                          )}
+                        </div>
+                      ) : field.type === "textarea" ? (
                         <Textarea
                           value={draft[field.key] ?? ""}
                           placeholder={field.placeholder}

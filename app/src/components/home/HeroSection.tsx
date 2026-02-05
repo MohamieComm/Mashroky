@@ -32,8 +32,7 @@ export function HeroSection() {
       <div className="absolute inset-0 dot-pattern opacity-25" />
 
       {/* Floating Elements */}
-      <div className="absolute top-20 right-10 w-20 h-20 bg-secondary/30 rounded-full blur-xl animate-float" />
-      <div className="absolute bottom-40 left-20 w-32 h-32 bg-primary-foreground/10 rounded-full blur-2xl animate-float" style={{ animationDelay: "2s" }} />
+      {/* Removed empty colored floating background boxes */}
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
