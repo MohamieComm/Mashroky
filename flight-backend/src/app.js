@@ -12,7 +12,8 @@ app.use(
   })
 );
 
-app.use('/', routes);
+// اجعل جميع المسارات تبدأ بـ /api
+app.use('/api', routes);
 app.use(errorMiddleware);
 
 app.listen(port, () => {
