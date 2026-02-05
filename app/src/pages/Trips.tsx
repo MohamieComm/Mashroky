@@ -41,6 +41,18 @@ const additionalServices = [
 ];
 
 export default function Trips() {
+      // Fallback دائم في الصفحة
+      const alwaysVisible = (
+        <div style={{textAlign:'center',marginTop:'100px'}}>
+          <img src="/logo.png" alt="مشروك" style={{width:'120px',marginBottom:'24px'}} />
+          <h2 style={{fontSize:'2rem',color:'#e11d48'}}>قسم الرحلات</h2>
+          <p style={{color:'#555',marginTop:'16px'}}>ابدأ البحث عن رحلتك من خلال النموذج أعلاه.<br/>إذا لم يظهر النموذج أو النتائج، يرجى تحديث الصفحة أو التواصل مع الدعم.</p>
+        </div>
+      );
+    // Fallback إذا فشل كل شيء
+    if (typeof Layout !== "function") {
+      return <div style={{textAlign:'center',marginTop:'100px',fontSize:'2rem',color:'#e11d48'}}>حدث خطأ في تحميل الصفحة. يرجى تحديث الصفحة أو التواصل مع الدعم.</div>;
+    }
   const navigate = useNavigate();
   const [destinationTab, setDestinationTab] = useState<"saudi" | "international" | "middleeast">("saudi");
   const flights = useAdminCollection("flights", defaultFlights);
@@ -60,7 +72,11 @@ export default function Trips() {
     navigate("/cart");
   };
 
-  const handleFlightSearch = (searchData: {
+  const [flightResults, setFlightResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleFlightSearch = async (searchData: {
     origin: string;
     destination: string;
     departureDate: string;
@@ -68,12 +84,29 @@ export default function Trips() {
     passengers: string;
     cabinClass: string;
     tripType: string;
-    selectedAirline?: string;
+    airline?: string;
   }) => {
-    console.log("🔍 بيانات البحث:", searchData);
-    // يمكنك إرسال البيانات إلى backend هنا
-    // const results = await fetchFlights(searchData);
-    navigate("/search-results", { state: { searchData } });
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("https://jubilant-hope-production-a334.up.railway.app/api/flights/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider: "amadeus",
+          origin: searchData.origin,
+          destination: searchData.destination,
+          departureDate: searchData.departureDate,
+          adults: searchData.passengers,
+          airline: searchData.airline || undefined,
+        }),
+      });
+      const data = await res.json();
+      setFlightResults(data.results || []);
+    } catch (err) {
+      setError("فشل جلب الرحلات. تأكد من الاتصال بالخادم.");
+    }
+    setLoading(false);
   };
 
   const destinationList = useMemo(() => {
@@ -95,6 +128,7 @@ export default function Trips() {
 
   return (
     <Layout>
+      {alwaysVisible}
       {/* Hero */}
       <section className="hero-gradient py-20">
         <div className="container mx-auto px-4">
@@ -111,6 +145,37 @@ export default function Trips() {
           <div className="max-w-6xl mx-auto">
             <FlightSearchForm onSearch={handleFlightSearch} />
           </div>
+        </div>
+      </section>
+
+      {/* نتائج البحث */}
+      <section className="py-8 bg-background">
+        <div className="container mx-auto px-4">
+          {loading && <div className="text-center text-lg">جاري البحث عن الرحلات...</div>}
+          {error && <div className="text-center text-destructive text-lg">{error}</div>}
+          {!loading && flightResults.length > 0 && (
+            <div className="grid md:grid-cols-2 gap-6 mt-6">
+              {flightResults.map((offer, idx) => (
+                <div key={offer.providerOfferId || idx} className="bg-card rounded-2xl p-6 shadow-card">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Plane className="w-5 h-5 text-primary" />
+                    <span className="font-bold text-lg">{offer.slices?.[0]?.origin} → {offer.slices?.[0]?.destination}</span>
+                  </div>
+                  <div className="mb-2">رقم الرحلة: {offer.providerOfferId}</div>
+                  <div className="mb-2">السعر: {offer.pricing?.total} {offer.pricing?.currency}</div>
+                  <div className="mb-2">الدرجة: {offer.cabins?.join("، ")}</div>
+                  <div className="mb-2">شركة الطيران: {offer.slices?.[0]?.marketingCarrier}</div>
+                  <Button variant="hero" onClick={() => handleBook({ id: offer.providerOfferId, from: offer.slices?.[0]?.origin, to: offer.slices?.[0]?.destination, price: offer.pricing?.total, duration: offer.slices?.[0]?.durationMinutes })}>احجز الآن</Button>
+                </div>
+              ))}
+            </div>
+          )}
+          {!loading && flightResults.length === 0 && !error && (
+            <div className="text-center text-muted-foreground text-lg mt-10">
+              <span>ابدأ البحث عن الرحلات بإدخال بياناتك في النموذج أعلاه.</span>
+              <div className="mt-4 text-sm">مثال: الرياض إلى القاهرة بتاريخ 2026-03-01</div>
+            </div>
+          )}
         </div>
       </section>
 

@@ -1,3 +1,41 @@
+export type SeasonOffer = {
+  id: string;
+  title: string;
+  season: "ramadan" | "hajj" | "summer";
+  description: string;
+  image: string;
+  price: string;
+  options: string[];
+};
+export const defaultSeasons: SeasonOffer[] = [
+  {
+    id: "season-ramadan",
+    title: "رحلات رمضان إلى مكة المكرمة",
+    season: "ramadan",
+    description: "باقة شاملة للإقامة في مكة المكرمة خلال شهر رمضان المبارك، تشمل السكن والمواصلات وخدمات إضافية حسب اختيار العميل.",
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800",
+    price: "2,500",
+    options: ["سكن 4 نجوم", "مواصلات خاصة", "إفطار يومي"],
+  },
+  {
+    id: "season-hajj",
+    title: "باقة الحج الكاملة",
+    season: "hajj",
+    description: "رحلة الحج مع خدمات السكن والمواصلات والإرشاد، باقات متنوعة تناسب جميع الاحتياجات.",
+    image: "https://images.unsplash.com/photo-1464983953574-0892a716854b?w=800",
+    price: "7,500",
+    options: ["سكن قريب من الحرم", "مواصلات مكيفة", "إرشاد ديني"],
+  },
+  {
+    id: "season-summer",
+    title: "دراسة اللغة الإنجليزية في الخارج (الصيف)",
+    season: "summer",
+    description: "فرصة لدراسة اللغة الإنجليزية في بريطانيا أو أمريكا خلال الإجازة الصيفية، تشمل السكن والدراسة والمواصلات.",
+    image: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?w=800",
+    price: "12,000",
+    options: ["سكن عائلي أو طلابي", "دروس لغة مكثفة", "رحلات سياحية"],
+  },
+];
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -127,6 +165,7 @@ export type AdminData = {
   users: ManagedUserItem[];
   pages: PageItem[];
   promoVideoUrl: string;
+  seasons: SeasonOffer[];
 };
 
 export const defaultFlights: Flight[] = [
@@ -1124,6 +1163,7 @@ export const useAdminData = () => {
       users,
       pages,
       promoVideoUrl,
+      seasons,
     ] = await Promise.all([
       fetchAdminCollection("flights", defaultFlights),
       fetchAdminCollection("hotels", defaultHotels),
@@ -1137,6 +1177,7 @@ export const useAdminData = () => {
       fetchAdminCollection("users", defaultUsers),
       fetchAdminCollection("pages", defaultPages),
       fetchPromoVideoUrl(),
+      fetchAdminCollection("seasons", defaultSeasons),
     ]);
 
     setData({
@@ -1152,6 +1193,7 @@ export const useAdminData = () => {
       users,
       pages,
       promoVideoUrl,
+      seasons,
     });
     setLoading(false);
   };

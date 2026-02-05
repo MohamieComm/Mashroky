@@ -20,15 +20,11 @@ export function WeeklyOffers() {
 
   return (
     <section className="py-20 bg-background relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl" />
+      {/* Removed empty colored background boxes */}
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-secondary/10 rounded-full px-4 py-2 mb-4">
-            <GraduationCap className="w-5 h-5 text-secondary" />
-            <span className="text-secondary font-semibold">الدراسة بالخارج</span>
-          </div>
+          {/* Removed colored badge above title (empty/visual only) */}
           <h2 className="text-3xl md:text-4xl font-bold">
             أفضل أربعة عروض <span className="text-gold">لدراسة اللغة الإنجليزية</span>
           </h2>

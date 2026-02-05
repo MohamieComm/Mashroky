@@ -13,7 +13,7 @@ export function ImageWithFallback({
   src,
   alt,
   className,
-  fallbackSrc = "/placeholder.svg",
+  fallbackSrc = "/fallback-city.jpg",
   fallbackClassName,
 }: ImageWithFallbackProps) {
   const [failed, setFailed] = useState(false);

@@ -24,4 +24,5 @@ export const moyasarEnv = {
 export const allowedOrigins = [
   'https://www.mashrok.online',
   'https://mashroky-production.up.railway.app',
+  'https://jubilant-hope-production-a334.up.railway.app',
 ];
