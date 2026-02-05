@@ -16,6 +16,11 @@ export const duffelEnv = {
   accessToken: process.env.DUFFEL_ACCESS_TOKEN || '',
 };
 
+export const moyasarEnv = {
+  secretKey: process.env.MOYASAR_SECRET_KEY || '',
+  publishableKey: process.env.MOYASAR_PUBLISHABLE_KEY || '',
+};
+
 export const allowedOrigins = [
   'https://www.mashrok.online',
   'https://mashroky-production.up.railway.app',

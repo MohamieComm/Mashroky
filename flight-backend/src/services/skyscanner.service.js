@@ -1,7 +1,49 @@
 import { skyscannerClient } from '../config/skyscanner.config.js';
 
-// ملاحظة: مسارات سكاي سكانر قد تختلف حسب الاشتراك. هذا طلب حي مبسّط.
-export async function searchFlights({
+function mapSkyscannerToDTOs(raw) {
+  const offers = raw?.itineraries || raw?.offers || [];
+
+  return offers.map((offer) => {
+    const slices = (offer.legs || []).map((leg) =>
+      (leg.segments || []).map((seg) => {
+        const duration = seg.durationInMinutes || seg.duration || 0;
+        return {
+          marketingCarrier: seg.marketingCarrier?.code || seg.carrierCode,
+          operatingCarrier: seg.operatingCarrier?.code || seg.marketingCarrier?.code,
+          flightNumber: seg.flightNumber,
+          origin: seg.origin?.iata || seg.origin,
+          destination: seg.destination?.iata || seg.destination,
+          departureTime: seg.departure || seg.departureTime,
+          arrivalTime: seg.arrival || seg.arrivalTime,
+          durationMinutes: Number(duration),
+          aircraft: seg.aircraft?.code || null,
+        };
+      })
+    );
+
+    const price = offer.price || {};
+    const currency = price.currency || 'USD';
+    const total = Number(price.amount || price.total || 0);
+    const cabins = (offer.cabins || ['ECONOMY']).map((c) => String(c).toUpperCase());
+
+    return {
+      provider: 'skyscanner',
+      providerOfferId: offer.id || offer.itineraryId,
+      slices,
+      pricing: {
+        currency,
+        total,
+        base: null,
+        taxes: null,
+      },
+      cabins,
+      refundable: offer.refundable ?? null,
+      baggageInfo: {},
+    };
+  });
+}
+
+function buildSkyscannerPayload({
   origin,
   destination,
   departureDate,
@@ -10,7 +52,7 @@ export async function searchFlights({
   market = 'SA',
   locale = 'en-US',
 }) {
-  const payload = {
+  return {
     query: {
       market,
       locale,
@@ -29,10 +71,14 @@ export async function searchFlights({
       adults,
     },
   };
+}
 
+// ملاحظة: مسارات سكاي سكانر قد تختلف حسب الاشتراك.
+export async function searchFlights(params) {
+  const payload = buildSkyscannerPayload(params);
   const { data } = await skyscannerClient.post(
     '/apiservices/v3/flights/live/search/create',
     payload
   );
-  return data;
+  return mapSkyscannerToDTOs(data);
 }
