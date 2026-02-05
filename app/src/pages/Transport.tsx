@@ -1,6 +1,8 @@
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Car, Bus, Train, Plane, MapPin } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "@/hooks/useCart";
 
 const transportOptions = [
   {
@@ -26,6 +28,13 @@ const transportOptions = [
 ];
 
 export default function Transport() {
+  const navigate = useNavigate();
+  const { addItem } = useCart();
+  const handleBook = (title: string) => {
+    addItem({ id: `transport-${title}-${Date.now()}`, title, price: 0 });
+    navigate("/cart");
+  };
+
   return (
     <Layout>
       <section className="hero-gradient py-20">
@@ -67,7 +76,7 @@ export default function Transport() {
               <input className="h-12 rounded-xl border border-input px-4" placeholder="عدد الركاب" />
               <input className="h-12 rounded-xl border border-input px-4" placeholder="ملاحظات إضافية" />
             </div>
-            <Button variant="hero" className="mt-6">إضافة للمسار</Button>
+            <Button variant="hero" className="mt-6" onClick={() => handleBook("خدمة نقل")}>إضافة للمسار</Button>
             <p className="text-xs text-muted-foreground mt-3">
               سيتم إرسال تفاصيل الوصول ونقطة الالتقاء بعد إتمام الدفع مباشرة.
             </p>

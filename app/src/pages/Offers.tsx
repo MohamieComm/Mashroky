@@ -11,10 +11,23 @@ import {
   Calendar
 } from "lucide-react";
 import { defaultOffers, useAdminCollection } from "@/data/adminStore";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "@/hooks/useCart";
 
 
 export default function Offers() {
   const offers = useAdminCollection("offers", defaultOffers);
+  const navigate = useNavigate();
+  const { addItem } = useCart();
+  const handleBook = (title: string, price: number, details?: string) => {
+    addItem({
+      id: `offer-${title}-${Date.now()}`,
+      title,
+      price,
+      details,
+    });
+    navigate("/cart");
+  };
 
   return (
     <Layout>
@@ -134,7 +147,19 @@ export default function Offers() {
                           وفر {Number(offer.originalPrice.replace(/,/g, "")) - Number(offer.newPrice.replace(/,/g, ""))} ر.س
                         </div>
                       </div>
-                      <Button variant="hero" size="lg">احجز الآن</Button>
+                      <Button
+                        variant="hero"
+                        size="lg"
+                        onClick={() =>
+                          handleBook(
+                            offer.title,
+                            offer.price,
+                            `${offer.location} • ${offer.duration}`
+                          )
+                        }
+                      >
+                        احجز الآن
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -144,27 +169,6 @@ export default function Offers() {
         </div>
       </section>
 
-      {/* Payment Methods */}
-      <section className="py-12 bg-card border-t border-border">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-3">
-              <CreditCard className="w-8 h-8 text-primary" />
-              <div>
-                <h3 className="font-bold">طرق الدفع المتاحة</h3>
-                <p className="text-sm text-muted-foreground">ادفع بالطريقة التي تناسبك</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-6 flex-wrap justify-center">
-              <div className="bg-muted rounded-lg px-6 py-3 font-semibold">Apple Pay</div>
-              <div className="bg-muted rounded-lg px-6 py-3 font-semibold">Samsung Pay</div>
-              <div className="bg-muted rounded-lg px-6 py-3 font-semibold">Visa</div>
-              <div className="bg-muted rounded-lg px-6 py-3 font-semibold">Mastercard</div>
-              <div className="bg-muted rounded-lg px-6 py-3 font-semibold">مدى</div>
-            </div>
-          </div>
-        </div>
-      </section>
     </Layout>
   );
 }

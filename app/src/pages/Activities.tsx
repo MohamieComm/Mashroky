@@ -3,9 +3,22 @@ import { Button } from "@/components/ui/button";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { CalendarCheck, Ticket, MapPin, Users } from "lucide-react";
 import { defaultActivities, useAdminCollection } from "@/data/adminStore";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "@/hooks/useCart";
 
 export default function Activities() {
   const activities = useAdminCollection("activities", defaultActivities);
+  const navigate = useNavigate();
+  const { addItem } = useCart();
+  const handleBook = (activityTitle: string, price: string, location?: string) => {
+    addItem({
+      id: `activity-${activityTitle}-${Date.now()}`,
+      title: activityTitle,
+      price: Number(price.replace(/[^\\d.]/g, "")) || 0,
+      details: location,
+    });
+    navigate("/cart");
+  };
 
   return (
     <Layout>
@@ -56,7 +69,13 @@ export default function Activities() {
                   </div>
                   <div className="flex items-center justify-between mt-4">
                     <p className="text-lg font-bold text-primary">{activity.price} ر.س</p>
-                    <Button variant="hero" size="sm">احجز</Button>
+                    <Button
+                      variant="hero"
+                      size="sm"
+                      onClick={() => handleBook(activity.title, activity.price, activity.location)}
+                    >
+                      احجز
+                    </Button>
                   </div>
                 </div>
               </div>

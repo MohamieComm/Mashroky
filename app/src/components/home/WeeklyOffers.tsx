@@ -1,10 +1,23 @@
 import { GraduationCap, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useCart } from "@/hooks/useCart";
 import { studyOffers } from "@/data/content";
 
 export function WeeklyOffers() {
+  const navigate = useNavigate();
+  const { addItem } = useCart();
+  const handleBook = (offerTitle?: string, price?: string, details?: string) => {
+    addItem({
+      id: `study-${offerTitle ?? Date.now()}`,
+      title: offerTitle ?? "حجز دراسة",
+      price: Number((price ?? "0").replace(/[^\\d.]/g, "")) || 0,
+      details,
+    });
+    navigate("/cart");
+  };
+
   return (
     <section className="py-20 bg-background relative overflow-hidden">
       <div className="absolute top-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
@@ -60,7 +73,13 @@ export function WeeklyOffers() {
                       {offer.price} <span className="text-sm">ر.س</span>
                     </p>
                   </div>
-                  <Button variant="hero" size="sm">احجز</Button>
+                  <Button
+                    variant="hero"
+                    size="sm"
+                    onClick={() => handleBook(offer.title, offer.price, offer.location)}
+                  >
+                    احجز
+                  </Button>
                 </div>
               </div>
             </div>

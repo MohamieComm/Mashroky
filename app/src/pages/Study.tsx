@@ -4,8 +4,22 @@ import { Input } from "@/components/ui/input";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { GraduationCap, Globe, CheckCircle } from "lucide-react";
 import { studyOffers, studyDestinations, topUniversities } from "@/data/content";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "@/hooks/useCart";
 
 export default function Study() {
+  const navigate = useNavigate();
+  const { addItem } = useCart();
+  const handleBook = (title?: string, price?: string, details?: string) => {
+    addItem({
+      id: `study-${title ?? Date.now()}`,
+      title: title ?? "برنامج دراسة",
+      price: Number((price ?? "0").replace(/[^\\d.]/g, "")) || 0,
+      details,
+    });
+    navigate("/cart");
+  };
+
   return (
     <Layout>
       <section className="hero-gradient py-20">
@@ -37,7 +51,7 @@ export default function Study() {
               <Input placeholder="إضافة السكن" />
               <Input placeholder="إضافة المواصلات" />
             </div>
-            <Button variant="hero" className="mt-6">
+            <Button variant="hero" className="mt-6" onClick={() => handleBook()}>
               احجز البرنامج
             </Button>
             <p className="text-xs text-muted-foreground mt-3">
@@ -72,7 +86,13 @@ export default function Study() {
                   </div>
                   <div className="flex items-center justify-between mt-4">
                     <p className="text-lg font-bold text-primary">{offer.price} ر.س</p>
-                    <Button variant="hero" size="sm">احجز</Button>
+                    <Button
+                      variant="hero"
+                      size="sm"
+                      onClick={() => handleBook(offer.title, offer.price, `${offer.location} • ${offer.duration}`)}
+                    >
+                      احجز
+                    </Button>
                   </div>
                 </div>
               </div>

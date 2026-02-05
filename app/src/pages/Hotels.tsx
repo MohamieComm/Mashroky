@@ -18,6 +18,8 @@ import {
   Filter
 } from "lucide-react";
 import { defaultHotels, useAdminCollection } from "@/data/adminStore";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "@/hooks/useCart";
 
 const hotelNotes = [
   "وقت تسجيل الدخول 3:00 مساءً وتسجيل الخروج 12:00 ظهرًا.",
@@ -37,6 +39,18 @@ const amenityIcons: Record<string, { icon: React.ComponentType<{ className?: str
 
 export default function Hotels() {
   const hotels = useAdminCollection("hotels", defaultHotels);
+  const navigate = useNavigate();
+  const { addItem } = useCart();
+  const handleBook = (hotel: (typeof defaultHotels)[number]) => {
+    addItem({
+      id: `hotel-${hotel.id}-${Date.now()}`,
+      title: hotel.title,
+      price: Number(String(hotel.price).replace(/[^\\d.]/g, "")) || 0,
+      details: hotel.priceNote,
+      image: hotel.image,
+    });
+    navigate("/cart");
+  };
 
   return (
     <Layout>
@@ -182,7 +196,7 @@ export default function Hotels() {
                       {hotel.price} <span className="text-base">ر.س</span>
                     </p>
                     <p className="text-sm text-muted-foreground mb-4">{hotel.priceNote}</p>
-                    <Button variant="hero" className="w-full">احجز الآن</Button>
+                    <Button variant="hero" className="w-full" onClick={() => handleBook(hotel)}>احجز الآن</Button>
                     <Button variant="ghost" className="w-full mt-2">عرض التفاصيل</Button>
                   </div>
                 </div>

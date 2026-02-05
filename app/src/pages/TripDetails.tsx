@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useCart } from "@/hooks/useCart";
 import { supabase } from "@/integrations/supabase/client";
 import {
   MapPin,
@@ -49,6 +50,7 @@ export default function TripDetails() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { addItem } = useCart();
 
   const [trip, setTrip] = useState<Trip | null>(null);
   const [loading, setLoading] = useState(true);
@@ -134,6 +136,18 @@ export default function TripDetails() {
       setShowBookingForm(false);
       navigate("/profile");
     }
+  };
+
+  const handleCartBook = () => {
+    if (!trip) return;
+    addItem({
+      id: `trip-${trip.id}-${Date.now()}`,
+      title: trip.title,
+      price: trip.price,
+      details: `${trip.destination} • ${trip.duration_days} أيام`,
+      image: trip.image_url,
+    });
+    navigate("/cart");
   };
 
   if (loading) {
@@ -427,17 +441,7 @@ export default function TripDetails() {
                       variant="hero"
                       size="lg"
                       className="w-full"
-                      onClick={() => {
-                        if (!user) {
-                          toast({
-                            title: "يجب تسجيل الدخول",
-                            description: "قم بتسجيل الدخول أولاً لإتمام الحجز",
-                          });
-                          navigate("/auth");
-                        } else {
-                          setShowBookingForm(true);
-                        }
-                      }}
+                      onClick={handleCartBook}
                     >
                       احجز الآن
                     </Button>

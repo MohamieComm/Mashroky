@@ -1,17 +1,11 @@
 import { useMemo, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { 
   Plane, 
-  MapPin, 
-  Calendar, 
-  Users, 
   Clock, 
   Star,
-  Filter,
-  ArrowLeftRight,
   CreditCard,
   Hotel,
   Car,
@@ -19,7 +13,10 @@ import {
   FileText
 } from "lucide-react";
 import { defaultAirlines, defaultDestinations, defaultFlights, useAdminCollection } from "@/data/adminStore";
+import { useNavigate } from "react-router-dom";
 import { adminBenefitCards, popularDestinationsByRegion } from "@/data/content";
+import { useCart } from "@/hooks/useCart";
+import FlightSearchForm from "@/components/FlightSearchForm";
 
 const bookingNotes = [
   "يرجى الحضور إلى المطار قبل 3 ساعات من الإقلاع.",
@@ -44,11 +41,40 @@ const additionalServices = [
 ];
 
 export default function Trips() {
-  const [tripType, setTripType] = useState<"roundtrip" | "oneway">("roundtrip");
+  const navigate = useNavigate();
   const [destinationTab, setDestinationTab] = useState<"saudi" | "international" | "middleeast">("saudi");
   const flights = useAdminCollection("flights", defaultFlights);
   const destinations = useAdminCollection("destinations", defaultDestinations);
   const airlines = useAdminCollection("airlines", defaultAirlines);
+  const { addItem } = useCart();
+
+  const handleBook = (flight?: { id: string; from: string; to: string; price: number; duration: string }) => {
+    if (flight) {
+      addItem({
+        id: `flight-${flight.id}-${Date.now()}`,
+        title: `${flight.from} → ${flight.to}`,
+        price: flight.price,
+        details: flight.duration,
+      });
+    }
+    navigate("/cart");
+  };
+
+  const handleFlightSearch = (searchData: {
+    origin: string;
+    destination: string;
+    departureDate: string;
+    returnDate?: string;
+    passengers: string;
+    cabinClass: string;
+    tripType: string;
+    selectedAirline?: string;
+  }) => {
+    console.log("🔍 بيانات البحث:", searchData);
+    // يمكنك إرسال البيانات إلى backend هنا
+    // const results = await fetchFlights(searchData);
+    navigate("/search-results", { state: { searchData } });
+  };
 
   const destinationList = useMemo(() => {
     const fromAdmin = destinations
@@ -81,77 +107,9 @@ export default function Trips() {
             </p>
           </div>
 
-          {/* Search Box */}
-          <div className="bg-card rounded-2xl p-6 shadow-hover max-w-5xl mx-auto">
-            {/* Trip Type */}
-            <div className="flex gap-4 mb-6">
-              <button
-                onClick={() => setTripType("roundtrip")}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
-                  tripType === "roundtrip"
-                    ? "hero-gradient text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:bg-accent"
-                }`}
-              >
-                <ArrowLeftRight className="w-5 h-5" />
-                ذهاب وعودة
-              </button>
-              <button
-                onClick={() => setTripType("oneway")}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
-                  tripType === "oneway"
-                    ? "hero-gradient text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:bg-accent"
-                }`}
-              >
-                <Plane className="w-5 h-5" />
-                ذهاب فقط
-              </button>
-            </div>
-
-            {/* Search Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-              <div className="relative">
-                <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input placeholder="من أين؟" className="pr-10 h-12 bg-muted border-0" />
-              </div>
-              <div className="relative">
-                <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input placeholder="إلى أين؟" className="pr-10 h-12 bg-muted border-0" />
-              </div>
-              <div className="relative">
-                <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input placeholder="تاريخ الذهاب" className="pr-10 h-12 bg-muted border-0" />
-              </div>
-              {tripType === "roundtrip" && (
-                <div className="relative">
-                  <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input placeholder="تاريخ العودة" className="pr-10 h-12 bg-muted border-0" />
-                </div>
-              )}
-              <div className="relative">
-                <Users className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input placeholder="المسافرون" className="pr-10 h-12 bg-muted border-0" />
-              </div>
-              <div className="relative">
-                <select className="h-12 w-full rounded-xl border-0 bg-muted px-4 text-sm text-muted-foreground">
-                  <option>الدرجة الاقتصادية</option>
-                  <option>درجة الأعمال</option>
-                  <option>الدرجة الأولى</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="flex justify-between items-center mt-6">
-              <Button variant="ghost" className="gap-2">
-                <Filter className="w-4 h-4" />
-                تصفية النتائج
-              </Button>
-              <Button variant="hero" size="lg" className="gap-2">
-                <Plane className="w-5 h-5" />
-                ابحث عن رحلات
-              </Button>
-            </div>
+          {/* Flight Search Form Component */}
+          <div className="max-w-6xl mx-auto">
+            <FlightSearchForm onSearch={handleFlightSearch} />
           </div>
         </div>
       </section>
@@ -216,13 +174,11 @@ export default function Trips() {
                 className="bg-card rounded-xl px-4 py-3 shadow-card flex items-center gap-3"
               >
                 {airline.logo && (
-                  <img
+                  <ImageWithFallback
                     src={airline.logo}
                     alt={airline.name}
                     className="w-20 h-8 object-contain"
-                    onError={(event) => {
-                      event.currentTarget.style.display = "none";
-                    }}
+                    fallbackClassName="w-20 h-8 object-contain bg-muted"
                   />
                 )}
                 <div className="text-sm font-semibold">{airline.name}</div>
@@ -293,7 +249,7 @@ export default function Trips() {
                   <div className="lg:w-48 flex flex-col items-center justify-center lg:border-r border-border lg:pr-6">
                     <p className="text-sm text-muted-foreground">يبدأ من</p>
                     <p className="text-3xl font-bold text-primary">{flight.price} <span className="text-sm">ر.س</span></p>
-                    <Button variant="hero" className="w-full mt-4">احجز الآن</Button>
+                    <Button variant="hero" className="w-full mt-4" onClick={() => handleBook(flight)}>احجز الآن</Button>
                   </div>
                 </div>
               </div>

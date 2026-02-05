@@ -1,0 +1,331 @@
+import { useState } from "react";
+import { Layout } from "@/components/layout/Layout";
+import { CalendarDays, ArrowLeft, Clock, User, Eye } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { defaultArticles, useAdminCollection } from "@/data/adminStore";
+
+// محتوى مقالات ونصائح السفر
+export const travelTips = [
+  {
+    id: 1,
+    title: "أفضل وقت لزيارة دبي",
+    category: "وجهات",
+    readTime: "5 دقائق",
+    views: 2450,
+    date: "2026-02-04",
+    author: "أحمد السلمان",
+    image: "https://images.unsplash.com/photo-1512453391709-c5d2f4c5c5e0",
+    excerpt: "تعرف على أفضل الأشهر لزيارة دبي والاستمتاع بالطقس واستكشاف الوجهات السياحية المميزة.",
+    content: `
+دبي من أجمل الوجهات السياحية في الشرق الأوسط. إذا كنت تخطط للسفر إلى دبي، فعليك أن تختار الوقت المناسب.
+
+## أفضل فترات الزيارة
+
+### أكتوبر إلى مارس
+* درجات حرارة معتدلة (20-30 درجة مئوية)
+* طقس مثالي لاستكشاف المدينة
+* فرص رائعة للأنشطة الخارجية
+* تقل الازدحامات قليلاً مقارنة بذروة الموسم
+
+### أبريل إلى سبتمبر
+* حر شديد قد يصل إلى 50 درجة مئوية
+* أسعار فنادق أقل من الموسم العالي
+* مناسب للقاطنين البارد
+
+## نصائح مهمة
+
+1. **التنقل**: استخدم المترو أو سيارات الأجرة
+2. **الملابس**: ارتدي ملابس فضفاضة خفيفة
+3. **الماء**: اشرب الكثير من الماء
+4. **الأوقات**: تجنب الخروج في أوقات الذروة
+    `
+  },
+  {
+    id: 2,
+    title: "نصائح حجز الفنادق والتوفير",
+    category: "نصائح",
+    readTime: "8 دقائق",
+    views: 1823,
+    date: "2026-02-02",
+    author: "فاطمة المحمود",
+    image: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304",
+    excerpt: "اكتشف أفضل الطرق لحجز الفنادق بأسعار رخيصة والحصول على أفضل العروض والخصومات.",
+    content: `
+حجز الفند يمكن أن يكون أكثر الأجزاء تكلفة في السفر. إليك بعض النصائح للتوفير:
+
+## نصائح حجز ذكي
+
+### 1. احجز مقدماً
+- احجز قبل 4-6 أسابيع من السفر
+- تجنب الحجز في آخر لحظة
+
+### 2. قارن الأسعار
+- استخدم مواقع المقارنة
+- تحقق من التقييمات
+- اقرأ التعليقات
+
+### 3. ابحث عن عروض خاصة
+- الحجوزات غير القابلة للإلغاء أرخص
+- الوجبات المشمولة توفر المال
+
+### 4. اختر فندق بموقع استراتيجي
+- بالقرب من المترو
+- بالقرب من المعالم الرئيسية
+    `
+  },
+  {
+    id: 3,
+    title: "وثائق السفر الأساسية",
+    category: "معلومات",
+    readTime: "6 دقائق",
+    views: 3156,
+    date: "2026-02-01",
+    author: "محمد العتيبي",
+    image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828",
+    excerpt: "قائمة شاملة بجميع الوثائق والأوراق التي تحتاجها قبل السفر إلى الخارج.",
+    content: `
+التأكد من وجود جميع الوثائق المطلوبة قبل السفر أمر بالغ الأهمية.
+
+## الوثائق الأساسية
+
+### 1. جواز السفر
+- تأكد من صلاحيته
+- لا يقل عن 6 أشهر من تاريخ السفر
+
+### 2. التأشيرة
+- اعرف متطلبات التأشيرة
+- ابدأ العملية مبكراً
+
+### 3. التأمين
+- تأمين السياحة
+- تأمين الطوارئ الطبية
+
+### 4. حجوزات الرحلات
+- حفظ تأكيد الحجز
+- بيانات الفندق
+- بطاقة الائتمان
+    `
+  },
+  {
+    id: 4,
+    title: "أفضل المطاعم في الرياض",
+    category: "طعام",
+    readTime: "7 دقائق",
+    views: 2789,
+    date: "2026-01-30",
+    author: "سارة الملحن",
+    image: "https://images.unsplash.com/photo-1504674900757-da26b07bfd83",
+    excerpt: "استكشف أفضل المطاعم ذات الأكل السعودي والعالمي في الرياض.",
+    content: `
+الرياض لديها تشكيلة رائعة من المطاعم والمقاهي.
+
+## المطاعم الموصى بها
+
+### الأكل السعودي
+- **مطعم الذقن**: للطعام التقليدي
+- **مجلس الأكل**: للشاورما الفاخرة
+- **مطعم الضيافة**: للمندي والكبسة
+
+### الأكل الآسيوي
+- **مطعم ياباني**: المأكولات اليابانية الفاخرة
+- **مطعم صيني**: الطعام الصيني الأصيل
+
+### المقاهي
+- **قهوة الفوار**: قهوة سعودية تقليدية
+- **مقهى الفرزدق**: ديكور عصري وقهوة رائعة
+    `
+  },
+];
+
+export default function Articles() {
+  const [selectedArticle, setSelectedArticle] = useState<typeof travelTips[0] | null>(null);
+  const latestArticles = useAdminCollection("articles", defaultArticles);
+
+  return (
+    <Layout>
+      <section className="hero-gradient py-20">
+        <div className="container mx-auto px-4 text-center">
+          <span className="text-primary-foreground/80 text-lg">الأخبار والمقالات</span>
+          <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mt-3">
+            مقالات ونصائح السفر
+          </h1>
+          <p className="text-primary-foreground/80 mt-4 max-w-2xl mx-auto text-lg">
+            أحدث الأخبار السياحية، إرشادات للمسافرين، ونصائح لاختيار الوجهة حسب الموسم.
+          </p>
+        </div>
+      </section>
+
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-10">
+            {/* Main Articles */}
+            <div className="space-y-8">
+              {selectedArticle ? (
+                // Article Detail View
+                <div className="bg-card rounded-2xl p-8 shadow-card">
+                  <button
+                    onClick={() => setSelectedArticle(null)}
+                    className="flex items-center gap-2 text-primary mb-6 hover:gap-3 transition-all"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    العودة للقائمة
+                  </button>
+
+                  <img
+                    src={selectedArticle.image}
+                    alt={selectedArticle.title}
+                    className="w-full h-96 object-cover rounded-xl mb-6"
+                  />
+
+                  <div className="flex flex-wrap gap-4 mb-6 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      {selectedArticle.author}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CalendarDays className="w-4 h-4" />
+                      {new Date(selectedArticle.date).toLocaleDateString("ar-SA")}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4" />
+                      {selectedArticle.readTime}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Eye className="w-4 h-4" />
+                      {selectedArticle.views.toLocaleString()} عرض
+                    </div>
+                  </div>
+
+                  <h1 className="text-3xl font-bold mb-6">{selectedArticle.title}</h1>
+
+                  <div className="prose prose-invert max-w-none text-foreground/90">
+                    {selectedArticle.content.split("\n##").map((section, idx) => {
+                      if (idx === 0) return <p key={idx} className="mb-6">{section}</p>;
+                      const [title, ...rest] = section.split("\n");
+                      return (
+                        <div key={idx} className="mb-6">
+                          <h2 className="text-2xl font-bold mb-4">{title}</h2>
+                          {rest.map((line, i) => {
+                            if (!line.trim()) return null;
+                            if (line.startsWith("###")) {
+                              return <h3 key={i} className="text-lg font-semibold mt-4 mb-2">{line.replace("###", "").trim()}</h3>;
+                            }
+                            if (line.startsWith("*")) {
+                              return <li key={i} className="ml-6 list-disc">{line.replace("*", "").trim()}</li>;
+                            }
+                            if (line.startsWith("-")) {
+                              return <li key={i} className="ml-6 list-disc">{line.replace("-", "").trim()}</li>;
+                            }
+                            if (line.startsWith("1.") || line.match(/^\d+\./)) {
+                              return <li key={i} className="ml-6 list-decimal">{line.replace(/^\d+\.\s*/, "").trim()}</li>;
+                            }
+                            return <p key={i} className="mb-3">{line}</p>;
+                          })}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                // Articles List View
+                travelTips.map((article) => (
+                  <div
+                    key={article.id}
+                    className="bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-hover transition-all duration-300 cursor-pointer group"
+                    onClick={() => setSelectedArticle(article)}
+                  >
+                    <div className="grid md:grid-cols-[1fr_300px] gap-4">
+                      <div className="p-6">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="px-3 py-1 rounded-full bg-secondary/20 text-secondary text-xs font-semibold">
+                            {article.category}
+                          </span>
+                          <span className="text-xs text-muted-foreground">{article.readTime}</span>
+                        </div>
+                        <h3 className="text-xl font-bold mb-3 group-hover:text-secondary transition-colors">
+                          {article.title}
+                        </h3>
+                        <p className="text-muted-foreground mb-4">{article.excerpt}</p>
+                        <div className="flex items-center justify-between text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2">
+                            <User className="w-4 h-4" />
+                            <span>{article.author}</span>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <span className="flex items-center gap-1">
+                              <CalendarDays className="w-4 h-4" />
+                              {new Date(article.date).toLocaleDateString("ar-SA")}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Eye className="w-4 h-4" />
+                              {article.views}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="overflow-hidden h-48 md:h-auto">
+                        <ImageWithFallback
+                          src={article.image}
+                          alt={article.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Sidebar */}
+            <aside className="space-y-6">
+              {/* أكثر المقالات مشاهدة */}
+              <div className="bg-card rounded-2xl p-6 shadow-card">
+                <h3 className="text-xl font-bold mb-4">أكثر المقالات مشاهدة</h3>
+                <div className="space-y-4">
+                  {travelTips
+                    .sort((a, b) => b.views - a.views)
+                    .slice(0, 5)
+                    .map((article, idx) => (
+                      <div
+                        key={article.id}
+                        onClick={() => setSelectedArticle(article)}
+                        className="pb-4 border-b border-border last:border-0 cursor-pointer hover:text-secondary transition-colors group"
+                      >
+                        <div className="flex items-start gap-3">
+                          <span className="text-lg font-bold text-secondary">{idx + 1}</span>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-sm group-hover:text-secondary transition-colors">
+                              {article.title}
+                            </h4>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {article.views} عرض
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              {/* الفئات */}
+              <div className="bg-card rounded-2xl p-6 shadow-card">
+                <h3 className="text-lg font-bold mb-4">الفئات</h3>
+                <div className="flex flex-wrap gap-2">
+                  {["وجهات", "نصائح", "معلومات", "طعام", "فنادق"].map((cat) => (
+                    <button
+                      key={cat}
+                      className="px-3 py-1 rounded-full bg-muted text-sm text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-all"
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+    </Layout>
+  );
+}

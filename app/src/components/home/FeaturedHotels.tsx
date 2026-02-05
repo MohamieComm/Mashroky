@@ -1,10 +1,23 @@
 import { Heart, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useCart } from "@/hooks/useCart";
 import { honeymoonOffers } from "@/data/content";
 
 export function FeaturedHotels() {
+  const navigate = useNavigate();
+  const { addItem } = useCart();
+  const handleBook = (title: string, price: string, details?: string) => {
+    addItem({
+      id: `honeymoon-${title}-${Date.now()}`,
+      title,
+      price: Number(price.replace(/[^\\d.]/g, "")) || 0,
+      details,
+    });
+    navigate("/cart");
+  };
+
   return (
     <section className="py-20 bg-muted">
       <div className="container mx-auto px-4">
@@ -15,7 +28,7 @@ export function FeaturedHotels() {
               <span className="text-secondary font-semibold text-sm">شهر العسل</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mt-2">
-              أفضل أربعة عروض <span className="text-gradient">شهر العسل</span>
+              أفضل أربعة عروض شهر العسل
             </h2>
             <p className="text-muted-foreground mt-3 max-w-xl">
               باقات رومانسية شاملة للطيران، الإقامة الفاخرة، والأنشطة الخاصة بالأزواج.
@@ -65,7 +78,13 @@ export function FeaturedHotels() {
                       {offer.price} <span className="text-sm">ر.س</span>
                     </p>
                   </div>
-                  <Button variant="hero" size="sm">احجز</Button>
+                  <Button
+                    variant="hero"
+                    size="sm"
+                    onClick={() => handleBook(offer.title, offer.price, `${offer.location} • ${offer.duration}`)}
+                  >
+                    احجز
+                  </Button>
                 </div>
               </div>
             </div>

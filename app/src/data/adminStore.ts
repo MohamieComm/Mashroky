@@ -95,7 +95,7 @@ export type ApiKeyItem = {
   id: string;
   name: string;
   provider: string;
-  key: string;
+  key?: string;
   status: "enabled" | "disabled";
 };
 
@@ -141,7 +141,7 @@ export const defaultFlights: Flight[] = [
     price: "650",
     stops: "مباشر",
     rating: 4.8,
-    image: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400",
+    image: "https://images.unsplash.com/photo-1520425155577-aaad47db1d1f?w=400",
   },
   {
     id: "flight-2",
@@ -154,7 +154,7 @@ export const defaultFlights: Flight[] = [
     price: "1,200",
     stops: "مباشر",
     rating: 4.5,
-    image: "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?w=400",
+    image: "https://images.unsplash.com/photo-1502933691298-84fc14542831?w=400",
   },
   {
     id: "flight-3",
@@ -167,7 +167,7 @@ export const defaultFlights: Flight[] = [
     price: "800",
     stops: "مباشر",
     rating: 4.6,
-    image: "https://images.unsplash.com/photo-1529074963764-98f45c47344b?w=400",
+    image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400",
   },
   {
     id: "flight-4",
@@ -180,7 +180,7 @@ export const defaultFlights: Flight[] = [
     price: "3,500",
     stops: "محطة واحدة",
     rating: 4.9,
-    image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400",
+    image: "https://images.unsplash.com/photo-1500422017585-53bff1160f14?w=400",
   },
   {
     id: "flight-5",
@@ -193,7 +193,7 @@ export const defaultFlights: Flight[] = [
     price: "2,900",
     stops: "مباشر",
     rating: 4.7,
-    image: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=400",
+    image: "https://images.unsplash.com/photo-1505236858576-d1b2c6ce53b9?w=400",
   },
   {
     id: "flight-6",
@@ -206,7 +206,7 @@ export const defaultFlights: Flight[] = [
     price: "2,400",
     stops: "محطة واحدة",
     rating: 4.4,
-    image: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=400",
+    image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400",
   },
 ];
 
@@ -215,7 +215,7 @@ export const defaultHotels: HotelItem[] = [
     id: "hotel-1",
     name: "فندق برج العرب جميرا",
     location: "دبي، الإمارات العربية المتحدة",
-    image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800",
+    image: "https://images.unsplash.com/photo-1512453995560-851157e9a028?w=800",
     rating: 5,
     reviews: 2450,
     price: "3,500",
@@ -234,7 +234,7 @@ export const defaultHotels: HotelItem[] = [
     id: "hotel-2",
     name: "فندق فور سيزونز البوسفور",
     location: "إسطنبول، تركيا",
-    image: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800",
+    image: "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?w=800",
     rating: 4.9,
     reviews: 1890,
     price: "1,800",
@@ -253,7 +253,7 @@ export const defaultHotels: HotelItem[] = [
     id: "hotel-3",
     name: "منتجع أنانتارا المالديف",
     location: "جزر المالديف",
-    image: "https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=800",
+    image: "https://images.unsplash.com/photo-1551244072-5d12893278ab?w=800",
     rating: 5,
     reviews: 980,
     price: "5,200",
@@ -271,7 +271,7 @@ export const defaultHotels: HotelItem[] = [
     id: "hotel-4",
     name: "فندق ريتز كارلتون باريس",
     location: "باريس، فرنسا",
-    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
+    image: "https://images.unsplash.com/photo-1495195129352-a9d3c9469a46?w=800",
     rating: 4.8,
     reviews: 1560,
     price: "4,200",
@@ -290,7 +290,7 @@ export const defaultHotels: HotelItem[] = [
     id: "hotel-5",
     name: "قصر الإمارات",
     location: "أبوظبي، الإمارات العربية المتحدة",
-    image: "https://images.unsplash.com/photo-1501117716987-c8e1ecb210d6?w=800",
+    image: "https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=800",
     rating: 4.9,
     reviews: 1320,
     price: "2,900",
@@ -309,7 +309,7 @@ export const defaultHotels: HotelItem[] = [
     id: "hotel-6",
     name: "منتجع شيبارا البحر الأحمر",
     location: "البحر الأحمر، السعودية",
-    image: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800",
+    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
     rating: 4.8,
     reviews: 610,
     price: "3,800",
@@ -330,7 +330,7 @@ export const defaultOffers: OfferItem[] = [
     id: "offer-1",
     title: "باقة العُلا التراثية",
     description: "اكتشف مدائن صالح وتجارب الصحراء في برنامج شامل للطيران والإقامة والجولات.",
-    image: "https://images.unsplash.com/photo-1547234934-7b6dff7f1f48?w=800",
+    image: "https://images.unsplash.com/photo-1534080764596-47f3efd8e0d5?w=800",
     discount: 20,
     validUntil: "حتى نهاية الموسم",
     originalPrice: "4,200",
@@ -347,7 +347,7 @@ export const defaultOffers: OfferItem[] = [
     id: "offer-2",
     title: "سحر البحر الأحمر",
     description: "منتجعات شاطئية وأنشطة بحرية مع برنامج متكامل للعائلات.",
-    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+    image: "https://images.unsplash.com/photo-1519046904884-53103b34b206?w=800",
     discount: 18,
     validUntil: "حتى نهاية الموسم",
     originalPrice: "5,600",
@@ -364,7 +364,7 @@ export const defaultOffers: OfferItem[] = [
     id: "offer-3",
     title: "دبي العائلية الشاملة",
     description: "باقة تشمل الطيران والفندق والأنشطة الترفيهية والمواصلات.",
-    image: "https://images.unsplash.com/photo-1518684079-3c830dcef090?w=800",
+    image: "https://images.unsplash.com/photo-1512453995560-851157e9a028?w=800",
     discount: 30,
     validUntil: "حتى نهاية الموسم",
     originalPrice: "4,500",
@@ -377,7 +377,7 @@ export const defaultOffers: OfferItem[] = [
     id: "offer-4",
     title: "استكشاف إسطنبول التاريخية",
     description: "جولات ثقافية وأسواق تقليدية مع باقة اقتصادية شاملة.",
-    image: "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=800",
+    image: "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?w=800",
     discount: 28,
     validUntil: "حتى نهاية الموسم",
     originalPrice: "5,000",
@@ -390,7 +390,7 @@ export const defaultOffers: OfferItem[] = [
     id: "offer-5",
     title: "شتاء جنيف الفاخر",
     description: "باقة شتوية تشمل الطيران والفندق الفاخر وتجربة التزلج مع مرشد.",
-    image: "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?w=800",
+    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800",
     discount: 22,
     validUntil: "حتى نهاية الشتاء",
     originalPrice: "8,500",
@@ -403,7 +403,7 @@ export const defaultOffers: OfferItem[] = [
     id: "offer-6",
     title: "مغامرة كيب تاون",
     description: "برنامج مغامرات يشمل السفاري والجبال مع إقامة مريحة.",
-    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
+    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800",
     discount: 18,
     validUntil: "حتى نهاية الربيع",
     originalPrice: "7,200",
@@ -445,7 +445,7 @@ export const defaultActivities: ActivityItem[] = [
     location: "البحر الأحمر",
     category: "أنشطة بحرية",
     price: "900",
-    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200",
+    image: "https://images.unsplash.com/photo-1519046904884-53103b34b206?w=1200",
   },
   {
     id: "activity-5",
@@ -453,7 +453,7 @@ export const defaultActivities: ActivityItem[] = [
     location: "الرياض",
     category: "ثقافة وفنون",
     price: "250",
-    image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1200",
+    image: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=1200",
   },
   {
     id: "activity-6",
@@ -461,7 +461,7 @@ export const defaultActivities: ActivityItem[] = [
     location: "المنطقة الشرقية",
     category: "مغامرات",
     price: "780",
-    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200",
+    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200",
   },
 ];
 
@@ -471,42 +471,42 @@ export const defaultArticles: ArticleItem[] = [
     title: "أفضل وقت لزيارة العُلا ولماذا يفضّلها عشاق الطبيعة",
     category: "سياحة السعودية",
     date: "فبراير 2026",
-    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200",
+    image: "https://images.unsplash.com/photo-1534080764596-47f3efd8e0d5?w=1200",
   },
   {
     id: "article-2",
     title: "دليل المسافر الذكي: كيف تختار الفندق المناسب لعائلتك؟",
     category: "نصائح السفر",
     date: "فبراير 2026",
-    image: "https://images.unsplash.com/photo-1501117716987-c8e1ecb210d6?w=1200",
+    image: "https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=1200",
   },
   {
     id: "article-3",
     title: "خطوات استخراج التأشيرة السياحية بسهولة للمسافرين السعوديين",
     category: "إجراءات السفر",
     date: "فبراير 2026",
-    image: "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?w=1200",
+    image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200",
   },
   {
     id: "article-4",
     title: "أبرز الوجهات العربية للعطلات القصيرة في نهاية الأسبوع",
     category: "وجهات قريبة",
     date: "فبراير 2026",
-    image: "https://images.unsplash.com/photo-1495195129352-a9d3c9469a46?w=1200",
+    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200",
   },
   {
     id: "article-5",
     title: "أفضل المدن الأوروبية المناسبة للعائلات السعودية",
     category: "وجهات عالمية",
     date: "فبراير 2026",
-    image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1200",
+    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200",
   },
   {
     id: "article-6",
     title: "قائمة تجهيزات السفر الذكية للموسم الشتوي",
     category: "نصائح السفر",
     date: "فبراير 2026",
-    image: "https://images.unsplash.com/photo-1513258496099-48168024aec0?w=1200",
+    image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200",
   },
 ];
 
@@ -520,7 +520,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "5 أيام",
     priceFrom: "2,600",
     description: "طبيعة خضراء، جبال خلابة، وأسواق شعبية تناسب العائلة.",
-    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200",
+    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200",
   },
   {
     id: "dest-2",
@@ -531,7 +531,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "4 أيام",
     priceFrom: "3,150",
     description: "مناظر بالونات الهواء وتجارب سياحية مميزة للزوجين.",
-    image: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=1200",
+    image: "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?w=1200",
   },
   {
     id: "dest-3",
@@ -542,7 +542,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "6 أيام",
     priceFrom: "6,900",
     description: "منتجعات فخمة على الماء وتجارب بحرية حصرية.",
-    image: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1200",
+    image: "https://images.unsplash.com/photo-1551244072-5d12893278ab?w=1200",
   },
   {
     id: "dest-4",
@@ -553,7 +553,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "3 أيام",
     priceFrom: "1,200",
     description: "تراث سعودي أصيل وتجارب حضارية ومعارض ثقافية.",
-    image: "https://images.unsplash.com/photo-1523987355523-c7b5b95cf7cf?w=1200",
+    image: "https://images.unsplash.com/photo-1512453995560-851157e9a028?w=1200",
   },
   {
     id: "dest-5",
@@ -564,7 +564,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "5 أيام",
     priceFrom: "3,400",
     description: "طبيعة جبلية وأسواق حديثة وأنشطة مناسبة للعائلة.",
-    image: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=1200",
+    image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200",
   },
   {
     id: "dest-6",
@@ -575,7 +575,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "4 أيام",
     priceFrom: "2,100",
     description: "خريف صلالة، شلالات وضباب وجولات طبيعية منعشة.",
-    image: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1200",
+    image: "https://images.unsplash.com/photo-1519046904884-53103b34b206?w=1200",
   },
   {
     id: "dest-7",
@@ -586,7 +586,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "3 أيام",
     priceFrom: "1,450",
     description: "مغامرات صحراوية ومواقع تراث عالمي وتجارب ثقافية حية.",
-    image: "https://images.unsplash.com/photo-1547234934-7b6dff7f1f48?w=1200",
+    image: "https://images.unsplash.com/photo-1534080764596-47f3efd8e0d5?w=1200",
   },
   {
     id: "dest-8",
@@ -597,7 +597,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "3 أيام",
     priceFrom: "980",
     description: "كورنيش ساحر وأسواق تاريخية وتجارب بحرية ممتعة.",
-    image: "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?w=1200",
+    image: "https://images.unsplash.com/photo-1518684079-3c830dcef090?w=1200",
   },
   {
     id: "dest-9",
@@ -608,7 +608,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "4 أيام",
     priceFrom: "2,350",
     description: "تجارب تسوق وترفيه ومطاعم عالمية تناسب العائلة.",
-    image: "https://images.unsplash.com/photo-1518684079-3c830dcef090?w=1200",
+    image: "https://images.unsplash.com/photo-1512453995560-851157e9a028?w=1200",
   },
   {
     id: "dest-10",
@@ -619,7 +619,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "3 أيام",
     priceFrom: "1,950",
     description: "متاحف عالمية وأسواق تقليدية وإطلالة بحرية أنيقة.",
-    image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200",
+    image: "https://images.unsplash.com/photo-1495195129352-a9d3c9469a46?w=1200",
   },
   {
     id: "dest-11",
@@ -630,7 +630,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "6 أيام",
     priceFrom: "4,750",
     description: "مدينة ثقافية مناسبة للدراسة والخدمات المتنوعة.",
-    image: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1200",
+    image: "https://images.unsplash.com/photo-1516585427167-9f4af9627851?w=1200",
   },
   {
     id: "dest-12",
@@ -722,13 +722,7 @@ export const defaultAirlines: AirlineItem[] = [
 ];
 
 export const defaultApiKeys: ApiKeyItem[] = [
-  {
-    id: "api-1",
-    name: "Amadeus API",
-    provider: "Amadeus",
-    key: "amadeus_live_xxxxx",
-    status: "enabled",
-  },
+  
 ];
 
 export const defaultUsers: ManagedUserItem[] = [
@@ -795,6 +789,7 @@ type CollectionKey =
 
 type CollectionConfig<T> = {
   table: string;
+  select?: string;
   fromDb: (row: Record<string, any>) => T;
   toDb: (item: T) => Record<string, any>;
 };
@@ -990,18 +985,17 @@ const collectionConfigs: Record<CollectionKey, CollectionConfig<any>> = {
   },
   apiKeys: {
     table: "api_keys",
+    select: "id, name, provider, status",
     fromDb: (row) => ({
       id: row.id,
       name: row.name ?? "",
       provider: row.provider ?? "",
-      key: row.key ?? "",
       status: row.status ?? "disabled",
     }),
     toDb: (item: ApiKeyItem) => ({
       id: item.id,
       name: item.name,
       provider: item.provider,
-      key: item.key,
       status: item.status,
     }),
   },
@@ -1066,7 +1060,9 @@ const fetchAdminCollection = async <K extends CollectionKey>(
 ): Promise<AdminData[K]> => {
   if (!isBrowser) return fallback;
   const config = collectionConfigs[key];
-  const { data, error } = await supabase.from(config.table).select("*");
+  const { data, error } = await supabase
+    .from(config.table)
+    .select(config.select ?? "*");
   if (error) return fallback;
   const mapped = (data || []).map(config.fromDb);
   return emptyOrFallback(mapped, fallback as any) as AdminData[K];

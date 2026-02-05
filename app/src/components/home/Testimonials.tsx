@@ -34,7 +34,7 @@ export function Testimonials() {
             آراء العملاء
           </span>
           <h2 className="text-3xl md:text-4xl font-bold mt-2">
-            ماذا يقول <span className="text-gradient">عملاؤنا</span>؟
+            ماذا يقول عملاؤنا؟
           </h2>
           <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
             نفخر بثقة عملائنا ونسعى دائماً لتقديم أفضل الخدمات

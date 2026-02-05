@@ -5,13 +5,14 @@ import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { defaultAirlines, defaultDestinations, useAdminCollection } from "@/data/adminStore";
 import { adminBenefitCards, popularDestinationsByRegion } from "@/data/content";
 import { ArrowLeft, MapPin, Sparkles, Star } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useCart } from "@/hooks/useCart";
 
 const tagStyles: Record<string, string> = {
   "شتوية": "bg-sky-100 text-sky-700",
   "صيفية": "bg-amber-100 text-amber-700",
   "رومانسية": "bg-rose-100 text-rose-700",
-  "فاخر": "bg-purple-100 text-purple-700",
+  "فاخر": "bg-amber-100 text-amber-700",
   "تراث": "bg-emerald-100 text-emerald-700",
   "عائلي": "bg-orange-100 text-orange-700",
 };
@@ -20,6 +21,17 @@ export default function Destinations() {
   const [activeTab, setActiveTab] = useState<"saudi" | "international" | "middleeast">("saudi");
   const destinations = useAdminCollection("destinations", defaultDestinations);
   const airlines = useAdminCollection("airlines", defaultAirlines);
+  const navigate = useNavigate();
+  const { addItem } = useCart();
+  const handleBook = (title?: string, tag?: string) => {
+    addItem({
+      id: `destination-${title ?? Date.now()}`,
+      title: title ?? "وجهة سياحية",
+      price: 0,
+      details: tag,
+    });
+    navigate("/cart");
+  };
 
   const destinationList = useMemo(() => {
     const fromAdmin = destinations
@@ -51,7 +63,7 @@ export default function Destinations() {
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             الوجهات السياحية
-            <span className="block mt-2 text-gradient">ألوان وتجارب لا تُنسى</span>
+            <span className="block mt-2 text-primary">ألوان وتجارب لا تُنسى</span>
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             اختر وجهتك حسب الموسم، واحصل على باقة شاملة للطيران والإقامة والأنشطة مع تنقلات مريحة.
@@ -119,13 +131,11 @@ export default function Destinations() {
             {airlines.map((airline) => (
               <div key={airline.id} className="bg-card rounded-xl px-4 py-3 shadow-card flex items-center gap-3">
                 {airline.logo && (
-                  <img
+                  <ImageWithFallback
                     src={airline.logo}
                     alt={airline.name}
                     className="w-20 h-8 object-contain"
-                    onError={(event) => {
-                      event.currentTarget.style.display = "none";
-                    }}
+                    fallbackClassName="w-20 h-8 object-contain bg-muted"
                   />
                 )}
                 <span className="text-sm font-semibold">{airline.name}</span>
@@ -183,7 +193,7 @@ export default function Destinations() {
                   <p className="text-sm text-muted-foreground mt-3">{dest.description}</p>
                   <div className="flex items-center justify-between mt-4">
                     <span className="text-sm text-muted-foreground">المدة: {dest.duration}</span>
-                    <Button variant="hero" size="sm">احجز الآن</Button>
+                  <Button variant="hero" size="sm" onClick={() => handleBook(dest.title, dest.tag)}>احجز الآن</Button>
                   </div>
                 </div>
               </div>

@@ -1,8 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Changa:wght@400;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Changa:wght@400;600;700&display=swap');
 
 @layer base {
   :root {
@@ -18,7 +18,8 @@
     --primary: 184 62% 35%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 267 62% 45%;
+    /* Secondary now uses the warm orange previously in secondary-text */
+    --secondary: 32 92% 58%;
     --secondary-foreground: 0 0% 100%;
     --secondary-text: 32 92% 58%;
 
@@ -69,7 +70,7 @@
     --primary: 184 55% 45%;
     --primary-foreground: 220 25% 10%;
 
-    --secondary: 268 70% 55%;
+    --secondary: 32 90% 60%;
     --secondary-foreground: 0 0% 100%;
     --secondary-text: 32 90% 60%;
 

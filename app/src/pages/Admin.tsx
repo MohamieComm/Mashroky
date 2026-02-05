@@ -26,6 +26,8 @@ import {
   MapPinned,
   Newspaper,
   PlayCircle,
+  CreditCard,
+  ShieldCheck,
 } from "lucide-react";
 
 type FieldType = "text" | "number" | "textarea" | "list" | "pairlist" | "select";
@@ -60,6 +62,7 @@ const sidebarItems = [
   { name: "خطوط الطيران", icon: Plane, id: "airlines" },
   { name: "API Keys", icon: Key, id: "api" },
   { name: "الصفحات", icon: FileText, id: "pages" },
+  { name: "المدفوعات", icon: CreditCard, id: "payments" },
   { name: "الإعدادات", icon: Settings, id: "settings" },
 ];
 
@@ -212,7 +215,6 @@ const sectionConfigs: Record<string, SectionConfig> = {
     fields: [
       { key: "name", label: "اسم المفتاح" },
       { key: "provider", label: "المزود" },
-      { key: "key", label: "المفتاح" },
       {
         key: "status",
         label: "الحالة",
@@ -309,7 +311,11 @@ export default function Admin() {
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [promoDraft, setPromoDraft] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [authFailed, setAuthFailed] = useState(false);
   const isPageLoading = authLoading || adminLoading;
+  const paymentProvider = (import.meta.env.VITE_PAYMENT_PROVIDER || "").toLowerCase();
+  const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
+  const moyasarPublicKey = import.meta.env.VITE_MOYASAR_PUBLISHABLE_KEY || "";
 
   const activeConfig = sectionConfigs[activeSection];
 
@@ -419,12 +425,31 @@ export default function Admin() {
     );
   }, [adminData, activeConfig, searchTerm]);
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!authLoading && !isAdmin) {
+        setAuthFailed(true);
+      }
+    }, 8000);
+    return () => clearTimeout(timeout);
+  }, [authLoading, isAdmin]);
+
   if (isPageLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted px-4">
         <div className="bg-card rounded-2xl p-10 shadow-card text-center max-w-lg">
           <h2 className="text-2xl font-bold mb-3">جاري التحقق من الصلاحيات</h2>
           <p className="text-muted-foreground">يرجى الانتظار لحظات...</p>
+          <div className="mt-6 flex justify-center gap-3">
+            <Button variant="outline" onClick={() => window.location.reload()}>
+              إعادة المحاولة
+            </Button>
+            {authFailed && (
+              <Button variant="ghost" onClick={() => navigate("/auth")}>
+                تسجيل الدخول
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -625,6 +650,63 @@ export default function Admin() {
                   >
                     حفظ الرابط
                   </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeSection === "payments" && (
+            <div className="space-y-6">
+              <div className="bg-card rounded-2xl p-8 shadow-card">
+                <div className="flex items-center gap-3 mb-4">
+                  <CreditCard className="w-6 h-6 text-primary" />
+                  <h2 className="text-2xl font-bold">لوحة المدفوعات</h2>
+                </div>
+                <p className="text-sm text-muted-foreground mb-6">
+                  إعدادات الدفع المباشر تُدار عبر مزود خارجي. تأكد من تهيئة المفاتيح العامة في ملف البيئة وعدم تخزين المفاتيح السرية في الواجهة.
+                </p>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="bg-muted rounded-2xl p-4">
+                    <p className="text-xs text-muted-foreground">المزود الحالي</p>
+                    <p className="text-lg font-semibold mt-2">
+                      {paymentProvider ? paymentProvider : "غير مهيأ"}
+                    </p>
+                  </div>
+                  <div className="bg-muted rounded-2xl p-4">
+                    <p className="text-xs text-muted-foreground">مفتاح Stripe العام</p>
+                    <p className="text-lg font-semibold mt-2">
+                      {stripePublicKey ? "موجود" : "غير موجود"}
+                    </p>
+                  </div>
+                  <div className="bg-muted rounded-2xl p-4">
+                    <p className="text-xs text-muted-foreground">مفتاح Moyasar العام</p>
+                    <p className="text-lg font-semibold mt-2">
+                      {moyasarPublicKey ? "موجود" : "غير موجود"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-card rounded-2xl p-6 shadow-card">
+                  <div className="flex items-center gap-3 mb-3">
+                    <ShieldCheck className="w-5 h-5 text-secondary" />
+                    <h3 className="text-lg font-bold">جاهزية الأمان</h3>
+                  </div>
+                  <ul className="text-sm text-muted-foreground space-y-2">
+                    <li>تأكد من تفعيل 3D Secure لدى مزود الدفع.</li>
+                    <li>استخدم Webhooks للتحقق من حالة الدفع من الخادم.</li>
+                    <li>لا تحفظ بيانات البطاقة في المتصفح أو قاعدة البيانات.</li>
+                  </ul>
+                </div>
+                <div className="bg-card rounded-2xl p-6 shadow-card">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Key className="w-5 h-5 text-secondary" />
+                    <h3 className="text-lg font-bold">المفاتيح والسرية</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    المفاتيح السرية يجب أن تبقى في الخادم فقط. يمكنك إدارة المفاتيح العامة من ملف البيئة وتحديثها بدون إعادة نشر قاعدة البيانات.
+                  </p>
                 </div>
               </div>
             </div>

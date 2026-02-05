@@ -1,10 +1,22 @@
 import { MapPin, Sparkles, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useCart } from "@/hooks/useCart";
 import { seasonalOffers } from "@/data/content";
 
 export function FeaturedDestinations() {
+  const navigate = useNavigate();
+  const { addItem } = useCart();
+  const handleBook = (offerTitle?: string, price?: string, details?: string) => {
+    addItem({
+      id: `seasonal-${offerTitle ?? Date.now()}`,
+      title: offerTitle ?? "عرض موسمي",
+      price: Number((price ?? "0").replace(/[^\\d.]/g, "")) || 0,
+      details,
+    });
+    navigate("/cart");
+  };
   return (
     <section className="py-20 bg-background">
       <div className="container mx-auto px-4">
@@ -15,7 +27,7 @@ export function FeaturedDestinations() {
               <span className="text-secondary font-semibold text-sm">عروض الموسم</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mt-2">
-              أفضل ستة عروض <span className="text-gradient">لأكثر الوجهات سياحة</span>
+              أفضل ستة عروض لأكثر الوجهات سياحة
             </h2>
             <p className="text-muted-foreground mt-3 max-w-xl">
               باقات شاملة للطيران والفنادق والأنشطة الترفيهية والمواصلات لهذا الموسم.
@@ -79,7 +91,11 @@ export function FeaturedDestinations() {
                   ))}
                 </div>
 
-                <Button variant="hero" className="w-full mt-5">
+                <Button
+                  variant="hero"
+                  className="w-full mt-5"
+                  onClick={() => handleBook(offer.title, offer.price, `${offer.location} • ${offer.duration}`)}
+                >
                   احجز الآن
                 </Button>
               </div>

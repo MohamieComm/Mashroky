@@ -25,12 +25,10 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAILS || "ibrahemest@outlook.sa,ish959@gmail.com")
-  .split(",")
-  .map((email) => email.trim().toLowerCase())
-  .filter(Boolean);
-
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const adminEmails =
+    (import.meta.env.VITE_ADMIN_EMAILS as string | undefined)?.split(",").map((e) => e.trim().toLowerCase()) ??
+    [];
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -48,29 +46,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq("user_id", sessionUser.id)
       .maybeSingle();
 
-    const shouldBeAdmin = Boolean(
-      sessionUser.email && ADMIN_EMAILS.includes(sessionUser.email.toLowerCase())
-    );
-
     if (profileData) {
-      if (shouldBeAdmin && profileData.role !== "admin") {
-        const { data: updated } = await supabase
-          .from("profiles")
-          .update({ role: "admin" })
-          .eq("user_id", sessionUser.id)
-          .select("*")
-          .maybeSingle();
-        setProfile(updated ?? profileData);
-        return;
-      }
       setProfile(profileData);
     } else {
+      const isAdminEmail = adminEmails.includes((sessionUser.email ?? "").toLowerCase());
       const { data: inserted, error: insertError } = await supabase
         .from("profiles")
         .insert({
           user_id: sessionUser.id,
           full_name: sessionUser.user_metadata?.full_name ?? null,
-          role: shouldBeAdmin ? "admin" : "user",
+          role: isAdminEmail ? "admin" : "user",
         })
         .select("*")
         .maybeSingle();
@@ -83,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           phone: null,
           avatar_url: null,
           address: null,
-          role: shouldBeAdmin ? "admin" : "user",
+          role: isAdminEmail ? "admin" : "user",
         });
         return;
       }
@@ -103,9 +88,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     };
 
+    const runWithTimeout = <T,>(p: Promise<T>, ms: number) => {
+      return Promise.race([
+        p,
+        new Promise<T>((_, rej) => setTimeout(() => rej(new Error("timeout")), ms)),
+      ]);
+    };
+
     const safeHydrate = async (sessionUser: User | null) => {
       try {
-        await hydrateUser(sessionUser);
+        // avoid hanging indefinitely if supabase call stalls
+        await runWithTimeout(hydrateUser(sessionUser), 5000);
       } catch (error) {
         console.error("Failed to hydrate auth profile", error);
         setProfile(null);
@@ -124,6 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      // ensure hydrate can't hang forever
       safeHydrate(session?.user ?? null).finally(() => stopLoading());
     });
 
@@ -149,17 +143,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     });
     if (!error && data.user) {
-      const shouldBeAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
       await supabase.from("profiles").upsert({
         user_id: data.user.id,
         full_name: fullName,
-        role: shouldBeAdmin ? "admin" : "user",
+        role: "user",
       });
     }
     return { error };
   };
 
   const signOut = async () => {
+    // optimistically clear local state first so UI updates immediately
+    setUser(null);
+    setSession(null);
+    setProfile(null);
+
     try {
       await supabase.auth.signOut({ scope: "local" });
     } catch (error) {
@@ -181,11 +179,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.warn("Failed to clear auth storage", error);
     }
-    setUser(null);
-    setSession(null);
-    setProfile(null);
+
     if (typeof window !== "undefined") {
-      window.location.assign("/auth");
+      // use replace to avoid leaving a history entry
+      window.location.replace("/auth");
     }
   };
 
@@ -204,7 +201,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     isAdmin:
       (profile?.role ?? "").toLowerCase() === "admin" ||
-      Boolean(user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase())),
+      (!!user && adminEmails.includes((user.email ?? "").toLowerCase())),
     signIn,
     signUp,
     signOut,
