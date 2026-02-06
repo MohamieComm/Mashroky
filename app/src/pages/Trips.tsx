@@ -197,7 +197,10 @@ export default function Trips() {
 
           {/* Flight Search Form Component */}
           <div className="max-w-6xl mx-auto">
-            <FlightSearchForm onSearch={handleFlightSearch} />
+            <FlightSearchForm
+              onSearch={handleFlightSearch}
+              airlineCodes={airlines.map((airline) => airline.code).filter(Boolean)}
+            />
           </div>
         </div>
       </section>

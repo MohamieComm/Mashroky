@@ -94,7 +94,10 @@ export async function searchFlights({ origin, destination, departureDate, adults
     currencyCode: 'SAR',
     max: 30,
   };
-  if (airline) params.includedAirlineCodes = airline;
+  const airlineCodes = Array.isArray(airline)
+    ? airline.filter(Boolean).join(',')
+    : String(airline || '').trim();
+  if (airlineCodes) params.includedAirlineCodes = airlineCodes;
   const response = await amadeusClient.shopping.flightOffersSearch.get(params);
   const result = response.result;
   const offers = result?.data || result || [];

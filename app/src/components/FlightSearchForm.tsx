@@ -57,6 +57,7 @@ export const AIRPORTS = [
 
 interface FlightSearchFormProps {
   onSearch?: (data: FlightSearchData) => void;
+  airlineCodes?: string[];
 }
 
 export interface FlightSearchData {
@@ -70,7 +71,7 @@ export interface FlightSearchData {
   airline?: string;
 }
 
-export function FlightSearchForm({ onSearch }: FlightSearchFormProps) {
+export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFormProps) {
   const [tripType, setTripType] = useState<"roundtrip" | "oneway">("roundtrip");
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
@@ -110,7 +111,9 @@ export function FlightSearchForm({ onSearch }: FlightSearchFormProps) {
     const controller = new AbortController();
     const loadAirlines = async () => {
       try {
-        const apiUrl = `${flightApiBaseUrl.replace(/\/$/, "")}/api/flights/airlines`;
+        const codes = airlineCodes.filter(Boolean).join(",");
+        const apiUrlBase = `${flightApiBaseUrl.replace(/\/$/, "")}/api/flights/airlines`;
+        const apiUrl = codes ? `${apiUrlBase}?codes=${encodeURIComponent(codes)}` : apiUrlBase;
         const res = await fetch(apiUrl, { signal: controller.signal });
         if (!res.ok) return;
         const data = await res.json();
@@ -131,7 +134,7 @@ export function FlightSearchForm({ onSearch }: FlightSearchFormProps) {
     };
     loadAirlines();
     return () => controller.abort();
-  }, [flightApiBaseUrl]);
+  }, [flightApiBaseUrl, airlineCodes]);
 
   const countryOptions = useMemo(
     () => Array.from(new Set(AIRPORTS.map((airport) => airport.country))),
