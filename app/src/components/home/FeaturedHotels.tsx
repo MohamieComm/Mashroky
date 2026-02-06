@@ -54,6 +54,7 @@ export function FeaturedHotels() {
                   src={offer.image}
                   alt={offer.title}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  fallbackQuery={`${offer.location} honeymoon`}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 to-transparent" />
                 <div className="absolute top-4 right-4 gold-gradient text-secondary-foreground text-xs font-semibold px-3 py-1 rounded-full">

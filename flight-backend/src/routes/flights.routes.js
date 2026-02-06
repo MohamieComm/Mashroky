@@ -4,11 +4,13 @@ import {
   priceAmadeus,
   bookAmadeus,
   bookDuffel,
+  listAirlines,
 } from '../controllers/flights.controller.js';
 
 const router = express.Router();
 
 router.post('/search', searchFlights);
+router.get('/airlines', listAirlines);
 router.post('/amadeus/price', priceAmadeus);
 router.post('/amadeus/book', bookAmadeus);
 router.post('/duffel/book', bookDuffel);

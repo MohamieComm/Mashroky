@@ -12,13 +12,18 @@ import {
 } from "lucide-react";
 import { stats } from "@/data/content";
 import { usePromoVideoUrl } from "@/data/adminStore";
+import { getMediaTypeFromUrl } from "@/lib/media";
+import { Link } from "react-router-dom";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 export function HeroSection() {
   const [searchType, setSearchType] = useState<"flights" | "hotels">("flights");
   const supabasePromoUrl = usePromoVideoUrl();
   const promoVideoUrl =
     (import.meta.env.VITE_PROMO_VIDEO_URL as string | undefined) || supabasePromoUrl;
-  const showVideo = Boolean(promoVideoUrl);
+  const promoMediaType = getMediaTypeFromUrl(promoVideoUrl);
+  const showVideo = promoMediaType === "video";
+  const showImage = promoMediaType === "image" || promoMediaType === "unknown";
 
   const searchLabel = useMemo(
     () => (searchType === "flights" ? "رحلات الطيران" : "الفنادق"),
@@ -58,9 +63,11 @@ export function HeroSection() {
               <Button variant="hero" size="lg" className="gap-2">
                 ابدأ رحلتك الآن
               </Button>
-              <Button variant="outline" size="lg" className="bg-primary-foreground/15 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/25">
-                تعرف على العروض
-              </Button>
+              <Link to="/seasons">
+                <Button variant="outline" size="lg" className="bg-primary-foreground/15 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/25">
+                  تعرف على العروض الموسمية
+                </Button>
+              </Link>
             </div>
 
             {/* Search Box */}
@@ -153,6 +160,25 @@ export function HeroSection() {
             <div className="relative rounded-2xl overflow-hidden bg-background/20 min-h-[260px] flex items-center justify-center">
               {showVideo ? (
                 <video className="w-full h-full object-cover" controls preload="metadata" src={promoVideoUrl} />
+              ) : showImage ? (
+                <Link to="/seasons" className="relative w-full h-full group">
+                  <ImageWithFallback
+                    src={promoVideoUrl}
+                    alt="إعلان مواسم"
+                    className="w-full h-full object-cover"
+                    fallbackQuery="عروض مواسم سفر"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent" />
+                  <div className="absolute bottom-4 right-4 left-4 flex items-center justify-between">
+                    <div className="text-primary-foreground">
+                      <p className="text-sm text-primary-foreground/80">عروض مواسم</p>
+                      <p className="text-lg font-semibold">اكتشف باقات رمضان والحج والصيف</p>
+                    </div>
+                    <span className="bg-secondary text-secondary-foreground px-4 py-2 rounded-full text-sm font-semibold">
+                      استكشف الآن
+                    </span>
+                  </div>
+                </Link>
               ) : (
                 <div className="flex flex-col items-center gap-3 text-primary-foreground/70 py-12">
                   <PlayCircle className="w-16 h-16 text-secondary" />

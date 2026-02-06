@@ -2,7 +2,7 @@ import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Trash2, CreditCard, ShieldCheck } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
-import { useMemo } from "react";
+import { useState } from "react";
 
 export default function Cart() {
   const { items, removeItem, clear, total } = useCart();
@@ -10,6 +10,49 @@ export default function Cart() {
   const subtotal = total;
   const discount = Math.floor(subtotal * 0.05);
   const finalTotal = Math.max(subtotal - discount, 0);
+  const [processing, setProcessing] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
+  const flightApiBaseUrl =
+    (import.meta.env.VITE_FLIGHT_API_URL as string | undefined) ||
+    "https://jubilant-hope-production-a334.up.railway.app";
+
+  const handleCheckout = async () => {
+    if (!hasItems || processing) return;
+    setProcessing(true);
+    setPaymentError("");
+    if (finalTotal <= 0) {
+      setPaymentError("قيمة الدفع يجب أن تكون أكبر من صفر.");
+      setProcessing(false);
+      return;
+    }
+    try {
+      const apiUrl = `${flightApiBaseUrl.replace(/\/$/, "")}/api/payments/create`;
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: finalTotal,
+          currency: "SAR",
+          description: "حجز عبر السلة",
+          returnUrl: window.location.origin,
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.error || "payment_failed");
+      }
+      const data = await res.json();
+      if (data.paymentUrl) {
+        window.location.href = data.paymentUrl;
+        return;
+      }
+      throw new Error("missing_payment_url");
+    } catch (error) {
+      setPaymentError("تعذر بدء عملية الدفع. يرجى المحاولة لاحقًا أو التواصل مع الدعم.");
+    } finally {
+      setProcessing(false);
+    }
+  };
 
   return (
     <Layout>
@@ -75,10 +118,18 @@ export default function Cart() {
                 <span>{finalTotal.toLocaleString()} ر.س</span>
               </div>
             </div>
-            <Button variant="hero" className="mt-6 w-full gap-2" disabled={!hasItems}>
+            <Button
+              variant="hero"
+              className="mt-6 w-full gap-2"
+              disabled={!hasItems || processing}
+              onClick={handleCheckout}
+            >
               <CreditCard className="w-5 h-5" />
-              المتابعة للدفع
+              {processing ? "جاري التحويل للدفع..." : "المتابعة للدفع"}
             </Button>
+            {paymentError && (
+              <p className="text-xs text-destructive mt-3">{paymentError}</p>
+            )}
             <div className="flex items-center gap-2 text-xs text-muted-foreground mt-4">
               <ShieldCheck className="w-4 h-4 text-primary" />
               الدفع آمن ومشفر عبر منصة ميسر.

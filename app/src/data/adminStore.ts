@@ -152,6 +152,16 @@ export type PageItem = {
   summary: string;
 };
 
+export type AdminSettings = {
+  promoVideoUrl: string;
+  appDownloadImageUrl: string;
+  appDownloadLink: string;
+  featuredImageUrl: string;
+  featuredTitle: string;
+  featuredDescription: string;
+  featuredLink: string;
+};
+
 export type AdminData = {
   flights: Flight[];
   hotels: HotelItem[];
@@ -165,6 +175,12 @@ export type AdminData = {
   users: ManagedUserItem[];
   pages: PageItem[];
   promoVideoUrl: string;
+  appDownloadImageUrl: string;
+  appDownloadLink: string;
+  featuredImageUrl: string;
+  featuredTitle: string;
+  featuredDescription: string;
+  featuredLink: string;
   seasons: SeasonOffer[];
 };
 
@@ -547,6 +563,34 @@ export const defaultArticles: ArticleItem[] = [
     date: "فبراير 2026",
     image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200",
   },
+  {
+    id: "article-7",
+    title: "اتجاهات السياحة العالمية في 2026: الاستدامة والرحلات القصيرة",
+    category: "أخبار عالمية",
+    date: "فبراير 2026",
+    image: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200",
+  },
+  {
+    id: "article-8",
+    title: "أفضل المدن الآسيوية المناسبة للعائلات السعودية",
+    category: "وجهات عالمية",
+    date: "فبراير 2026",
+    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200",
+  },
+  {
+    id: "article-9",
+    title: "دليل السفر في مواسم الذروة وكيف تتجنب ارتفاع الأسعار",
+    category: "إرشادات",
+    date: "فبراير 2026",
+    image: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1200",
+  },
+  {
+    id: "article-10",
+    title: "رحلات الكروز: تجربة بحرية تجمع الترفيه والاسترخاء",
+    category: "تجارب سفر",
+    date: "فبراير 2026",
+    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200",
+  },
 ];
 
 export const defaultDestinations: DestinationItem[] = [
@@ -559,7 +603,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "5 أيام",
     priceFrom: "2,600",
     description: "طبيعة خضراء، جبال خلابة، وأسواق شعبية تناسب العائلة.",
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200",
+    image: "https://source.unsplash.com/featured/?georgia,tbilisi,travel",
   },
   {
     id: "dest-2",
@@ -570,7 +614,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "4 أيام",
     priceFrom: "3,150",
     description: "مناظر بالونات الهواء وتجارب سياحية مميزة للزوجين.",
-    image: "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?w=1200",
+    image: "https://source.unsplash.com/featured/?cappadocia,balloons,travel",
   },
   {
     id: "dest-3",
@@ -581,7 +625,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "6 أيام",
     priceFrom: "6,900",
     description: "منتجعات فخمة على الماء وتجارب بحرية حصرية.",
-    image: "https://images.unsplash.com/photo-1551244072-5d12893278ab?w=1200",
+    image: "https://source.unsplash.com/featured/?maldives,beach,resort",
   },
   {
     id: "dest-4",
@@ -592,7 +636,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "3 أيام",
     priceFrom: "1,200",
     description: "تراث سعودي أصيل وتجارب حضارية ومعارض ثقافية.",
-    image: "https://images.unsplash.com/photo-1512453995560-851157e9a028?w=1200",
+    image: "https://source.unsplash.com/featured/?riyadh,diriyah,saudi",
   },
   {
     id: "dest-5",
@@ -603,7 +647,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "5 أيام",
     priceFrom: "3,400",
     description: "طبيعة جبلية وأسواق حديثة وأنشطة مناسبة للعائلة.",
-    image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200",
+    image: "https://source.unsplash.com/featured/?baku,azerbaijan,travel",
   },
   {
     id: "dest-6",
@@ -614,7 +658,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "4 أيام",
     priceFrom: "2,100",
     description: "خريف صلالة، شلالات وضباب وجولات طبيعية منعشة.",
-    image: "https://images.unsplash.com/photo-1519046904884-53103b34b206?w=1200",
+    image: "https://source.unsplash.com/featured/?salalah,oman,landscape",
   },
   {
     id: "dest-7",
@@ -625,7 +669,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "3 أيام",
     priceFrom: "1,450",
     description: "مغامرات صحراوية ومواقع تراث عالمي وتجارب ثقافية حية.",
-    image: "https://images.unsplash.com/photo-1534080764596-47f3efd8e0d5?w=1200",
+    image: "https://source.unsplash.com/featured/?alula,saudi,desert",
   },
   {
     id: "dest-8",
@@ -636,7 +680,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "3 أيام",
     priceFrom: "980",
     description: "كورنيش ساحر وأسواق تاريخية وتجارب بحرية ممتعة.",
-    image: "https://images.unsplash.com/photo-1518684079-3c830dcef090?w=1200",
+    image: "https://source.unsplash.com/featured/?jeddah,saudi,sea",
   },
   {
     id: "dest-9",
@@ -647,7 +691,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "4 أيام",
     priceFrom: "2,350",
     description: "تجارب تسوق وترفيه ومطاعم عالمية تناسب العائلة.",
-    image: "https://images.unsplash.com/photo-1512453995560-851157e9a028?w=1200",
+    image: "https://source.unsplash.com/featured/?dubai,skyline,travel",
   },
   {
     id: "dest-10",
@@ -658,7 +702,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "3 أيام",
     priceFrom: "1,950",
     description: "متاحف عالمية وأسواق تقليدية وإطلالة بحرية أنيقة.",
-    image: "https://images.unsplash.com/photo-1495195129352-a9d3c9469a46?w=1200",
+    image: "https://source.unsplash.com/featured/?doha,qatar,corniche",
   },
   {
     id: "dest-11",
@@ -669,7 +713,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "6 أيام",
     priceFrom: "4,750",
     description: "مدينة ثقافية مناسبة للدراسة والخدمات المتنوعة.",
-    image: "https://images.unsplash.com/photo-1516585427167-9f4af9627851?w=1200",
+    image: "https://source.unsplash.com/featured/?london,uk,travel",
   },
   {
     id: "dest-12",
@@ -680,7 +724,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "5 أيام",
     priceFrom: "4,200",
     description: "تجارب فنية ومطاعم راقية ومعالم تاريخية خلابة.",
-    image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1200",
+    image: "https://source.unsplash.com/featured/?paris,eiffel,travel",
   },
 ];
 
@@ -796,6 +840,16 @@ export const defaultPages: PageItem[] = [
   },
 ];
 
+export const defaultAdminSettings: AdminSettings = {
+  promoVideoUrl: "",
+  appDownloadImageUrl: "",
+  appDownloadLink: "",
+  featuredImageUrl: "",
+  featuredTitle: "",
+  featuredDescription: "",
+  featuredLink: "",
+};
+
 export const defaultAdminData: AdminData = {
   flights: defaultFlights,
   hotels: defaultHotels,
@@ -808,7 +862,14 @@ export const defaultAdminData: AdminData = {
   apiKeys: defaultApiKeys,
   users: defaultUsers,
   pages: defaultPages,
-  promoVideoUrl: "",
+  promoVideoUrl: defaultAdminSettings.promoVideoUrl,
+  appDownloadImageUrl: defaultAdminSettings.appDownloadImageUrl,
+  appDownloadLink: defaultAdminSettings.appDownloadLink,
+  featuredImageUrl: defaultAdminSettings.featuredImageUrl,
+  featuredTitle: defaultAdminSettings.featuredTitle,
+  featuredDescription: defaultAdminSettings.featuredDescription,
+  featuredLink: defaultAdminSettings.featuredLink,
+  seasons: defaultSeasons,
 };
 
 const isBrowser = typeof window !== "undefined";
@@ -824,7 +885,8 @@ type CollectionKey =
   | "airlines"
   | "apiKeys"
   | "users"
-  | "pages";
+  | "pages"
+  | "seasons";
 
 type CollectionConfig<T> = {
   table: string;
@@ -1070,28 +1132,68 @@ const collectionConfigs: Record<CollectionKey, CollectionConfig<any>> = {
       summary: item.summary,
     }),
   },
+  seasons: {
+    table: "seasons",
+    fromDb: (row) => ({
+      id: row.id,
+      title: row.title ?? "",
+      season: row.season ?? "ramadan",
+      description: row.description ?? "",
+      image: row.image ?? "",
+      price: row.price ?? "",
+      options: Array.isArray(row.options) ? row.options : [],
+    }),
+    toDb: (item: SeasonOffer) => ({
+      id: item.id,
+      title: item.title,
+      season: item.season,
+      description: item.description,
+      image: item.image,
+      price: item.price,
+      options: item.options,
+    }),
+  },
 };
 
 const emptyOrFallback = <T,>(items: T[] | null | undefined, fallback: T[]) =>
   Array.isArray(items) && items.length ? items : fallback;
 
-const fetchPromoVideoUrl = async (): Promise<string> => {
-  if (!isBrowser) return "";
-  const { data } = await supabase
+const fetchAdminSettings = async (): Promise<AdminSettings> => {
+  if (!isBrowser) return defaultAdminSettings;
+  const { data, error } = await supabase
     .from("admin_settings")
-    .select("promo_video_url, updated_at")
+    .select(
+      "promo_video_url, app_download_image_url, app_download_link, featured_image_url, featured_title, featured_description, featured_link, updated_at"
+    )
     .order("updated_at", { ascending: false })
     .limit(1);
-  return data?.[0]?.promo_video_url ?? "";
+  if (error) return defaultAdminSettings;
+  const row = data?.[0] ?? {};
+  return {
+    promoVideoUrl: row.promo_video_url ?? "",
+    appDownloadImageUrl: row.app_download_image_url ?? "",
+    appDownloadLink: row.app_download_link ?? "",
+    featuredImageUrl: row.featured_image_url ?? "",
+    featuredTitle: row.featured_title ?? "",
+    featuredDescription: row.featured_description ?? "",
+    featuredLink: row.featured_link ?? "",
+  };
 };
 
-export const savePromoVideoUrl = async (url: string, userId?: string | null) => {
+export const saveAdminSettings = async (settings: AdminSettings, userId?: string | null) => {
   await supabase.from("admin_settings").insert({
-    promo_video_url: url,
+    promo_video_url: settings.promoVideoUrl,
+    app_download_image_url: settings.appDownloadImageUrl,
+    app_download_link: settings.appDownloadLink,
+    featured_image_url: settings.featuredImageUrl,
+    featured_title: settings.featuredTitle,
+    featured_description: settings.featuredDescription,
+    featured_link: settings.featuredLink,
     updated_by: userId ?? null,
   });
   if (isBrowser) window.dispatchEvent(new Event("admin-data-updated"));
 };
+
 
 const fetchAdminCollection = async <K extends CollectionKey>(
   key: K,
@@ -1162,7 +1264,7 @@ export const useAdminData = () => {
       apiKeys,
       users,
       pages,
-      promoVideoUrl,
+      adminSettings,
       seasons,
     ] = await Promise.all([
       fetchAdminCollection("flights", defaultFlights),
@@ -1176,7 +1278,7 @@ export const useAdminData = () => {
       fetchAdminCollection("apiKeys", defaultApiKeys),
       fetchAdminCollection("users", defaultUsers),
       fetchAdminCollection("pages", defaultPages),
-      fetchPromoVideoUrl(),
+      fetchAdminSettings(),
       fetchAdminCollection("seasons", defaultSeasons),
     ]);
 
@@ -1192,7 +1294,7 @@ export const useAdminData = () => {
       apiKeys,
       users,
       pages,
-      promoVideoUrl,
+      ...adminSettings,
       seasons,
     });
     setLoading(false);
@@ -1240,9 +1342,26 @@ export const useAdminData = () => {
     if (isBrowser) window.dispatchEvent(new Event("admin-data-updated"));
   };
 
+  const updateAdminSettings = async (
+    updates: Partial<AdminSettings>,
+    userId?: string | null
+  ) => {
+    const next: AdminSettings = {
+      promoVideoUrl: data.promoVideoUrl,
+      appDownloadImageUrl: data.appDownloadImageUrl,
+      appDownloadLink: data.appDownloadLink,
+      featuredImageUrl: data.featuredImageUrl,
+      featuredTitle: data.featuredTitle,
+      featuredDescription: data.featuredDescription,
+      featuredLink: data.featuredLink,
+      ...updates,
+    };
+    await saveAdminSettings(next, userId);
+    setData((prev) => ({ ...prev, ...next }));
+  };
+
   const updatePromoVideoUrl = async (url: string, userId?: string | null) => {
-    await savePromoVideoUrl(url, userId);
-    setData((prev) => ({ ...prev, promoVideoUrl: url }));
+    await updateAdminSettings({ promoVideoUrl: url }, userId);
   };
 
   return {
@@ -1252,17 +1371,18 @@ export const useAdminData = () => {
     upsertItem,
     deleteItem,
     updatePromoVideoUrl,
+    updateAdminSettings,
   };
 };
 
-export const usePromoVideoUrl = () => {
-  const [url, setUrl] = useState("");
+export const useAdminSettings = () => {
+  const [settings, setSettings] = useState<AdminSettings>(defaultAdminSettings);
 
   useEffect(() => {
     let active = true;
     const load = async () => {
-      const value = await fetchPromoVideoUrl();
-      if (active) setUrl(value);
+      const value = await fetchAdminSettings();
+      if (active) setSettings(value);
     };
     load();
     const handleUpdate = () => load();
@@ -1273,7 +1393,12 @@ export const usePromoVideoUrl = () => {
     };
   }, []);
 
-  return url;
+  return settings;
+};
+
+export const usePromoVideoUrl = () => {
+  const settings = useAdminSettings();
+  return settings.promoVideoUrl;
 };
 
 export const getPromoVideoUrl = () => "";

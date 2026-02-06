@@ -3,6 +3,19 @@ import * as skyscannerService from '../services/skyscanner.service.js';
 import * as duffelService from '../services/duffel.service.js';
 import { createMockMoyasarPayment } from '../services/moyasar.service.js';
 
+const DEFAULT_AIRLINE_CODES = [
+  'SV',
+  'EK',
+  'FZ',
+  'XY',
+  'MS',
+  'TK',
+  'QR',
+  'LH',
+  'BA',
+  'UA',
+];
+
 export async function searchFlights(req, res, next) {
   try {
     const { provider = 'amadeus', ...params } = req.body || {};
@@ -19,6 +32,17 @@ export async function searchFlights(req, res, next) {
       results = [...a, ...s, ...d];
     } else return res.status(400).json({ error: 'unknown_provider' });
 
+    res.json({ results });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listAirlines(req, res, next) {
+  try {
+    const codesParam = String(req.query.codes || '').trim();
+    const codes = codesParam || DEFAULT_AIRLINE_CODES.join(',');
+    const results = await amadeusService.listAirlines({ codes });
     res.json({ results });
   } catch (err) {
     next(err);

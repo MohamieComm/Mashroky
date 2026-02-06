@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -36,7 +36,7 @@ export const AIRPORTS = [
   { code: "RUH", city: "الرياض", country: "السعودية", region: "saudi" },
   { code: "JED", city: "جدة", country: "السعودية", region: "saudi" },
   { code: "DMM", city: "الدمام", country: "السعودية", region: "saudi" },
-  { code: "ABV", city: "أبها", country: "السعودية", region: "saudi" },
+  { code: "AHB", city: "أبها", country: "السعودية", region: "saudi" },
   { code: "TIF", city: "الطائف", country: "السعودية", region: "saudi" },
   
   // الإمارات
@@ -74,11 +74,17 @@ export function FlightSearchForm({ onSearch }: FlightSearchFormProps) {
   const [tripType, setTripType] = useState<"roundtrip" | "oneway">("roundtrip");
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
+  const [originCountry, setOriginCountry] = useState("all");
+  const [destinationCountry, setDestinationCountry] = useState("all");
   const [departureDate, setDepartureDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
   const [passengers, setPassengers] = useState("1");
   const [cabinClass, setCabinClass] = useState<"economy" | "business" | "first">("economy");
-  const [selectedAirline, setSelectedAirline] = useState("");
+  const [selectedAirline, setSelectedAirline] = useState("all");
+  const [airlines, setAirlines] = useState(AIRLINES);
+  const flightApiBaseUrl =
+    (import.meta.env.VITE_FLIGHT_API_URL as string | undefined) ||
+    "https://jubilant-hope-production-a334.up.railway.app";
 
   const handleSearch = () => {
     if (!origin || !destination || !departureDate) {
@@ -94,16 +100,65 @@ export function FlightSearchForm({ onSearch }: FlightSearchFormProps) {
       returnDate: tripType === "roundtrip" ? returnDate : undefined,
       passengers: parseInt(passengers),
       cabinClass,
-      airline: selectedAirline || undefined,
+      airline: selectedAirline !== "all" ? selectedAirline : undefined,
     };
 
     onSearch?.(searchData);
   };
 
-  const domesticAirports = useMemo(
-    () => AIRPORTS.filter((a) => a.region === "saudi"),
+  useEffect(() => {
+    const controller = new AbortController();
+    const loadAirlines = async () => {
+      try {
+        const apiUrl = `${flightApiBaseUrl.replace(/\/$/, "")}/api/flights/airlines`;
+        const res = await fetch(apiUrl, { signal: controller.signal });
+        if (!res.ok) return;
+        const data = await res.json();
+        const list = Array.isArray(data.results) ? data.results : Array.isArray(data.airlines) ? data.airlines : [];
+        if (list.length) {
+          setAirlines(
+            list.map((item: any) => ({
+              code: item.code || item.iataCode || item.iata || item.icaoCode || item.icao || "",
+              name: item.name || item.commonName || item.businessName || item.airlineName || "",
+              country: item.country || "",
+            }))
+            .filter((item: any) => item.code && item.name)
+          );
+        }
+      } catch {
+        // keep fallback list
+      }
+    };
+    loadAirlines();
+    return () => controller.abort();
+  }, [flightApiBaseUrl]);
+
+  const countryOptions = useMemo(
+    () => Array.from(new Set(AIRPORTS.map((airport) => airport.country))),
     []
   );
+
+  const originAirports = useMemo(() => {
+    if (originCountry === "all") return AIRPORTS;
+    return AIRPORTS.filter((airport) => airport.country === originCountry);
+  }, [originCountry]);
+
+  const destinationAirports = useMemo(() => {
+    if (destinationCountry === "all") return AIRPORTS;
+    return AIRPORTS.filter((airport) => airport.country === destinationCountry);
+  }, [destinationCountry]);
+
+  useEffect(() => {
+    if (origin && !originAirports.find((airport) => airport.code === origin)) {
+      setOrigin("");
+    }
+  }, [origin, originAirports]);
+
+  useEffect(() => {
+    if (destination && !destinationAirports.find((airport) => airport.code === destination)) {
+      setDestination("");
+    }
+  }, [destination, destinationAirports]);
 
   return (
     <div className="bg-card rounded-2xl p-6 shadow-hover max-w-6xl mx-auto">
@@ -133,18 +188,35 @@ export function FlightSearchForm({ onSearch }: FlightSearchFormProps) {
         </button>
       </div>
 
-      {/* Search Fields Grid */}
+      {/* Country & City Selection */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {/* Origin Airport */}
         <div>
-          <label className="block text-sm font-semibold mb-2 text-foreground">من أين؟</label>
+          <label className="block text-sm font-semibold mb-2 text-foreground">دولة المغادرة</label>
+          <Select value={originCountry} onValueChange={setOriginCountry}>
+            <SelectTrigger className="bg-muted border-0 h-12">
+              <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
+              <SelectValue placeholder="اختر الدولة" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">كل الدول</SelectItem>
+              {countryOptions.map((country) => (
+                <SelectItem key={country} value={country}>
+                  {country}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold mb-2 text-foreground">مدينة المغادرة</label>
           <Select value={origin} onValueChange={setOrigin}>
             <SelectTrigger className="bg-muted border-0 h-12">
               <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
-              <SelectValue placeholder="اختر المطار" />
+              <SelectValue placeholder="اختر المدينة" />
             </SelectTrigger>
             <SelectContent>
-              {AIRPORTS.map((airport) => (
+              {originAirports.map((airport) => (
                 <SelectItem key={airport.code} value={airport.code}>
                   {airport.city} ({airport.code})
                 </SelectItem>
@@ -153,16 +225,33 @@ export function FlightSearchForm({ onSearch }: FlightSearchFormProps) {
           </Select>
         </div>
 
-        {/* Destination Airport */}
         <div>
-          <label className="block text-sm font-semibold mb-2 text-foreground">إلى أين؟</label>
+          <label className="block text-sm font-semibold mb-2 text-foreground">دولة الوصول</label>
+          <Select value={destinationCountry} onValueChange={setDestinationCountry}>
+            <SelectTrigger className="bg-muted border-0 h-12">
+              <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
+              <SelectValue placeholder="اختر الدولة" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">كل الدول</SelectItem>
+              {countryOptions.map((country) => (
+                <SelectItem key={country} value={country}>
+                  {country}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold mb-2 text-foreground">مدينة الوصول</label>
           <Select value={destination} onValueChange={setDestination}>
             <SelectTrigger className="bg-muted border-0 h-12">
               <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
-              <SelectValue placeholder="اختر الوجهة" />
+              <SelectValue placeholder="اختر المدينة" />
             </SelectTrigger>
             <SelectContent>
-              {AIRPORTS.map((airport) => (
+              {destinationAirports.map((airport) => (
                 <SelectItem key={airport.code} value={airport.code}>
                   {airport.city} ({airport.code})
                 </SelectItem>
@@ -170,8 +259,10 @@ export function FlightSearchForm({ onSearch }: FlightSearchFormProps) {
             </SelectContent>
           </Select>
         </div>
+      </div>
 
-        {/* Departure Date */}
+      {/* Dates */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-6">
         <div>
           <label className="block text-sm font-semibold mb-2 text-foreground">تاريخ الذهاب</label>
           <div className="relative">
@@ -185,21 +276,21 @@ export function FlightSearchForm({ onSearch }: FlightSearchFormProps) {
           </div>
         </div>
 
-        {/* Return Date (if roundtrip) */}
-        {tripType === "roundtrip" && (
-          <div>
-            <label className="block text-sm font-semibold mb-2 text-foreground">تاريخ العودة</label>
-            <div className="relative">
-              <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
-              <Input
-                type="date"
-                value={returnDate}
-                onChange={(e) => setReturnDate(e.target.value)}
-                className="pr-10 h-12 bg-muted border-0"
-              />
-            </div>
+        <div>
+          <label className="block text-sm font-semibold mb-2 text-foreground">تاريخ العودة</label>
+          <div className="relative">
+            <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+            <Input
+              type="date"
+              value={tripType === "roundtrip" ? returnDate : ""}
+              onChange={(e) => {
+                if (tripType === "roundtrip") setReturnDate(e.target.value);
+              }}
+              disabled={tripType !== "roundtrip"}
+              className="pr-10 h-12 bg-muted border-0"
+            />
           </div>
-        )}
+        </div>
       </div>
 
       {/* Second Row - Passengers, Class, Airline */}
@@ -247,8 +338,8 @@ export function FlightSearchForm({ onSearch }: FlightSearchFormProps) {
               <SelectValue placeholder="الكل" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">جميع الخطوط</SelectItem>
-              {AIRLINES.map((airline) => (
+              <SelectItem value="all">جميع الخطوط</SelectItem>
+              {airlines.map((airline) => (
                 <SelectItem key={airline.code} value={airline.code}>
                   {airline.name} ({airline.code})
                 </SelectItem>

@@ -42,6 +42,7 @@ export function LatestArticles() {
                   src={article.image}
                   alt={article.title}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  fallbackQuery={`${article.title} travel`}
                 />
                 <div className="absolute top-4 right-4 bg-card/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold text-primary">
                   {article.category}

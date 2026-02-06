@@ -85,18 +85,33 @@ function mapAmadeusOrderToDTO(order) {
   };
 }
 
-export async function searchFlights({ origin, destination, departureDate, adults = 1 }) {
-  const response = await amadeusClient.shopping.flightOffersSearch.get({
+export async function searchFlights({ origin, destination, departureDate, adults = 1, airline }) {
+  const params = {
     originLocationCode: origin,
     destinationLocationCode: destination,
     departureDate,
     adults: String(adults),
-    currencyCode: 'USD',
+    currencyCode: 'SAR',
     max: 30,
-  });
+  };
+  if (airline) params.includedAirlineCodes = airline;
+  const response = await amadeusClient.shopping.flightOffersSearch.get(params);
   const result = response.result;
   const offers = result?.data || result || [];
   return offers.map(mapAmadeusOfferToDTO);
+}
+
+export async function listAirlines({ codes }) {
+  if (!codes) return [];
+  const response = await amadeusClient.referenceData.airlines.get({
+    airlineCodes: codes,
+  });
+  const result = response.result;
+  const list = result?.data || result || [];
+  return list.map((item) => ({
+    code: item.iataCode || item.icaoCode || item.airlineCode || item.code,
+    name: item.commonName || item.businessName || item.name || item.airlineName,
+  }));
 }
 
 export async function priceFlights({ flightOffers }) {

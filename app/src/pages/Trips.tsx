@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { ServiceCard } from "@/components/ServiceCard";
 import { 
   Plane, 
   Clock, 
@@ -10,9 +11,17 @@ import {
   Hotel,
   Car,
   Camera,
-  FileText
+  FileText,
+  CalendarCheck,
+  Smartphone
 } from "lucide-react";
-import { defaultAirlines, defaultDestinations, defaultFlights, useAdminCollection } from "@/data/adminStore";
+import {
+  defaultAirlines,
+  defaultDestinations,
+  defaultFlights,
+  useAdminCollection,
+  useAdminSettings,
+} from "@/data/adminStore";
 import { useNavigate } from "react-router-dom";
 import { adminBenefitCards, popularDestinationsByRegion } from "@/data/content";
 import { useCart } from "@/hooks/useCart";
@@ -34,41 +43,82 @@ const ticketDetails = [
 
 
 const additionalServices = [
-  { icon: Hotel, name: "حجز فندق", description: "أفضل الفنادق بأسعار مميزة" },
-  { icon: Car, name: "تأجير سيارة", description: "سيارات حديثة مع سائق" },
-  { icon: Camera, name: "جولات سياحية", description: "اكتشف أجمل المعالم" },
-  { icon: FileText, name: "خدمات الفيزا", description: "مساعدة في إجراءات السفر" },
+  {
+    icon: Hotel,
+    name: "حجز فندق",
+    description: "أفضل الفنادق بأسعار مميزة مع خيارات مرنة.",
+    details: ["فنادق 3-5 نجوم حسب الميزانية.", "خيارات إفطار ونقل من المطار."],
+    price: "350",
+  },
+  {
+    icon: Car,
+    name: "تأجير سيارة",
+    description: "سيارات حديثة مع أو بدون سائق.",
+    details: ["سائق خاص عند الطلب.", "خيارات يومية أو أسبوعية."],
+    price: "220",
+  },
+  {
+    icon: Camera,
+    name: "جولات سياحية",
+    description: "اكتشف أجمل المعالم مع مرشدين معتمدين.",
+    details: ["جولات يومية خاصة أو جماعية.", "برامج مناسبة للعائلة."],
+    price: "180",
+  },
+  {
+    icon: FileText,
+    name: "خدمات الفيزا",
+    description: "مساعدة في إجراءات السفر والتأشيرات.",
+    details: ["متابعة المستندات خطوة بخطوة.", "تنبيه بالمواعيد والمتطلبات."],
+    price: "120",
+  },
 ];
 
+const benefitIcons: Record<string, typeof Plane> = {
+  checkin: FileText,
+  bookings: CalendarCheck,
+  app: Smartphone,
+};
+
 export default function Trips() {
-      // Fallback دائم في الصفحة
-      const alwaysVisible = (
-        <div style={{textAlign:'center',marginTop:'100px'}}>
-          <img src="/logo.png" alt="مشروك" style={{width:'120px',marginBottom:'24px'}} />
-          <h2 style={{fontSize:'2rem',color:'#e11d48'}}>قسم الرحلات</h2>
-          <p style={{color:'#555',marginTop:'16px'}}>ابدأ البحث عن رحلتك من خلال النموذج أعلاه.<br/>إذا لم يظهر النموذج أو النتائج، يرجى تحديث الصفحة أو التواصل مع الدعم.</p>
-        </div>
-      );
-    // Fallback إذا فشل كل شيء
-    if (typeof Layout !== "function") {
-      return <div style={{textAlign:'center',marginTop:'100px',fontSize:'2rem',color:'#e11d48'}}>حدث خطأ في تحميل الصفحة. يرجى تحديث الصفحة أو التواصل مع الدعم.</div>;
-    }
   const navigate = useNavigate();
   const [destinationTab, setDestinationTab] = useState<"saudi" | "international" | "middleeast">("saudi");
   const flights = useAdminCollection("flights", defaultFlights);
   const destinations = useAdminCollection("destinations", defaultDestinations);
   const airlines = useAdminCollection("airlines", defaultAirlines);
+  const { appDownloadLink } = useAdminSettings();
   const { addItem } = useCart();
+  const flightApiBaseUrl =
+    (import.meta.env.VITE_FLIGHT_API_URL as string | undefined) ||
+    "https://jubilant-hope-production-a334.up.railway.app";
 
-  const handleBook = (flight?: { id: string; from: string; to: string; price: number; duration: string }) => {
+  const handleBook = (flight?: {
+    id: string;
+    from: string;
+    to: string;
+    price: number | string;
+    duration: string;
+    image?: string | null;
+  }) => {
     if (flight) {
       addItem({
         id: `flight-${flight.id}-${Date.now()}`,
         title: `${flight.from} → ${flight.to}`,
-        price: flight.price,
+        price: Number(String(flight.price).replace(/[^\d.]/g, "")) || 0,
         details: flight.duration,
+        image: flight.image,
       });
     }
+    navigate("/cart");
+  };
+
+  const handleServiceAdd = (service: { name: string; description: string; price: string }) => {
+    const serviceDetails = additionalServices.find((item) => item.name === service.name)?.details || [];
+    addItem({
+      id: `service-${service.name}-${Date.now()}`,
+      title: service.name,
+      price: Number(String(service.price).replace(/[^\d.]/g, "")) || 0,
+      details: serviceDetails.length ? `${service.description} • ${serviceDetails.join("، ")}` : service.description,
+    });
     navigate("/cart");
   };
 
@@ -89,7 +139,8 @@ export default function Trips() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("https://jubilant-hope-production-a334.up.railway.app/api/flights/search", {
+      const apiUrl = `${flightApiBaseUrl.replace(/\/$/, "")}/api/flights/search`;
+      const res = await fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -97,12 +148,16 @@ export default function Trips() {
           origin: searchData.origin,
           destination: searchData.destination,
           departureDate: searchData.departureDate,
-          adults: searchData.passengers,
+          adults: Number(searchData.passengers) || 1,
           airline: searchData.airline || undefined,
         }),
       });
+      if (!res.ok) {
+        const errorBody = await res.json().catch(() => ({}));
+        throw new Error(errorBody?.error || "flight_search_failed");
+      }
       const data = await res.json();
-      setFlightResults(data.results || []);
+      setFlightResults(Array.isArray(data.results) ? data.results : []);
     } catch (err) {
       setError("فشل جلب الرحلات. تأكد من الاتصال بالخادم.");
     }
@@ -128,7 +183,6 @@ export default function Trips() {
 
   return (
     <Layout>
-      {alwaysVisible}
       {/* Hero */}
       <section className="hero-gradient py-20">
         <div className="container mx-auto px-4">
@@ -155,19 +209,41 @@ export default function Trips() {
           {error && <div className="text-center text-destructive text-lg">{error}</div>}
           {!loading && flightResults.length > 0 && (
             <div className="grid md:grid-cols-2 gap-6 mt-6">
-              {flightResults.map((offer, idx) => (
-                <div key={offer.providerOfferId || idx} className="bg-card rounded-2xl p-6 shadow-card">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Plane className="w-5 h-5 text-primary" />
-                    <span className="font-bold text-lg">{offer.slices?.[0]?.origin} → {offer.slices?.[0]?.destination}</span>
+              {flightResults.map((offer, idx) => {
+                const firstSlice = Array.isArray(offer.slices?.[0]) ? offer.slices[0] : [];
+                const firstSegment = firstSlice[0] || {};
+                const lastSegment = firstSlice[firstSlice.length - 1] || {};
+                const origin = firstSegment.origin || "";
+                const destination = lastSegment.destination || "";
+                const carrier = firstSegment.marketingCarrier || "";
+                const durationMinutes = firstSegment.durationMinutes ?? 0;
+                return (
+                  <div key={offer.providerOfferId || idx} className="bg-card rounded-2xl p-6 shadow-card">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Plane className="w-5 h-5 text-primary" />
+                      <span className="font-bold text-lg">{origin} → {destination}</span>
+                    </div>
+                    <div className="mb-2">رقم الرحلة: {offer.providerOfferId}</div>
+                    <div className="mb-2">السعر: {offer.pricing?.total} {offer.pricing?.currency}</div>
+                    <div className="mb-2">الدرجة: {offer.cabins?.join("، ")}</div>
+                    <div className="mb-2">شركة الطيران: {carrier}</div>
+                    <Button
+                      variant="hero"
+                      onClick={() =>
+                        handleBook({
+                          id: offer.providerOfferId,
+                          from: origin,
+                          to: destination,
+                          price: offer.pricing?.total,
+                          duration: `${durationMinutes} دقيقة`,
+                        })
+                      }
+                    >
+                      احجز الآن
+                    </Button>
                   </div>
-                  <div className="mb-2">رقم الرحلة: {offer.providerOfferId}</div>
-                  <div className="mb-2">السعر: {offer.pricing?.total} {offer.pricing?.currency}</div>
-                  <div className="mb-2">الدرجة: {offer.cabins?.join("، ")}</div>
-                  <div className="mb-2">شركة الطيران: {offer.slices?.[0]?.marketingCarrier}</div>
-                  <Button variant="hero" onClick={() => handleBook({ id: offer.providerOfferId, from: offer.slices?.[0]?.origin, to: offer.slices?.[0]?.destination, price: offer.pricing?.total, duration: offer.slices?.[0]?.durationMinutes })}>احجز الآن</Button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
           {!loading && flightResults.length === 0 && !error && (
@@ -238,14 +314,13 @@ export default function Trips() {
                 key={airline.id}
                 className="bg-card rounded-xl px-4 py-3 shadow-card flex items-center gap-3"
               >
-                {airline.logo && (
-                  <ImageWithFallback
-                    src={airline.logo}
-                    alt={airline.name}
-                    className="w-20 h-8 object-contain"
-                    fallbackClassName="w-20 h-8 object-contain bg-muted"
-                  />
-                )}
+                <ImageWithFallback
+                  src={airline.logo}
+                  alt={airline.name}
+                  className="w-20 h-8 object-contain"
+                  fallbackClassName="w-20 h-8 object-contain bg-muted"
+                  fallbackSrc="/airline-placeholder.svg"
+                />
                 <div className="text-sm font-semibold">{airline.name}</div>
               </div>
             ))}
@@ -272,6 +347,7 @@ export default function Trips() {
                       src={flight.image}
                       alt={`${flight.from} إلى ${flight.to}`}
                       className="w-full h-full object-cover"
+                      fallbackQuery={`${flight.from} ${flight.to} سفر`}
                     />
                   </div>
 
@@ -329,11 +405,24 @@ export default function Trips() {
             {adminBenefitCards.map((item, index) => (
               <div
                 key={item.title}
-                className="bg-card rounded-2xl p-6 shadow-card animate-fade-up"
+                className="animate-fade-up"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <h4 className="text-lg font-bold mb-2">{item.title}</h4>
-                <p className="text-sm text-muted-foreground">{item.description}</p>
+                {(() => {
+                  const resolvedLink =
+                    item.id === "app" && appDownloadLink ? appDownloadLink : item.ctaLink;
+                  const Icon = benefitIcons[item.id] ?? Star;
+                  return (
+                <ServiceCard
+                  title={item.title}
+                  description={item.description}
+                  details={item.details}
+                  ctaLabel={item.ctaLabel}
+                  ctaLink={resolvedLink}
+                  icon={<Icon className="w-6 h-6" />}
+                />
+                  );
+                })()}
               </div>
             ))}
           </div>
@@ -352,14 +441,18 @@ export default function Trips() {
               return (
                 <div
                   key={service.name}
-                  className="bg-card rounded-2xl p-6 text-center shadow-card hover:shadow-hover transition-all duration-300 cursor-pointer group animate-fade-up"
+                  className="animate-fade-up"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <div className="w-16 h-16 hero-gradient rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                    <Icon className="w-8 h-8 text-primary-foreground" />
-                  </div>
-                  <h3 className="font-bold mb-2">{service.name}</h3>
-                  <p className="text-sm text-muted-foreground">{service.description}</p>
+                  <ServiceCard
+                    title={service.name}
+                    description={service.description}
+                    details={service.details}
+                    ctaLabel="أضف للسلة"
+                    onCta={() => handleServiceAdd(service)}
+                    icon={<Icon className="w-7 h-7" />}
+                    className="text-center"
+                  />
                 </div>
               );
             })}
@@ -411,8 +504,36 @@ export default function Trips() {
                 </div>
               </div>
               <div className="mt-6 flex flex-col gap-3">
-                <Button variant="outline" className="w-full">إضافة للسلة</Button>
-                <Button variant="hero" className="w-full">الدفع المباشر</Button>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() =>
+                    handleBook({
+                      id: "offer-bundle",
+                      from: "عرض متكامل",
+                      to: "رحلتك",
+                      price: flights[0]?.price ?? 0,
+                      duration: "خدمات إضافية للطيران والفندق",
+                    })
+                  }
+                >
+                  إضافة للسلة
+                </Button>
+                <Button
+                  variant="hero"
+                  className="w-full"
+                  onClick={() =>
+                    handleBook({
+                      id: "offer-checkout",
+                      from: "عرض متكامل",
+                      to: "رحلتك",
+                      price: flights[0]?.price ?? 0,
+                      duration: "خدمات إضافية للطيران والفندق",
+                    })
+                  }
+                >
+                  الدفع المباشر
+                </Button>
               </div>
             </div>
           </div>

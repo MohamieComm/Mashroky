@@ -1,8 +1,8 @@
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
-import { MapPin, Star } from "lucide-react";
-import { saudiHighlights, saudiHeritage } from "@/data/content";
+import { CalendarDays, MapPin, Star } from "lucide-react";
+import { saudiHighlights, saudiHeritage, saudiMegaEvents, saudiTourismTopics } from "@/data/content";
 
 export default function Saudi() {
   return (
@@ -14,7 +14,7 @@ export default function Saudi() {
             اكتشف جمال المملكة
           </h1>
           <p className="text-primary-foreground/80 mt-4 max-w-2xl mx-auto">
-            وجهات متنوعة تجمع بين التراث العريق والطبيعة الخلابة والمشاريع السياحية الحديثة.
+            وجهات متنوعة تجمع بين التراث العريق والطبيعة الخلابة والمشاريع السياحية الحديثة، مع فعاليات عالمية قادمة.
           </p>
         </div>
       </section>
@@ -23,15 +23,18 @@ export default function Saudi() {
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-10">
             <div className="space-y-6">
-              <div className="bg-card rounded-2xl p-8 shadow-card">
-                <h2 className="text-2xl font-bold mb-4">لماذا السعودية؟</h2>
-                <ul className="space-y-3 text-muted-foreground">
-                  <li>• تنوع جغرافي من الشواطئ إلى الجبال والصحارى.</li>
-                  <li>• مواقع تاريخية مسجلة ضمن التراث العالمي.</li>
-                  <li>• تجارب ثقافية وأسواق شعبية ومطابخ محلية مميزة.</li>
-                  <li>• مواسم وفعاليات على مدار العام تناسب العائلات والأصدقاء.</li>
-                </ul>
-              </div>
+              {saudiTourismTopics.map((topic) => (
+                <div key={topic.title} className="bg-card rounded-2xl p-8 shadow-card">
+                  <h2 className="text-2xl font-bold mb-3">{topic.title}</h2>
+                  <p className="text-muted-foreground mb-4">{topic.description}</p>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    {topic.points.map((point) => (
+                      <li key={point}>• {point}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+
               <div className="bg-card rounded-2xl p-8 shadow-card">
                 <h3 className="text-xl font-bold mb-4">مواقع تراث عالمي في المملكة</h3>
                 <div className="grid md:grid-cols-2 gap-3 text-sm text-muted-foreground">
@@ -46,22 +49,37 @@ export default function Saudi() {
             </div>
 
             <div className="bg-muted rounded-3xl p-8 shadow-card">
-              <h3 className="text-xl font-bold mb-4">نصائح موسم السفر</h3>
-              <div className="space-y-4 text-sm text-muted-foreground">
-                <div className="bg-card rounded-xl p-4 shadow-soft">
-                  <p className="font-semibold text-foreground">الشتاء والربيع</p>
-                  <p>أفضل وقت لزيارة العُلا والدرعية والرياض للاستمتاع بالطقس المعتدل.</p>
-                </div>
-                <div className="bg-card rounded-xl p-4 shadow-soft">
-                  <p className="font-semibold text-foreground">الصيف</p>
-                  <p>توجه إلى أبها وعسير للأجواء الجبلية الباردة نسبياً.</p>
-                </div>
-                <div className="bg-card rounded-xl p-4 shadow-soft">
-                  <p className="font-semibold text-foreground">على مدار العام</p>
-                  <p>سواحل البحر الأحمر مثالية للغوص والمنتجعات الفاخرة.</p>
-                </div>
+              <div className="flex items-center gap-2 mb-4">
+                <CalendarDays className="w-5 h-5 text-secondary" />
+                <h3 className="text-xl font-bold">فعاليات عالمية قادمة</h3>
               </div>
-              <Button variant="hero" className="mt-6 w-full">خطط لرحلتك داخل السعودية</Button>
+              <div className="space-y-4 text-sm text-muted-foreground">
+                {saudiMegaEvents.map((event) => (
+                  <div key={event.title} className="bg-card rounded-xl p-4 shadow-soft">
+                    <p className="font-semibold text-foreground">{event.title}</p>
+                    <p>{event.description}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8">
+                <h3 className="text-xl font-bold mb-4">نصائح موسم السفر</h3>
+                <div className="space-y-4 text-sm text-muted-foreground">
+                  <div className="bg-card rounded-xl p-4 shadow-soft">
+                    <p className="font-semibold text-foreground">الشتاء والربيع</p>
+                    <p>أفضل وقت لزيارة العُلا والدرعية والرياض للاستمتاع بالطقس المعتدل.</p>
+                  </div>
+                  <div className="bg-card rounded-xl p-4 shadow-soft">
+                    <p className="font-semibold text-foreground">الصيف</p>
+                    <p>توجه إلى أبها وعسير للأجواء الجبلية الباردة نسبياً.</p>
+                  </div>
+                  <div className="bg-card rounded-xl p-4 shadow-soft">
+                    <p className="font-semibold text-foreground">على مدار العام</p>
+                    <p>سواحل البحر الأحمر مثالية للغوص والمنتجعات الفاخرة.</p>
+                  </div>
+                </div>
+                <Button variant="hero" className="mt-6 w-full">خطط لرحلتك داخل السعودية</Button>
+              </div>
             </div>
           </div>
         </div>
@@ -80,6 +98,7 @@ export default function Saudi() {
                     src={dest.image}
                     alt={dest.title}
                     className="w-full h-full object-cover"
+                    fallbackQuery={`${dest.title} السعودية`}
                   />
                 </div>
                 <div className="p-5">

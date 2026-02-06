@@ -73,6 +73,7 @@ export function Footer() {
                 <li><Link to="/trips" className="text-background/70 hover:text-primary transition-colors">الرحلات</Link></li>
                 <li><Link to="/hotels" className="text-background/70 hover:text-primary transition-colors">الفنادق</Link></li>
                 <li><Link to="/offers" className="text-background/70 hover:text-primary transition-colors">العروض</Link></li>
+                <li><Link to="/seasons" className="text-background/70 hover:text-primary transition-colors">مواسم</Link></li>
                 <li><Link to="/activities" className="text-background/70 hover:text-primary transition-colors">النشاطات</Link></li>
                 <li><Link to="/transport" className="text-background/70 hover:text-primary transition-colors">المواصلات</Link></li>
                 <li><Link to="/payments" className="text-background/70 hover:text-primary transition-colors">المدفوعات</Link></li>

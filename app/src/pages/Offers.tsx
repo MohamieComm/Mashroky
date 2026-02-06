@@ -19,12 +19,13 @@ export default function Offers() {
   const offers = useAdminCollection("offers", defaultOffers);
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const handleBook = (title: string, price: number, details?: string) => {
+  const handleBook = (title: string, price: string, details?: string, image?: string | null) => {
     addItem({
       id: `offer-${title}-${Date.now()}`,
       title,
-      price,
+      price: Number(String(price).replace(/[^\d.]/g, "")) || 0,
       details,
+      image,
     });
     navigate("/cart");
   };
@@ -69,6 +70,7 @@ export default function Offers() {
                       src={offer.image}
                       alt={offer.title}
                       className="w-full h-full object-cover"
+                      fallbackQuery={`${offer.title} ${offer.season}`}
                     />
                     <div className="absolute inset-0 bg-gradient-to-l from-foreground/60 to-transparent lg:bg-gradient-to-r" />
                     
@@ -153,8 +155,9 @@ export default function Offers() {
                         onClick={() =>
                           handleBook(
                             offer.title,
-                            offer.price,
-                            `${offer.location} • ${offer.duration}`
+                            offer.newPrice,
+                            `موسم: ${offer.season}`,
+                            offer.image
                           )
                         }
                       >

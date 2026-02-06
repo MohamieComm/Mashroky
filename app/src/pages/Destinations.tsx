@@ -2,9 +2,10 @@ import { useMemo, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
-import { defaultAirlines, defaultDestinations, useAdminCollection } from "@/data/adminStore";
+import { ServiceCard } from "@/components/ServiceCard";
+import { defaultAirlines, defaultDestinations, useAdminCollection, useAdminSettings } from "@/data/adminStore";
 import { adminBenefitCards, popularDestinationsByRegion } from "@/data/content";
-import { ArrowLeft, MapPin, Sparkles, Star } from "lucide-react";
+import { ArrowLeft, MapPin, Sparkles, Star, FileText, CalendarCheck, Smartphone } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 
@@ -17,18 +18,25 @@ const tagStyles: Record<string, string> = {
   "عائلي": "bg-orange-100 text-orange-700",
 };
 
+const benefitIcons: Record<string, typeof Star> = {
+  checkin: FileText,
+  bookings: CalendarCheck,
+  app: Smartphone,
+};
+
 export default function Destinations() {
   const [activeTab, setActiveTab] = useState<"saudi" | "international" | "middleeast">("saudi");
   const destinations = useAdminCollection("destinations", defaultDestinations);
   const airlines = useAdminCollection("airlines", defaultAirlines);
+  const { appDownloadLink } = useAdminSettings();
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const handleBook = (title?: string, tag?: string) => {
+  const handleBook = (title?: string, price?: string, details?: string) => {
     addItem({
       id: `destination-${title ?? Date.now()}`,
       title: title ?? "وجهة سياحية",
-      price: 0,
-      details: tag,
+      price: Number(String(price ?? "0").replace(/[^\d.]/g, "")) || 0,
+      details,
     });
     navigate("/cart");
   };
@@ -130,14 +138,13 @@ export default function Destinations() {
           <div className="flex flex-wrap items-center gap-4 mb-16">
             {airlines.map((airline) => (
               <div key={airline.id} className="bg-card rounded-xl px-4 py-3 shadow-card flex items-center gap-3">
-                {airline.logo && (
-                  <ImageWithFallback
-                    src={airline.logo}
-                    alt={airline.name}
-                    className="w-20 h-8 object-contain"
-                    fallbackClassName="w-20 h-8 object-contain bg-muted"
-                  />
-                )}
+                <ImageWithFallback
+                  src={airline.logo}
+                  alt={airline.name}
+                  className="w-20 h-8 object-contain"
+                  fallbackClassName="w-20 h-8 object-contain bg-muted"
+                  fallbackSrc="/airline-placeholder.svg"
+                />
                 <span className="text-sm font-semibold">{airline.name}</span>
               </div>
             ))}
@@ -170,6 +177,7 @@ export default function Destinations() {
                     src={dest.image}
                     alt={dest.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    fallbackQuery={`${dest.title} ${dest.country}`}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 to-transparent" />
                   <span className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold ${tagStyles[dest.tag] || "bg-white/80 text-foreground"}`}>
@@ -193,11 +201,17 @@ export default function Destinations() {
                   <p className="text-sm text-muted-foreground mt-3">{dest.description}</p>
                   <div className="flex items-center justify-between mt-4">
                     <span className="text-sm text-muted-foreground">المدة: {dest.duration}</span>
-                  <Button variant="hero" size="sm" onClick={() => handleBook(dest.title, dest.tag)}>احجز الآن</Button>
-                  </div>
+                  <Button
+                    variant="hero"
+                    size="sm"
+                    onClick={() => handleBook(dest.title, dest.priceFrom, `${dest.country} • ${dest.duration}`)}
+                  >
+                    احجز الآن
+                  </Button>
                 </div>
               </div>
-            ))}
+            </div>
+          ))}
           </div>
         </div>
       </section>
@@ -206,12 +220,26 @@ export default function Destinations() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-6">
             {adminBenefitCards.map((item, index) => (
-              <div key={item.title} className="bg-card rounded-2xl p-6 shadow-card">
-                <div className="w-12 h-12 rounded-xl hero-gradient flex items-center justify-center text-primary-foreground mb-4">
-                  <Star className="w-6 h-6" />
-                </div>
-                <h4 className="text-lg font-bold mb-2">{item.title}</h4>
-                <p className="text-sm text-muted-foreground">{item.description}</p>
+              <div
+                key={item.title}
+                className="animate-fade-up"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                {(() => {
+                  const resolvedLink =
+                    item.id === "app" && appDownloadLink ? appDownloadLink : item.ctaLink;
+                  const Icon = benefitIcons[item.id] ?? Star;
+                  return (
+                    <ServiceCard
+                      title={item.title}
+                      description={item.description}
+                      details={item.details}
+                      ctaLabel={item.ctaLabel}
+                      ctaLink={resolvedLink}
+                      icon={<Icon className="w-6 h-6" />}
+                    />
+                  );
+                })()}
               </div>
             ))}
           </div>

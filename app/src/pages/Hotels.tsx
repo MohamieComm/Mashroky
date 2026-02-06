@@ -44,12 +44,17 @@ export default function Hotels() {
   const handleBook = (hotel: (typeof defaultHotels)[number]) => {
     addItem({
       id: `hotel-${hotel.id}-${Date.now()}`,
-      title: hotel.title,
+      title: hotel.name,
       price: Number(String(hotel.price).replace(/[^\\d.]/g, "")) || 0,
       details: hotel.priceNote,
       image: hotel.image,
     });
     navigate("/cart");
+  };
+  const handleQuickAdd = () => {
+    const sampleHotel = hotels[0];
+    if (!sampleHotel) return;
+    handleBook(sampleHotel);
   };
 
   return (
@@ -128,6 +133,7 @@ export default function Hotels() {
                       src={hotel.image}
                       alt={hotel.name}
                       className="w-full h-full object-cover"
+                      fallbackQuery={`${hotel.location} hotel`}
                     />
                     <div className="absolute top-4 right-4">
                       <span className="gold-gradient text-secondary-foreground text-sm font-semibold px-3 py-1 rounded-full">
@@ -260,8 +266,8 @@ export default function Hotels() {
                 </div>
               </div>
               <div className="mt-6 flex flex-col gap-3">
-                <Button variant="outline" className="w-full">إضافة للسلة</Button>
-                <Button variant="hero" className="w-full">الدفع المباشر</Button>
+                <Button variant="outline" className="w-full" onClick={handleQuickAdd}>إضافة للسلة</Button>
+                <Button variant="hero" className="w-full" onClick={handleQuickAdd}>الدفع المباشر</Button>
               </div>
             </div>
           </div>

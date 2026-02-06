@@ -70,6 +70,48 @@ export type Database = {
           },
         ]
       }
+      admin_settings: {
+        Row: {
+          id: string
+          promo_video_url: string | null
+          app_download_image_url: string | null
+          app_download_link: string | null
+          featured_image_url: string | null
+          featured_title: string | null
+          featured_description: string | null
+          featured_link: string | null
+          updated_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          promo_video_url?: string | null
+          app_download_image_url?: string | null
+          app_download_link?: string | null
+          featured_image_url?: string | null
+          featured_title?: string | null
+          featured_description?: string | null
+          featured_link?: string | null
+          updated_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          promo_video_url?: string | null
+          app_download_image_url?: string | null
+          app_download_link?: string | null
+          featured_image_url?: string | null
+          featured_title?: string | null
+          featured_description?: string | null
+          featured_link?: string | null
+          updated_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
@@ -103,6 +145,42 @@ export type Database = {
           role?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      seasons: {
+        Row: {
+          id: string
+          title: string
+          season: string
+          description: string | null
+          image: string | null
+          price: string | null
+          options: string[] | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          season: string
+          description?: string | null
+          image?: string | null
+          price?: string | null
+          options?: string[] | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          season?: string
+          description?: string | null
+          image?: string | null
+          price?: string | null
+          options?: string[] | null
+          created_at?: string
+          updated_at?: string
         }
         Relationships: []
       }

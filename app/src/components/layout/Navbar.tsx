@@ -27,6 +27,7 @@ const navItems = [
   { name: "الرحلات", path: "/trips", icon: Plane },
   { name: "الفنادق", path: "/hotels", icon: Hotel },
   { name: "العروض", path: "/offers", icon: Tag },
+  { name: "مواسم", path: "/seasons", icon: CalendarCheck },
   { name: "النشاطات", path: "/activities", icon: CalendarCheck },
   { name: "الوجهات السياحية", path: "/destinations", icon: MapPinned },
   { name: "الدراسة بالخارج", path: "/study", icon: GraduationCap },

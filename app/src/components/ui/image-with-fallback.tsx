@@ -7,25 +7,32 @@ type ImageWithFallbackProps = {
   className?: string;
   fallbackSrc?: string;
   fallbackClassName?: string;
+  fallbackQuery?: string;
 };
 
 export function ImageWithFallback({
   src,
   alt,
   className,
-  fallbackSrc = "/fallback-city.jpg",
+  fallbackSrc,
   fallbackClassName,
+  fallbackQuery,
 }: ImageWithFallbackProps) {
   const [failed, setFailed] = useState(false);
   const showFallback = !src || failed;
+  const safeQuery = (fallbackQuery || alt || "travel").trim();
+  const autoFallbackSrc = `https://source.unsplash.com/featured/?${encodeURIComponent(
+    safeQuery
+  )}`;
+  const resolvedFallback = fallbackSrc || autoFallbackSrc;
 
   return (
     <img
-      src={showFallback ? fallbackSrc : src}
+      src={showFallback ? resolvedFallback : src}
       alt={alt}
       loading="lazy"
       decoding="async"
-      className={cn(className, showFallback && (fallbackClassName ?? "object-contain bg-muted"))}
+      className={cn(className, showFallback && (fallbackClassName ?? "object-cover bg-muted"))}
       onError={() => {
         if (!failed) setFailed(true);
       }}

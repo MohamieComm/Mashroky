@@ -45,6 +45,7 @@ export function WeeklyOffers() {
                   src={offer.image}
                   alt={offer.title}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  fallbackQuery={`${offer.location} دراسة لغة`}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent" />
                 <div className="absolute top-4 right-4 bg-card/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold text-primary">

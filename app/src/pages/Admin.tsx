@@ -3,7 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAdminData } from "@/data/adminStore";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { getMediaTypeFromUrl } from "@/lib/media";
+import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Plane,
@@ -28,6 +31,8 @@ import {
   PlayCircle,
   CreditCard,
   ShieldCheck,
+  Smartphone,
+  Sparkles,
 } from "lucide-react";
 
 type FieldType = "text" | "number" | "textarea" | "list" | "pairlist" | "select";
@@ -44,7 +49,19 @@ type SectionConfig = {
   id: string;
   title: string;
   description: string;
-  listKey: "flights" | "hotels" | "offers" | "activities" | "articles" | "destinations" | "partners" | "airlines" | "apiKeys" | "users" | "pages";
+  listKey:
+    | "flights"
+    | "hotels"
+    | "offers"
+    | "activities"
+    | "articles"
+    | "destinations"
+    | "partners"
+    | "airlines"
+    | "apiKeys"
+    | "users"
+    | "pages"
+    | "seasons";
   fields: FieldConfig[];
   primaryField?: string;
 };
@@ -317,6 +334,7 @@ const parseNumber = (value: string) => {
 };
 
 export default function Admin() {
+  const navigate = useNavigate();
   const { isAdmin, loading: authLoading, user, profile } = useAuth();
   const [activeSection, setActiveSection] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -327,16 +345,26 @@ export default function Admin() {
     upsertItem,
     deleteItem,
     updatePromoVideoUrl,
+    updateAdminSettings,
   } = useAdminData();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [promoDraft, setPromoDraft] = useState("");
+  const [appDownloadImageDraft, setAppDownloadImageDraft] = useState("");
+  const [appDownloadLinkDraft, setAppDownloadLinkDraft] = useState("");
+  const [featuredImageDraft, setFeaturedImageDraft] = useState("");
+  const [featuredTitleDraft, setFeaturedTitleDraft] = useState("");
+  const [featuredDescriptionDraft, setFeaturedDescriptionDraft] = useState("");
+  const [featuredLinkDraft, setFeaturedLinkDraft] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [authFailed, setAuthFailed] = useState(false);
   const isPageLoading = authLoading || adminLoading;
   const paymentProvider = (import.meta.env.VITE_PAYMENT_PROVIDER || "").toLowerCase();
   const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
   const moyasarPublicKey = import.meta.env.VITE_MOYASAR_PUBLISHABLE_KEY || "";
+  const promoMediaType = getMediaTypeFromUrl(promoDraft);
+  const isPromoVideo = promoMediaType === "video";
+  const isPromoImage = promoMediaType === "image" || promoMediaType === "unknown";
 
   const activeConfig = sectionConfigs[activeSection];
 
@@ -353,7 +381,21 @@ export default function Admin() {
 
   useEffect(() => {
     setPromoDraft(adminData.promoVideoUrl || "");
-  }, [adminData.promoVideoUrl]);
+    setAppDownloadImageDraft(adminData.appDownloadImageUrl || "");
+    setAppDownloadLinkDraft(adminData.appDownloadLink || "");
+    setFeaturedImageDraft(adminData.featuredImageUrl || "");
+    setFeaturedTitleDraft(adminData.featuredTitle || "");
+    setFeaturedDescriptionDraft(adminData.featuredDescription || "");
+    setFeaturedLinkDraft(adminData.featuredLink || "");
+  }, [
+    adminData.promoVideoUrl,
+    adminData.appDownloadImageUrl,
+    adminData.appDownloadLink,
+    adminData.featuredImageUrl,
+    adminData.featuredTitle,
+    adminData.featuredDescription,
+    adminData.featuredLink,
+  ]);
 
   const stats = useMemo(
     () => [
@@ -367,6 +409,28 @@ export default function Admin() {
 
   const handleDraftChange = (key: string, value: string) => {
     setDraft((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleSaveAppDownload = async () => {
+    await updateAdminSettings(
+      {
+        appDownloadImageUrl: appDownloadImageDraft,
+        appDownloadLink: appDownloadLinkDraft,
+      },
+      user?.id
+    );
+  };
+
+  const handleSaveFeatured = async () => {
+    await updateAdminSettings(
+      {
+        featuredImageUrl: featuredImageDraft,
+        featuredTitle: featuredTitleDraft,
+        featuredDescription: featuredDescriptionDraft,
+        featuredLink: featuredLinkDraft,
+      },
+      user?.id
+    );
   };
 
   const buildItemFromDraft = () => {
@@ -657,7 +721,7 @@ export default function Admin() {
                   <h2 className="text-2xl font-bold">الفيديو التعريفي أو صورة إعلان</h2>
                 </div>
                 <p className="text-sm text-muted-foreground mb-6">
-                  ضع رابط فيديو (MP4) أو صورة إعلان جذابة (JPG/PNG) ليظهر في الصفحة الرئيسية. يمكن تحديثه في أي وقت.
+                  ضع رابط فيديو (MP4) أو صورة إعلان جذابة (JPG/PNG) ليظهر في الصفحة الرئيسية. إذا كانت صورة سيتم ربطها بقسم “مواسم”.
                 </p>
                 <div className="flex flex-col md:flex-row gap-4 mb-4">
                   <Input
@@ -691,16 +755,148 @@ export default function Admin() {
                       await updatePromoVideoUrl(url, user?.id);
                     }}
                   />
-                  <Button variant="secondary" onClick={() => setPromoDraft("")}>مسح الملف</Button>
+                  <Button
+                    variant="secondary"
+                    onClick={async () => {
+                      setPromoDraft("");
+                      await updateAdminSettings({ promoVideoUrl: "" }, user?.id);
+                    }}
+                  >
+                    مسح الملف
+                  </Button>
                 </div>
                 <div className="mt-6 flex gap-6">
-                  {adminData.promoImageUrl && (
-                    <img src={adminData.promoImageUrl} alt="صورة إعلان" className="rounded-xl shadow-card w-64 h-40 object-cover" />
+                  {promoDraft && isPromoImage && (
+                    <img src={promoDraft} alt="صورة إعلان" className="rounded-xl shadow-card w-64 h-40 object-cover" />
                   )}
-                  {promoDraft && (
+                  {promoDraft && isPromoVideo && (
                     <video src={promoDraft} controls className="rounded-xl shadow-card w-64 h-40 object-cover" />
                   )}
                 </div>
+              </div>
+
+              <div className="bg-card rounded-2xl p-8 shadow-card">
+                <div className="flex items-center gap-3 mb-4">
+                  <Smartphone className="w-6 h-6 text-secondary" />
+                  <h2 className="text-2xl font-bold">صورة تحميل التطبيق</h2>
+                </div>
+                <p className="text-sm text-muted-foreground mb-6">
+                  ارفع صورة جذابة للتطبيق واربطها برابط التحميل من المتجر أو الموقع.
+                </p>
+                <div className="grid md:grid-cols-2 gap-4 mb-4">
+                  <Input
+                    placeholder="https://appstore.com/app"
+                    value={appDownloadLinkDraft}
+                    onChange={(event) => setAppDownloadLinkDraft(event.target.value)}
+                  />
+                  <Button variant="hero" onClick={handleSaveAppDownload}>
+                    حفظ الرابط
+                  </Button>
+                </div>
+                <div className="flex flex-col md:flex-row gap-4 mb-4">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (event) => {
+                      const file = event.target.files?.[0];
+                      if (!file) return;
+                      const fileName = `app-download/${Date.now()}-${file.name}`;
+                      const { error } = await supabase.storage.from("public").upload(fileName, file);
+                      if (error) {
+                        alert("فشل رفع الصورة: " + error.message);
+                        return;
+                      }
+                      const url = supabase.storage.from("public").getPublicUrl(fileName).publicUrl;
+                      setAppDownloadImageDraft(url);
+                      await updateAdminSettings({ appDownloadImageUrl: url }, user?.id);
+                    }}
+                  />
+                  <Button
+                    variant="secondary"
+                    onClick={async () => {
+                      setAppDownloadImageDraft("");
+                      await updateAdminSettings({ appDownloadImageUrl: "" }, user?.id);
+                    }}
+                  >
+                    مسح الصورة
+                  </Button>
+                </div>
+                {appDownloadImageDraft && (
+                  <img
+                    src={appDownloadImageDraft}
+                    alt="صورة التطبيق"
+                    className="rounded-xl shadow-card w-72 h-44 object-cover"
+                  />
+                )}
+              </div>
+
+              <div className="bg-card rounded-2xl p-8 shadow-card">
+                <div className="flex items-center gap-3 mb-4">
+                  <Sparkles className="w-6 h-6 text-secondary" />
+                  <h2 className="text-2xl font-bold">العرض المميز أو الحدث الترفيهي</h2>
+                </div>
+                <p className="text-sm text-muted-foreground mb-6">
+                  ارفع صورة لعرض الرحلة الأهم أو لحدث ترفيهي، مع العنوان والوصف والرابط.
+                </p>
+                <div className="grid md:grid-cols-2 gap-4 mb-4">
+                  <Input
+                    placeholder="عنوان العرض أو الحدث"
+                    value={featuredTitleDraft}
+                    onChange={(event) => setFeaturedTitleDraft(event.target.value)}
+                  />
+                  <Input
+                    placeholder="رابط العرض أو الحدث"
+                    value={featuredLinkDraft}
+                    onChange={(event) => setFeaturedLinkDraft(event.target.value)}
+                  />
+                </div>
+                <div className="mb-4">
+                  <Textarea
+                    placeholder="وصف مختصر يجذب العملاء"
+                    value={featuredDescriptionDraft}
+                    onChange={(event) => setFeaturedDescriptionDraft(event.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col md:flex-row gap-4 mb-4">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (event) => {
+                      const file = event.target.files?.[0];
+                      if (!file) return;
+                      const fileName = `featured/${Date.now()}-${file.name}`;
+                      const { error } = await supabase.storage.from("public").upload(fileName, file);
+                      if (error) {
+                        alert("فشل رفع الصورة: " + error.message);
+                        return;
+                      }
+                      const url = supabase.storage.from("public").getPublicUrl(fileName).publicUrl;
+                      setFeaturedImageDraft(url);
+                      await updateAdminSettings({ featuredImageUrl: url }, user?.id);
+                    }}
+                  />
+                  <div className="flex gap-3">
+                    <Button variant="hero" onClick={handleSaveFeatured}>
+                      حفظ البيانات
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={async () => {
+                        setFeaturedImageDraft("");
+                        await updateAdminSettings({ featuredImageUrl: "" }, user?.id);
+                      }}
+                    >
+                      مسح الصورة
+                    </Button>
+                  </div>
+                </div>
+                {featuredImageDraft && (
+                  <img
+                    src={featuredImageDraft}
+                    alt="العرض المميز"
+                    className="rounded-xl shadow-card w-full max-w-xl h-56 object-cover"
+                  />
+                )}
               </div>
             </div>
           )}

@@ -19,6 +19,11 @@ export default function Activities() {
     });
     navigate("/cart");
   };
+  const handleQuickAdd = () => {
+    const sample = activities[0];
+    if (!sample) return;
+    handleBook(sample.title, sample.price, sample.location);
+  };
 
   return (
     <Layout>
@@ -48,7 +53,7 @@ export default function Activities() {
               <input className="h-12 rounded-xl border border-input px-4" placeholder="إضافة الفندق" />
               <input className="h-12 rounded-xl border border-input px-4" placeholder="إضافة المواصلات" />
             </div>
-            <Button variant="hero" className="mt-6">إضافة للسلة</Button>
+            <Button variant="hero" className="mt-6" onClick={handleQuickAdd}>إضافة للسلة</Button>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -59,6 +64,7 @@ export default function Activities() {
                     src={activity.image}
                     alt={activity.title}
                     className="w-full h-full object-cover"
+                    fallbackQuery={`${activity.location} ${activity.category}`}
                   />
                 </div>
                 <div className="p-5">

@@ -10,6 +10,7 @@ import Trips from "./pages/Trips";
 import TripDetails from "./pages/TripDetails";
 import Hotels from "./pages/Hotels";
 import Offers from "./pages/Offers";
+import Seasons from "./pages/Seasons";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import Support from "./pages/Support";
@@ -65,6 +66,7 @@ const App = () => (
               <Route path="/trip/:id" element={<TripDetails />} />
               <Route path="/hotels" element={<Hotels />} />
               <Route path="/offers" element={<Offers />} />
+              <Route path="/seasons" element={<Seasons />} />
               <Route path="/activities" element={<Activities />} />
               <Route path="/transport" element={<Transport />} />
               <Route path="/payments" element={<Payments />} />
