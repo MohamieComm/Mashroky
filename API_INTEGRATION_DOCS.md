@@ -76,18 +76,19 @@ MOYASAR_PUBLISHABLE_KEY=pk_test_xxxxx
 - **المسارات**: `flight-backend/src/routes/payments.routes.js`
 
 ### الوظائف المتاحة
+✅ `createMoyasarInvoice()` - إنشاء رابط دفع (Invoice) وتحويل المستخدم لصفحة الدفع
 ✅ `createMockMoyasarPayment()` - إنشاء عملية دفع اختبارية
-✅ `processPayment()` - معالجة الدفع الفعلي
 
 ### استخدام الـ API
 ```javascript
-// إنشاء عملية دفع
+// إنشاء رابط دفع (Invoice)
 POST /api/payments/create
 {
-  "amount": 1500,           // بالقروش (halalas)
+  "amount": 1500,           // بالريال (سيتم تحويله إلى هللات)
   "currency": "SAR",
   "description": "حجز رحلة إلى دبي",
-  "bookingId": "BK123456"
+  "bookingId": "BK123456",
+  "returnUrl": "https://www.mashrok.online"
 }
 
 // رد الاتصال (Webhook)

@@ -15,6 +15,15 @@
 ✓ بيانات Amadeus API:
   - AMADEUS_CLIENT_ID
   - AMADEUS_CLIENT_SECRET
+✓ بيانات Moyasar:
+  - MOYASAR_SECRET_KEY
+  - MOYASAR_PUBLISHABLE_KEY
+  - VITE_MOYASAR_PUBLISHABLE_KEY
+✓ رابط API للرحلات:
+  - VITE_FLIGHT_API_URL
+✓ روابط الرجوع:
+  - APP_BASE_URL
+  - BACKEND_BASE_URL
 ```
 
 ---
@@ -94,6 +103,12 @@ powershell -ExecutionPolicy Bypass -File deploy.ps1
    VITE_ADMIN_EMAILS = admin@example.com
    AMADEUS_CLIENT_ID = xxxxx
    AMADEUS_CLIENT_SECRET = xxxxx
+   VITE_FLIGHT_API_URL = https://jubilant-hope-production-a334.up.railway.app
+   MOYASAR_SECRET_KEY = sk_test_xxxxx
+   MOYASAR_PUBLISHABLE_KEY = pk_test_xxxxx
+   VITE_MOYASAR_PUBLISHABLE_KEY = pk_test_xxxxx
+   APP_BASE_URL = https://www.mashrok.online
+   BACKEND_BASE_URL = https://jubilant-hope-production-a334.up.railway.app
    NODE_ENV = production
    PORT = 3000
    ```
