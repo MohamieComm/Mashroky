@@ -2,10 +2,11 @@ import { Phone, Mail, MapPin, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-
-const whatsappNumber = "+966542454094";
+import { useAdminSettings } from "@/data/adminStore";
 
 export function ContactSection() {
+  const { contactPhone, contactEmail, contactWhatsapp, contactAddress } = useAdminSettings();
+  const whatsappNumber = contactWhatsapp || contactPhone || "+966542454094";
   return (
     <section className="py-20 bg-background">
       <div className="container mx-auto px-4">
@@ -41,7 +42,9 @@ export function ContactSection() {
                   </div>
                   <div>
                     <p>اتصال مباشر</p>
-                    <p className="font-semibold text-foreground">+966 54 245 4094</p>
+                    <p className="font-semibold text-foreground phone-field" dir="ltr">
+                      {contactPhone || "+966 54 245 4094"}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -50,7 +53,9 @@ export function ContactSection() {
                   </div>
                   <div>
                     <p>البريد الإلكتروني</p>
-                    <p className="font-semibold text-foreground">ibrahemest@outlook.sa</p>
+                    <p className="font-semibold text-foreground phone-field" dir="ltr">
+                      {contactEmail || "ibrahemest@outlook.sa"}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -59,7 +64,9 @@ export function ContactSection() {
                   </div>
                   <div>
                     <p>المكتب الرئيسي</p>
-                    <p className="font-semibold text-foreground">الرياض، المملكة العربية السعودية</p>
+                    <p className="font-semibold text-foreground">
+                      {contactAddress || "الرياض، المملكة العربية السعودية"}
+                    </p>
                   </div>
                 </div>
               </div>

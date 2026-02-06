@@ -26,7 +26,7 @@ export function WeeklyOffers() {
         <div className="text-center mb-12">
           {/* Removed colored badge above title (empty/visual only) */}
           <h2 className="text-3xl md:text-4xl font-bold">
-            أفضل أربعة عروض <span className="text-gold">لدراسة اللغة الإنجليزية</span>
+            أفضل أربعة عروض <span className="text-secondary">لدراسة اللغة الإنجليزية</span>
           </h2>
           <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
             برامج مرنة مع خيارات سكن وأنشطة طلابية ومرافقة منذ القبول وحتى العودة.

@@ -160,6 +160,10 @@ export type AdminSettings = {
   featuredTitle: string;
   featuredDescription: string;
   featuredLink: string;
+  contactPhone: string;
+  contactEmail: string;
+  contactWhatsapp: string;
+  contactAddress: string;
 };
 
 export type AdminData = {
@@ -181,6 +185,10 @@ export type AdminData = {
   featuredTitle: string;
   featuredDescription: string;
   featuredLink: string;
+  contactPhone: string;
+  contactEmail: string;
+  contactWhatsapp: string;
+  contactAddress: string;
   seasons: SeasonOffer[];
 };
 
@@ -848,6 +856,10 @@ export const defaultAdminSettings: AdminSettings = {
   featuredTitle: "",
   featuredDescription: "",
   featuredLink: "",
+  contactPhone: "+966 54 245 4094",
+  contactEmail: "ibrahemest@outlook.sa",
+  contactWhatsapp: "+966542454094",
+  contactAddress: "الرياض، المملكة العربية السعودية",
 };
 
 export const defaultAdminData: AdminData = {
@@ -869,6 +881,10 @@ export const defaultAdminData: AdminData = {
   featuredTitle: defaultAdminSettings.featuredTitle,
   featuredDescription: defaultAdminSettings.featuredDescription,
   featuredLink: defaultAdminSettings.featuredLink,
+  contactPhone: defaultAdminSettings.contactPhone,
+  contactEmail: defaultAdminSettings.contactEmail,
+  contactWhatsapp: defaultAdminSettings.contactWhatsapp,
+  contactAddress: defaultAdminSettings.contactAddress,
   seasons: defaultSeasons,
 };
 
@@ -1178,7 +1194,7 @@ const fetchAdminSettings = async (): Promise<AdminSettings> => {
   const { data, error } = await supabase
     .from("admin_settings")
     .select(
-      "promo_video_url, app_download_image_url, app_download_link, featured_image_url, featured_title, featured_description, featured_link, updated_at"
+      "promo_video_url, app_download_image_url, app_download_link, featured_image_url, featured_title, featured_description, featured_link, contact_phone, contact_email, contact_whatsapp, contact_address, updated_at"
     )
     .order("updated_at", { ascending: false })
     .limit(1);
@@ -1192,6 +1208,10 @@ const fetchAdminSettings = async (): Promise<AdminSettings> => {
     featuredTitle: row.featured_title ?? "",
     featuredDescription: row.featured_description ?? "",
     featuredLink: row.featured_link ?? "",
+    contactPhone: row.contact_phone ?? defaultAdminSettings.contactPhone,
+    contactEmail: row.contact_email ?? defaultAdminSettings.contactEmail,
+    contactWhatsapp: row.contact_whatsapp ?? defaultAdminSettings.contactWhatsapp,
+    contactAddress: row.contact_address ?? defaultAdminSettings.contactAddress,
   };
 };
 
@@ -1204,6 +1224,10 @@ export const saveAdminSettings = async (settings: AdminSettings, userId?: string
     featured_title: settings.featuredTitle,
     featured_description: settings.featuredDescription,
     featured_link: settings.featuredLink,
+    contact_phone: settings.contactPhone,
+    contact_email: settings.contactEmail,
+    contact_whatsapp: settings.contactWhatsapp,
+    contact_address: settings.contactAddress,
     updated_by: userId ?? null,
   });
   if (isBrowser) window.dispatchEvent(new Event("admin-data-updated"));
@@ -1370,6 +1394,10 @@ export const useAdminData = () => {
       featuredTitle: data.featuredTitle,
       featuredDescription: data.featuredDescription,
       featuredLink: data.featuredLink,
+      contactPhone: data.contactPhone,
+      contactEmail: data.contactEmail,
+      contactWhatsapp: data.contactWhatsapp,
+      contactAddress: data.contactAddress,
       ...updates,
     };
     await saveAdminSettings(next, userId);

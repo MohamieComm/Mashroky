@@ -1,6 +1,6 @@
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { Trash2, CreditCard, ShieldCheck } from "lucide-react";
+import { Trash2, CreditCard } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { useState } from "react";
 
@@ -15,6 +15,12 @@ export default function Cart() {
   const flightApiBaseUrl =
     (import.meta.env.VITE_FLIGHT_API_URL as string | undefined) ||
     "https://jubilant-hope-production-a334.up.railway.app";
+  const paymentErrorMessages: Record<string, string> = {
+    moyasar_not_configured: "لم يتم تفعيل بوابة الدفع على الخادم بعد.",
+    backend_base_url_not_configured: "إعدادات الخادم غير مكتملة (BACKEND_BASE_URL).",
+    invalid_amount: "قيمة الدفع غير صالحة. يرجى مراجعة السلة.",
+    payment_failed: "فشل إنشاء رابط الدفع. حاول مرة أخرى.",
+  };
 
   const handleCheckout = async () => {
     if (!hasItems || processing) return;
@@ -48,7 +54,8 @@ export default function Cart() {
       }
       throw new Error("missing_payment_url");
     } catch (error) {
-      setPaymentError("تعذر بدء عملية الدفع. يرجى المحاولة لاحقًا أو التواصل مع الدعم.");
+      const code = error instanceof Error ? error.message : "payment_failed";
+      setPaymentError(paymentErrorMessages[code] || "تعذر بدء عملية الدفع. يرجى المحاولة لاحقًا أو التواصل مع الدعم.");
     } finally {
       setProcessing(false);
     }
@@ -130,10 +137,6 @@ export default function Cart() {
             {paymentError && (
               <p className="text-xs text-destructive mt-3">{paymentError}</p>
             )}
-            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-4">
-              <ShieldCheck className="w-4 h-4 text-primary" />
-              الدفع آمن ومشفر عبر منصة ميسر.
-            </div>
             {hasItems && (
               <Button variant="ghost" className="mt-4 w-full" onClick={clear}>
                 تفريغ السلة

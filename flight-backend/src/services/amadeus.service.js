@@ -1,5 +1,14 @@
 import { amadeusClient } from '../config/amadeus.config.js';
+import { amadeusEnv } from '../config/env.config.js';
 import { parseISODurationToMinutes } from '../utils/duration.js';
+
+const ensureAmadeusConfigured = () => {
+  if (!amadeusEnv.clientId || !amadeusEnv.clientSecret) {
+    const err = new Error('amadeus_not_configured');
+    err.status = 500;
+    throw err;
+  }
+};
 
 export function mapAmadeusOfferToDTO(offer) {
   const slices = (offer.itineraries || []).map((itinerary) =>
@@ -86,6 +95,7 @@ function mapAmadeusOrderToDTO(order) {
 }
 
 export async function searchFlights({ origin, destination, departureDate, adults = 1, airline }) {
+  ensureAmadeusConfigured();
   const params = {
     originLocationCode: origin,
     destinationLocationCode: destination,
@@ -105,6 +115,7 @@ export async function searchFlights({ origin, destination, departureDate, adults
 }
 
 export async function listAirlines({ codes }) {
+  ensureAmadeusConfigured();
   if (!codes) return [];
   const response = await amadeusClient.referenceData.airlines.get({
     airlineCodes: codes,
@@ -118,6 +129,7 @@ export async function listAirlines({ codes }) {
 }
 
 export async function priceFlights({ flightOffers }) {
+  ensureAmadeusConfigured();
   const response = await amadeusClient.shopping.flightOffers.pricing.post(
     JSON.stringify({
       data: {
@@ -130,6 +142,7 @@ export async function priceFlights({ flightOffers }) {
 }
 
 export async function bookFlights({ flightOffers, travelers }) {
+  ensureAmadeusConfigured();
   const response = await amadeusClient.booking.flightOrders.post(
     JSON.stringify({
       data: {

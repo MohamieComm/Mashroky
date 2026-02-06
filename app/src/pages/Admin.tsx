@@ -33,6 +33,9 @@ import {
   ShieldCheck,
   Smartphone,
   Sparkles,
+  Phone,
+  Mail,
+  MapPin,
 } from "lucide-react";
 
 type FieldType = "text" | "number" | "textarea" | "list" | "pairlist" | "select";
@@ -361,6 +364,10 @@ export default function Admin() {
   const [featuredTitleDraft, setFeaturedTitleDraft] = useState("");
   const [featuredDescriptionDraft, setFeaturedDescriptionDraft] = useState("");
   const [featuredLinkDraft, setFeaturedLinkDraft] = useState("");
+  const [contactPhoneDraft, setContactPhoneDraft] = useState("");
+  const [contactEmailDraft, setContactEmailDraft] = useState("");
+  const [contactWhatsappDraft, setContactWhatsappDraft] = useState("");
+  const [contactAddressDraft, setContactAddressDraft] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [authFailed, setAuthFailed] = useState(false);
   const isPageLoading = authLoading || adminLoading;
@@ -370,6 +377,13 @@ export default function Admin() {
   const promoMediaType = getMediaTypeFromUrl(promoDraft);
   const isPromoVideo = promoMediaType === "video";
   const isPromoImage = promoMediaType === "image" || promoMediaType === "unknown";
+  const formatStorageError = (error?: { message?: string }) => {
+    const message = String(error?.message || "").trim();
+    if (message.toLowerCase().includes("bucket") && message.toLowerCase().includes("not found")) {
+      return "فشل الرفع: لم يتم إنشاء Buckets التخزين. أنشئ buckets باسم public و promo في Supabase Storage.";
+    }
+    return `فشل الرفع: ${message || "خطأ غير معروف"}`;
+  };
 
   const activeConfig = sectionConfigs[activeSection];
 
@@ -392,6 +406,10 @@ export default function Admin() {
     setFeaturedTitleDraft(adminData.featuredTitle || "");
     setFeaturedDescriptionDraft(adminData.featuredDescription || "");
     setFeaturedLinkDraft(adminData.featuredLink || "");
+    setContactPhoneDraft(adminData.contactPhone || "");
+    setContactEmailDraft(adminData.contactEmail || "");
+    setContactWhatsappDraft(adminData.contactWhatsapp || "");
+    setContactAddressDraft(adminData.contactAddress || "");
   }, [
     adminData.promoVideoUrl,
     adminData.appDownloadImageUrl,
@@ -400,6 +418,10 @@ export default function Admin() {
     adminData.featuredTitle,
     adminData.featuredDescription,
     adminData.featuredLink,
+    adminData.contactPhone,
+    adminData.contactEmail,
+    adminData.contactWhatsapp,
+    adminData.contactAddress,
   ]);
 
   const stats = useMemo(
@@ -433,6 +455,18 @@ export default function Admin() {
         featuredTitle: featuredTitleDraft,
         featuredDescription: featuredDescriptionDraft,
         featuredLink: featuredLinkDraft,
+      },
+      user?.id
+    );
+  };
+
+  const handleSaveContact = async () => {
+    await updateAdminSettings(
+      {
+        contactPhone: contactPhoneDraft,
+        contactEmail: contactEmailDraft,
+        contactWhatsapp: contactWhatsappDraft,
+        contactAddress: contactAddressDraft,
       },
       user?.id
     );
@@ -752,7 +786,7 @@ export default function Admin() {
                       const fileName = `promo/${Date.now()}-${file.name}`;
                       const { data, error } = await supabase.storage.from("promo").upload(fileName, file);
                       if (error) {
-                        alert("فشل رفع الملف: " + error.message);
+                        alert(formatStorageError(error));
                         return;
                       }
                       const url = supabase.storage.from("promo").getPublicUrl(fileName).publicUrl;
@@ -808,7 +842,7 @@ export default function Admin() {
                       const fileName = `app-download/${Date.now()}-${file.name}`;
                       const { error } = await supabase.storage.from("public").upload(fileName, file);
                       if (error) {
-                        alert("فشل رفع الصورة: " + error.message);
+                        alert(formatStorageError(error));
                         return;
                       }
                       const url = supabase.storage.from("public").getPublicUrl(fileName).publicUrl;
@@ -833,6 +867,58 @@ export default function Admin() {
                     className="rounded-xl shadow-card w-72 h-44 object-cover"
                   />
                 )}
+              </div>
+
+              <div className="bg-card rounded-2xl p-8 shadow-card">
+                <div className="flex items-center gap-3 mb-4">
+                  <Phone className="w-6 h-6 text-secondary" />
+                  <h2 className="text-2xl font-bold">بيانات التواصل</h2>
+                </div>
+                <p className="text-sm text-muted-foreground mb-6">
+                  حدّث رقم الهاتف والبريد والواتساب والعنوان لظهورها في الموقع.
+                </p>
+                <div className="grid md:grid-cols-2 gap-4 mb-4">
+                  <Input
+                    placeholder="رقم التواصل"
+                    value={contactPhoneDraft}
+                    onChange={(event) => setContactPhoneDraft(event.target.value)}
+                    className="phone-field"
+                    dir="ltr"
+                  />
+                  <Input
+                    placeholder="واتساب"
+                    value={contactWhatsappDraft}
+                    onChange={(event) => setContactWhatsappDraft(event.target.value)}
+                    className="phone-field"
+                    dir="ltr"
+                  />
+                </div>
+                <div className="grid md:grid-cols-2 gap-4 mb-4">
+                  <Input
+                    placeholder="البريد الإلكتروني"
+                    value={contactEmailDraft}
+                    onChange={(event) => setContactEmailDraft(event.target.value)}
+                    className="phone-field"
+                    dir="ltr"
+                  />
+                  <div className="flex items-center gap-3 text-muted-foreground text-sm">
+                    <Mail className="w-4 h-4" />
+                    <span>تأكد من البريد الصحيح لاستقبال الرسائل.</span>
+                  </div>
+                </div>
+                <Textarea
+                  placeholder="العنوان"
+                  value={contactAddressDraft}
+                  onChange={(event) => setContactAddressDraft(event.target.value)}
+                  className="mb-4"
+                />
+                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-4">
+                  <MapPin className="w-4 h-4" />
+                  <span>العنوان الظاهر للزوار.</span>
+                </div>
+                <Button variant="hero" onClick={handleSaveContact}>
+                  حفظ بيانات التواصل
+                </Button>
               </div>
 
               <div className="bg-card rounded-2xl p-8 shadow-card">
@@ -872,7 +958,7 @@ export default function Admin() {
                       const fileName = `featured/${Date.now()}-${file.name}`;
                       const { error } = await supabase.storage.from("public").upload(fileName, file);
                       if (error) {
-                        alert("فشل رفع الصورة: " + error.message);
+                        alert(formatStorageError(error));
                         return;
                       }
                       const url = supabase.storage.from("public").getPublicUrl(fileName).publicUrl;
@@ -1008,7 +1094,7 @@ export default function Admin() {
                               const fileName = `${field.key}/${Date.now()}-${file.name}`;
                               const { data, error } = await supabase.storage.from("public").upload(fileName, file);
                               if (error) {
-                                alert("فشل رفع الصورة: " + error.message);
+                                alert(formatStorageError(error));
                                 return;
                               }
                               const url = supabase.storage.from("public").getPublicUrl(fileName).publicUrl;

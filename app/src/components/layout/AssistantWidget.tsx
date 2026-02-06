@@ -2,14 +2,13 @@ import { useState } from "react";
 import { MessageCircle, X, Send, Sparkles, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useAdminSettings } from "@/data/adminStore";
 
 type ChatMessage = {
   id: number;
   role: "assistant" | "user";
   text: string;
 };
-
-const whatsappNumber = "+966542454094";
 
 const initialMessages: ChatMessage[] = [
   {
@@ -43,6 +42,8 @@ const getSmartReply = (message: string) => {
 };
 
 export function AssistantWidget() {
+  const { contactWhatsapp, contactPhone } = useAdminSettings();
+  const whatsappNumber = contactWhatsapp || contactPhone || "+966542454094";
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState("");

@@ -80,6 +80,10 @@ export type Database = {
           featured_title: string | null
           featured_description: string | null
           featured_link: string | null
+          contact_phone: string | null
+          contact_email: string | null
+          contact_whatsapp: string | null
+          contact_address: string | null
           updated_by: string | null
           created_at: string
           updated_at: string
@@ -93,6 +97,10 @@ export type Database = {
           featured_title?: string | null
           featured_description?: string | null
           featured_link?: string | null
+          contact_phone?: string | null
+          contact_email?: string | null
+          contact_whatsapp?: string | null
+          contact_address?: string | null
           updated_by?: string | null
           created_at?: string
           updated_at?: string
@@ -106,6 +114,10 @@ export type Database = {
           featured_title?: string | null
           featured_description?: string | null
           featured_link?: string | null
+          contact_phone?: string | null
+          contact_email?: string | null
+          contact_whatsapp?: string | null
+          contact_address?: string | null
           updated_by?: string | null
           created_at?: string
           updated_at?: string

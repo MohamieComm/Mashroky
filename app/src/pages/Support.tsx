@@ -3,15 +3,16 @@ import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  HelpCircle, 
-  Phone, 
-  Mail, 
+import { useAdminSettings } from "@/data/adminStore";
+import {
+  HelpCircle,
+  Phone,
+  Mail,
   MessageCircle,
   ChevronDown,
   Send,
   Clock,
-  CheckCircle
+  CheckCircle,
 } from "lucide-react";
 
 const faqs = [
@@ -42,6 +43,8 @@ const faqs = [
 ];
 
 export default function Support() {
+  const { contactPhone, contactEmail, contactWhatsapp } = useAdminSettings();
+  const whatsappNumber = contactWhatsapp || contactPhone || "+966542454094";
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
@@ -71,7 +74,9 @@ export default function Support() {
               </div>
               <h3 className="text-xl font-bold mb-2">اتصل بنا</h3>
               <p className="text-muted-foreground mb-4">متاحون على مدار الساعة</p>
-              <p className="text-xl font-bold text-primary">+966 54 245 4094</p>
+              <p className="text-xl font-bold text-primary phone-field" dir="ltr">
+                {contactPhone || "+966 54 245 4094"}
+              </p>
             </div>
 
             <div className="bg-card rounded-2xl p-8 shadow-card text-center hover:shadow-hover transition-all">
@@ -80,7 +85,9 @@ export default function Support() {
               </div>
               <h3 className="text-xl font-bold mb-2">راسلنا</h3>
               <p className="text-muted-foreground mb-4">نرد خلال 24 ساعة</p>
-              <p className="text-xl font-bold text-primary">ibrahemest@outlook.sa</p>
+              <p className="text-xl font-bold text-primary phone-field" dir="ltr">
+                {contactEmail || "ibrahemest@outlook.sa"}
+              </p>
             </div>
 
             <div className="bg-card rounded-2xl p-8 shadow-card text-center hover:shadow-hover transition-all">
@@ -92,7 +99,7 @@ export default function Support() {
               <Button variant="hero">ابدأ المحادثة</Button>
               <a
                 className="block text-sm text-primary mt-3"
-                href="https://wa.me/966542454094"
+                href={`https://wa.me/${whatsappNumber.replace("+", "")}`}
                 rel="noreferrer"
               >
                 تحويل واتساب للدعم الفني

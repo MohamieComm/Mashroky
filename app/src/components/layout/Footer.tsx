@@ -9,8 +9,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAdminSettings } from "@/data/adminStore";
 
 export function Footer() {
+  const { contactPhone, contactEmail, contactAddress } = useAdminSettings();
   return (
     <footer className="bg-foreground text-background">
       {/* Newsletter Section */}
@@ -106,7 +108,9 @@ export function Footer() {
                   </div>
                   <div>
                     <p className="text-sm text-background/60">اتصل بنا</p>
-                    <p className="font-semibold">+966 54 245 4094</p>
+                    <p className="font-semibold phone-field" dir="ltr">
+                      {contactPhone || "+966 54 245 4094"}
+                    </p>
                   </div>
                 </li>
                 <li className="flex items-center gap-3">
@@ -115,7 +119,9 @@ export function Footer() {
                   </div>
                   <div>
                     <p className="text-sm text-background/60">البريد الإلكتروني</p>
-                    <p className="font-semibold">ibrahemest@outlook.sa</p>
+                    <p className="font-semibold phone-field" dir="ltr">
+                      {contactEmail || "ibrahemest@outlook.sa"}
+                    </p>
                   </div>
                 </li>
                 <li className="flex items-center gap-3">
@@ -124,7 +130,9 @@ export function Footer() {
                   </div>
                   <div>
                     <p className="text-sm text-background/60">العنوان</p>
-                    <p className="font-semibold">الرياض، المملكة العربية السعودية</p>
+                    <p className="font-semibold">
+                      {contactAddress || "الرياض، المملكة العربية السعودية"}
+                    </p>
                   </div>
                 </li>
               </ul>

@@ -190,7 +190,11 @@ ALTER TABLE public.admin_settings
   ADD COLUMN IF NOT EXISTS featured_image_url TEXT,
   ADD COLUMN IF NOT EXISTS featured_title TEXT,
   ADD COLUMN IF NOT EXISTS featured_description TEXT,
-  ADD COLUMN IF NOT EXISTS featured_link TEXT;
+  ADD COLUMN IF NOT EXISTS featured_link TEXT,
+  ADD COLUMN IF NOT EXISTS contact_phone TEXT,
+  ADD COLUMN IF NOT EXISTS contact_email TEXT,
+  ADD COLUMN IF NOT EXISTS contact_whatsapp TEXT,
+  ADD COLUMN IF NOT EXISTS contact_address TEXT;
 
 -- Enable RLS
 ALTER TABLE public.flights ENABLE ROW LEVEL SECURITY;
@@ -501,3 +505,34 @@ DROP TRIGGER IF EXISTS update_payments_updated_at ON public.payments;
 CREATE TRIGGER update_payments_updated_at
   BEFORE UPDATE ON public.payments
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+-- Storage buckets for uploads (promo + public)
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('public', 'public', true)
+ON CONFLICT (id) DO UPDATE SET public = EXCLUDED.public;
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('promo', 'promo', true)
+ON CONFLICT (id) DO UPDATE SET public = EXCLUDED.public;
+
+ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'storage' AND tablename = 'objects'
+      AND policyname = 'Public can view storage objects'
+  ) THEN
+    EXECUTE 'CREATE POLICY "Public can view storage objects" ON storage.objects FOR SELECT USING (bucket_id IN (''public'',''promo''))';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'storage' AND tablename = 'objects'
+      AND policyname = 'Admins can manage storage objects'
+  ) THEN
+    EXECUTE 'CREATE POLICY "Admins can manage storage objects" ON storage.objects FOR ALL USING (public.has_role(auth.uid(), ''admin'')) WITH CHECK (public.has_role(auth.uid(), ''admin''))';
+  END IF;
+END;
+$$;

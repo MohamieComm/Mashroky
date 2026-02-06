@@ -155,7 +155,6 @@ export function HeroSection() {
                 <p className="text-primary-foreground/70 text-sm">الفيديو التعريفي</p>
                 <h3 className="text-xl font-semibold text-primary-foreground">مشروك في دقيقة</h3>
               </div>
-              <span className="text-xs text-primary-foreground/70">يتم تحديثه من لوحة الإدارة</span>
             </div>
             <div className="relative rounded-2xl overflow-hidden bg-background/20 min-h-[260px] flex items-center justify-center">
               {showVideo ? (
@@ -183,7 +182,6 @@ export function HeroSection() {
                 <div className="flex flex-col items-center gap-3 text-primary-foreground/70 py-12">
                   <PlayCircle className="w-16 h-16 text-secondary" />
                   <p className="font-semibold">لا يوجد فيديو مرفوع بعد</p>
-                  <p className="text-sm">يمكنك رفعه من لوحة تحكم الإدارة.</p>
                 </div>
               )}
             </div>

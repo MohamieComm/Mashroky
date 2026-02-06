@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 
 type ImageWithFallbackProps = {
@@ -18,23 +18,34 @@ export function ImageWithFallback({
   fallbackClassName,
   fallbackQuery,
 }: ImageWithFallbackProps) {
-  const [failed, setFailed] = useState(false);
-  const showFallback = !src || failed;
   const safeQuery = (fallbackQuery || alt || "travel").trim();
   const autoFallbackSrc = `https://source.unsplash.com/featured/?${encodeURIComponent(
     safeQuery
   )}`;
-  const resolvedFallback = fallbackSrc || autoFallbackSrc;
+  const localFallback = useMemo(() => {
+    const label = encodeURIComponent(alt || "صورة");
+    return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='420'%3E%3Crect width='100%25' height='100%25' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='50%25' font-size='24' fill='%236b7280' text-anchor='middle' dominant-baseline='middle'%3E${label}%3C/text%3E%3C/svg%3E`;
+  }, [alt]);
+  const sources = useMemo(() => {
+    const list = [];
+    if (src) list.push(src);
+    list.push(fallbackSrc || autoFallbackSrc);
+    list.push(localFallback);
+    return list;
+  }, [src, fallbackSrc, autoFallbackSrc, localFallback]);
+  const [failedCount, setFailedCount] = useState(0);
+  const resolvedSrc = sources[Math.min(failedCount, sources.length - 1)];
+  const showFallback = !src || failedCount > 0;
 
   return (
     <img
-      src={showFallback ? resolvedFallback : src}
+      src={resolvedSrc}
       alt={alt}
       loading="lazy"
       decoding="async"
       className={cn(className, showFallback && (fallbackClassName ?? "object-cover bg-muted"))}
       onError={() => {
-        if (!failed) setFailed(true);
+        setFailedCount((count) => Math.min(count + 1, sources.length - 1));
       }}
     />
   );

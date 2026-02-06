@@ -139,6 +139,14 @@ export default function Trips() {
   const [flightResults, setFlightResults] = useState<FlightOffer[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const flightErrorMessages: Record<string, string> = {
+    amadeus_not_configured: "خدمة الرحلات غير مهيأة بعد على الخادم.",
+    invalid_airport_code: "رمز المطار غير صحيح.",
+    invalid_departure_date: "تاريخ المغادرة غير صحيح.",
+    invalid_passenger_count: "عدد المسافرين غير صالح.",
+    unknown_provider: "مزود الرحلات غير معروف.",
+    server_error: "تعذر جلب الرحلات بسبب خطأ في الخادم.",
+  };
 
   const handleFlightSearch = async (searchData: FlightSearchData) => {
     setLoading(true);
@@ -164,7 +172,8 @@ export default function Trips() {
       const data = await res.json();
       setFlightResults(Array.isArray(data.results) ? data.results : []);
     } catch (err) {
-      setError("فشل جلب الرحلات. تأكد من الاتصال بالخادم.");
+      const code = err instanceof Error ? err.message : "flight_search_failed";
+      setError(flightErrorMessages[code] || "فشل جلب الرحلات. تأكد من الاتصال بالخادم.");
     }
     setLoading(false);
   };

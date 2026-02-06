@@ -1,6 +1,6 @@
 import { createMoyasarInvoice } from '../services/moyasar.service.js';
 import { upsertPaymentStatus } from '../services/supabase.service.js';
-import { appBaseUrl, backendBaseUrl, moyasarEnv } from '../config/env.config.js';
+import { appBaseUrl, backendBaseUrl, moyasarEnv, allowedOrigins } from '../config/env.config.js';
 
 const isValidCurrency = (value) => /^[A-Z]{3}$/.test(String(value || '').trim());
 
@@ -18,8 +18,22 @@ const normalizeBaseUrl = (value, fallback) => {
 
 const resolveBackendBaseUrl = (req) => {
   if (backendBaseUrl) return backendBaseUrl.replace(/\/$/, '');
-  if (process.env.NODE_ENV === 'production') return '';
-  return `${req.protocol}://${req.get('host')}`;
+  const forwardedHost = String(req.headers['x-forwarded-host'] || '').split(',')[0].trim();
+  const rawHost = forwardedHost || req.get('host') || '';
+  const forwardedProto = String(req.headers['x-forwarded-proto'] || '').split(',')[0].trim();
+  const protocol = forwardedProto || req.protocol || 'https';
+  if (!rawHost) return '';
+  const allowedHosts = (allowedOrigins || [])
+    .map((origin) => {
+      try {
+        return new URL(origin).host;
+      } catch {
+        return '';
+      }
+    })
+    .filter(Boolean);
+  if (allowedHosts.length && !allowedHosts.includes(rawHost)) return '';
+  return `${protocol}://${rawHost}`.replace(/\/$/, '');
 };
 
 export async function createPayment(req, res, next) {
