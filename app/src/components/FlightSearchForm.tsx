@@ -17,8 +17,22 @@ import {
   ArrowLeftRight,
 } from "lucide-react";
 
+type AirlineOption = { code: string; name: string; country?: string };
+type ApiAirline = {
+  code?: string;
+  iataCode?: string;
+  iata?: string;
+  icaoCode?: string;
+  icao?: string;
+  name?: string;
+  commonName?: string;
+  businessName?: string;
+  airlineName?: string;
+  country?: string;
+};
+
 // بيانات الخطوط الجوية
-export const AIRLINES = [
+export const AIRLINES: AirlineOption[] = [
   { code: "SV", name: "الخطوط السعودية", country: "السعودية" },
   { code: "EK", name: "طيران الإمارات", country: "الإمارات" },
   { code: "FZ", name: "طيران اقتصادي", country: "الإمارات" },
@@ -71,6 +85,9 @@ export interface FlightSearchData {
   airline?: string;
 }
 
+const isCabinClass = (value: string): value is FlightSearchData["cabinClass"] =>
+  value === "economy" || value === "business" || value === "first";
+
 export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFormProps) {
   const [tripType, setTripType] = useState<"roundtrip" | "oneway">("roundtrip");
   const [origin, setOrigin] = useState("");
@@ -82,7 +99,7 @@ export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFo
   const [passengers, setPassengers] = useState("1");
   const [cabinClass, setCabinClass] = useState<"economy" | "business" | "first">("economy");
   const [selectedAirline, setSelectedAirline] = useState("all");
-  const [airlines, setAirlines] = useState(AIRLINES);
+  const [airlines, setAirlines] = useState<AirlineOption[]>(AIRLINES);
   const flightApiBaseUrl =
     (import.meta.env.VITE_FLIGHT_API_URL as string | undefined) ||
     "https://jubilant-hope-production-a334.up.railway.app";
@@ -120,12 +137,13 @@ export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFo
         const list = Array.isArray(data.results) ? data.results : Array.isArray(data.airlines) ? data.airlines : [];
         if (list.length) {
           setAirlines(
-            list.map((item: any) => ({
-              code: item.code || item.iataCode || item.iata || item.icaoCode || item.icao || "",
-              name: item.name || item.commonName || item.businessName || item.airlineName || "",
-              country: item.country || "",
-            }))
-            .filter((item: any) => item.code && item.name)
+            list
+              .map((item: ApiAirline) => ({
+                code: item.code || item.iataCode || item.iata || item.icaoCode || item.icao || "",
+                name: item.name || item.commonName || item.businessName || item.airlineName || "",
+                country: item.country || "",
+              }))
+              .filter((item): item is AirlineOption => Boolean(item.code && item.name))
           );
         }
       } catch {
@@ -319,7 +337,12 @@ export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFo
         {/* Cabin Class */}
         <div>
           <label className="block text-sm font-semibold mb-2 text-foreground">درجة السفر</label>
-          <Select value={cabinClass} onValueChange={(val) => setCabinClass(val as any)}>
+          <Select
+            value={cabinClass}
+            onValueChange={(val) => {
+              if (isCabinClass(val)) setCabinClass(val);
+            }}
+          >
             <SelectTrigger className="bg-muted border-0 h-12">
               <Plane className="w-4 h-4 mr-2 text-muted-foreground" />
               <SelectValue />

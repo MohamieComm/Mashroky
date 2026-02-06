@@ -25,7 +25,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { adminBenefitCards, popularDestinationsByRegion } from "@/data/content";
 import { useCart } from "@/hooks/useCart";
-import FlightSearchForm from "@/components/FlightSearchForm";
+import FlightSearchForm, { type FlightSearchData } from "@/components/FlightSearchForm";
 
 const bookingNotes = [
   "يرجى الحضور إلى المطار قبل 3 ساعات من الإقلاع.",
@@ -122,20 +122,25 @@ export default function Trips() {
     navigate("/cart");
   };
 
-  const [flightResults, setFlightResults] = useState<any[]>([]);
+  type FlightSlice = {
+    origin?: string;
+    destination?: string;
+    marketingCarrier?: string;
+    durationMinutes?: number;
+  };
+
+  type FlightOffer = {
+    providerOfferId?: string;
+    slices?: FlightSlice[][];
+    pricing?: { total?: number | string; currency?: string };
+    cabins?: string[];
+  };
+
+  const [flightResults, setFlightResults] = useState<FlightOffer[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleFlightSearch = async (searchData: {
-    origin: string;
-    destination: string;
-    departureDate: string;
-    returnDate?: string;
-    passengers: string;
-    cabinClass: string;
-    tripType: string;
-    airline?: string;
-  }) => {
+  const handleFlightSearch = async (searchData: FlightSearchData) => {
     setLoading(true);
     setError("");
     try {

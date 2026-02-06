@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useAdminData } from "@/data/adminStore";
+import { useAdminData, type AdminData } from "@/data/adminStore";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { getMediaTypeFromUrl } from "@/lib/media";
@@ -65,6 +65,8 @@ type SectionConfig = {
   fields: FieldConfig[];
   primaryField?: string;
 };
+
+type SectionKey = SectionConfig["listKey"];
 
 const sidebarItems = [
   { name: "لوحة التحكم", icon: LayoutDashboard, id: "dashboard" },
@@ -333,6 +335,9 @@ const parseNumber = (value: string) => {
   return Number.parseFloat(cleaned) || 0;
 };
 
+const asAdminItem = <K extends SectionKey>(item: Record<string, unknown>, _key: K) =>
+  item as AdminData[K][number];
+
 export default function Admin() {
   const navigate = useNavigate();
   const { isAdmin, loading: authLoading, user, profile } = useAuth();
@@ -463,7 +468,7 @@ export default function Admin() {
     if (!activeConfig) return;
     const nextItem = buildItemFromDraft();
     if (!nextItem) return;
-    const saved = await upsertItem(activeConfig.listKey, nextItem as any);
+    const saved = await upsertItem(activeConfig.listKey, asAdminItem(nextItem, activeConfig.listKey));
     if (!saved) return;
 
     const resetDraft = activeConfig.fields.reduce<Record<string, string>>((acc, field) => {

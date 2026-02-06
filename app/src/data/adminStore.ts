@@ -888,28 +888,43 @@ type CollectionKey =
   | "pages"
   | "seasons";
 
+type DbRow = Record<string, unknown>;
+
+const asString = (value: unknown, fallback = "") => (value === null || value === undefined ? fallback : String(value));
+const asNumber = (value: unknown, fallback = 0) => {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : fallback;
+};
+const asStringArray = (value: unknown) =>
+  Array.isArray(value) ? value.map((item) => String(item)) : [];
+const asArray = <T,>(value: unknown) => (Array.isArray(value) ? (value as T[]) : []);
+
 type CollectionConfig<T> = {
   table: string;
   select?: string;
-  fromDb: (row: Record<string, any>) => T;
-  toDb: (item: T) => Record<string, any>;
+  fromDb: (row: DbRow) => T;
+  toDb: (item: T) => DbRow;
 };
 
-const collectionConfigs: Record<CollectionKey, CollectionConfig<any>> = {
+type CollectionConfigMap = {
+  [K in CollectionKey]: CollectionConfig<AdminData[K][number]>;
+};
+
+const collectionConfigs: CollectionConfigMap = {
   flights: {
     table: "flights",
     fromDb: (row) => ({
-      id: row.id,
-      from: row.from ?? "",
-      to: row.to ?? "",
-      airline: row.airline ?? "",
-      departTime: row.depart_time ?? row.departTime ?? "",
-      arriveTime: row.arrive_time ?? row.arriveTime ?? "",
-      duration: row.duration ?? "",
-      price: row.price ?? "",
-      stops: row.stops ?? "",
-      rating: Number(row.rating ?? 0),
-      image: row.image ?? "",
+      id: asString(row.id),
+      from: asString(row.from),
+      to: asString(row.to),
+      airline: asString(row.airline),
+      departTime: asString(row.depart_time ?? row.departTime),
+      arriveTime: asString(row.arrive_time ?? row.arriveTime),
+      duration: asString(row.duration),
+      price: asString(row.price),
+      stops: asString(row.stops),
+      rating: asNumber(row.rating),
+      image: asString(row.image),
     }),
     toDb: (item: Flight) => ({
       id: item.id,
@@ -928,19 +943,19 @@ const collectionConfigs: Record<CollectionKey, CollectionConfig<any>> = {
   hotels: {
     table: "hotels",
     fromDb: (row) => ({
-      id: row.id,
-      name: row.name ?? "",
-      location: row.location ?? "",
-      image: row.image ?? "",
-      rating: Number(row.rating ?? 0),
-      reviews: Number(row.reviews ?? 0),
-      price: row.price ?? "",
-      priceNote: row.price_note ?? row.priceNote ?? "",
-      description: row.description ?? "",
-      amenities: Array.isArray(row.amenities) ? row.amenities : [],
-      distances: Array.isArray(row.distances) ? row.distances : row.distances ?? [],
-      cuisine: row.cuisine ?? "",
-      tag: row.tag ?? "",
+      id: asString(row.id),
+      name: asString(row.name),
+      location: asString(row.location),
+      image: asString(row.image),
+      rating: asNumber(row.rating),
+      reviews: asNumber(row.reviews),
+      price: asString(row.price),
+      priceNote: asString(row.price_note ?? row.priceNote),
+      description: asString(row.description),
+      amenities: asStringArray(row.amenities),
+      distances: asArray<{ name: string; distance: string }>(row.distances),
+      cuisine: asString(row.cuisine),
+      tag: asString(row.tag),
     }),
     toDb: (item: HotelItem) => ({
       id: item.id,
@@ -961,17 +976,17 @@ const collectionConfigs: Record<CollectionKey, CollectionConfig<any>> = {
   offers: {
     table: "offers",
     fromDb: (row) => ({
-      id: row.id,
-      title: row.title ?? "",
-      description: row.description ?? "",
-      image: row.image ?? "",
-      discount: Number(row.discount ?? 0),
-      validUntil: row.valid_until ?? row.validUntil ?? "",
-      originalPrice: row.original_price ?? row.originalPrice ?? "",
-      newPrice: row.new_price ?? row.newPrice ?? "",
-      season: row.season ?? "",
-      includes: Array.isArray(row.includes) ? row.includes : [],
-      tips: Array.isArray(row.tips) ? row.tips : [],
+      id: asString(row.id),
+      title: asString(row.title),
+      description: asString(row.description),
+      image: asString(row.image),
+      discount: asNumber(row.discount),
+      validUntil: asString(row.valid_until ?? row.validUntil),
+      originalPrice: asString(row.original_price ?? row.originalPrice),
+      newPrice: asString(row.new_price ?? row.newPrice),
+      season: asString(row.season),
+      includes: asStringArray(row.includes),
+      tips: asStringArray(row.tips),
     }),
     toDb: (item: OfferItem) => ({
       id: item.id,
@@ -990,12 +1005,12 @@ const collectionConfigs: Record<CollectionKey, CollectionConfig<any>> = {
   activities: {
     table: "activities",
     fromDb: (row) => ({
-      id: row.id,
-      title: row.title ?? "",
-      location: row.location ?? "",
-      category: row.category ?? "",
-      price: row.price ?? "",
-      image: row.image ?? "",
+      id: asString(row.id),
+      title: asString(row.title),
+      location: asString(row.location),
+      category: asString(row.category),
+      price: asString(row.price),
+      image: asString(row.image),
     }),
     toDb: (item: ActivityItem) => ({
       id: item.id,
@@ -1009,11 +1024,11 @@ const collectionConfigs: Record<CollectionKey, CollectionConfig<any>> = {
   articles: {
     table: "articles",
     fromDb: (row) => ({
-      id: row.id,
-      title: row.title ?? "",
-      category: row.category ?? "",
-      date: row.date ?? "",
-      image: row.image ?? "",
+      id: asString(row.id),
+      title: asString(row.title),
+      category: asString(row.category),
+      date: asString(row.date),
+      image: asString(row.image),
     }),
     toDb: (item: ArticleItem) => ({
       id: item.id,
@@ -1026,15 +1041,15 @@ const collectionConfigs: Record<CollectionKey, CollectionConfig<any>> = {
   destinations: {
     table: "destinations",
     fromDb: (row) => ({
-      id: row.id,
-      title: row.title ?? "",
-      country: row.country ?? "",
-      region: row.region ?? "",
-      tag: row.tag ?? "",
-      duration: row.duration ?? "",
-      priceFrom: row.price_from ?? row.priceFrom ?? "",
-      description: row.description ?? "",
-      image: row.image ?? "",
+      id: asString(row.id),
+      title: asString(row.title),
+      country: asString(row.country),
+      region: asString(row.region),
+      tag: asString(row.tag),
+      duration: asString(row.duration),
+      priceFrom: asString(row.price_from ?? row.priceFrom),
+      description: asString(row.description),
+      image: asString(row.image),
     }),
     toDb: (item: DestinationItem) => ({
       id: item.id,
@@ -1051,11 +1066,11 @@ const collectionConfigs: Record<CollectionKey, CollectionConfig<any>> = {
   partners: {
     table: "partners",
     fromDb: (row) => ({
-      id: row.id,
-      name: row.name ?? "",
-      type: row.type ?? "",
-      website: row.website ?? "",
-      commission: row.commission ?? "",
+      id: asString(row.id),
+      name: asString(row.name),
+      type: asString(row.type),
+      website: asString(row.website),
+      commission: asString(row.commission),
     }),
     toDb: (item: PartnerItem) => ({
       id: item.id,
@@ -1068,12 +1083,12 @@ const collectionConfigs: Record<CollectionKey, CollectionConfig<any>> = {
   airlines: {
     table: "airlines",
     fromDb: (row) => ({
-      id: row.id,
-      name: row.name ?? "",
-      code: row.code ?? "",
-      website: row.website ?? "",
-      phone: row.phone ?? "",
-      logo: row.logo ?? "",
+      id: asString(row.id),
+      name: asString(row.name),
+      code: asString(row.code),
+      website: asString(row.website),
+      phone: asString(row.phone),
+      logo: asString(row.logo),
     }),
     toDb: (item: AirlineItem) => ({
       id: item.id,
@@ -1088,10 +1103,10 @@ const collectionConfigs: Record<CollectionKey, CollectionConfig<any>> = {
     table: "api_keys",
     select: "id, name, provider, status",
     fromDb: (row) => ({
-      id: row.id,
-      name: row.name ?? "",
-      provider: row.provider ?? "",
-      status: row.status ?? "disabled",
+      id: asString(row.id),
+      name: asString(row.name),
+      provider: asString(row.provider),
+      status: (asString(row.status, "disabled") as ApiKeyItem["status"]) || "disabled",
     }),
     toDb: (item: ApiKeyItem) => ({
       id: item.id,
@@ -1103,11 +1118,11 @@ const collectionConfigs: Record<CollectionKey, CollectionConfig<any>> = {
   users: {
     table: "users_admin",
     fromDb: (row) => ({
-      id: row.id,
-      name: row.name ?? "",
-      email: row.email ?? "",
-      role: row.role ?? "user",
-      status: row.status ?? "active",
+      id: asString(row.id),
+      name: asString(row.name),
+      email: asString(row.email),
+      role: (asString(row.role, "user") as ManagedUserItem["role"]) || "user",
+      status: (asString(row.status, "active") as ManagedUserItem["status"]) || "active",
     }),
     toDb: (item: ManagedUserItem) => ({
       id: item.id,
@@ -1120,10 +1135,10 @@ const collectionConfigs: Record<CollectionKey, CollectionConfig<any>> = {
   pages: {
     table: "pages",
     fromDb: (row) => ({
-      id: row.id,
-      title: row.title ?? "",
-      slug: row.slug ?? "",
-      summary: row.summary ?? "",
+      id: asString(row.id),
+      title: asString(row.title),
+      slug: asString(row.slug),
+      summary: asString(row.summary),
     }),
     toDb: (item: PageItem) => ({
       id: item.id,
@@ -1135,13 +1150,13 @@ const collectionConfigs: Record<CollectionKey, CollectionConfig<any>> = {
   seasons: {
     table: "seasons",
     fromDb: (row) => ({
-      id: row.id,
-      title: row.title ?? "",
-      season: row.season ?? "ramadan",
-      description: row.description ?? "",
-      image: row.image ?? "",
-      price: row.price ?? "",
-      options: Array.isArray(row.options) ? row.options : [],
+      id: asString(row.id),
+      title: asString(row.title),
+      season: (asString(row.season, "ramadan") as SeasonOffer["season"]) || "ramadan",
+      description: asString(row.description),
+      image: asString(row.image),
+      price: asString(row.price),
+      options: asStringArray(row.options),
     }),
     toDb: (item: SeasonOffer) => ({
       id: item.id,
@@ -1205,8 +1220,9 @@ const fetchAdminCollection = async <K extends CollectionKey>(
     .from(config.table)
     .select(config.select ?? "*");
   if (error) return fallback;
-  const mapped = (data || []).map(config.fromDb);
-  return emptyOrFallback(mapped, fallback as any) as AdminData[K];
+  const rows = (data || []) as DbRow[];
+  const mapped = rows.map(config.fromDb);
+  return emptyOrFallback(mapped, fallback);
 };
 
 export const useAdminCollection = <K extends CollectionKey>(
@@ -1326,7 +1342,7 @@ export const useAdminData = () => {
     const mapped = config.fromDb(saved);
     setData((prev) => ({
       ...prev,
-      [key]: upsertItemInList(prev[key] as any, mapped),
+      [key]: upsertItemInList(prev[key], mapped),
     }));
     if (isBrowser) window.dispatchEvent(new Event("admin-data-updated"));
     return mapped;
@@ -1337,7 +1353,7 @@ export const useAdminData = () => {
     await supabase.from(config.table).delete().eq("id", id);
     setData((prev) => ({
       ...prev,
-      [key]: (prev[key] as any).filter((entry: { id: string }) => entry.id !== id),
+      [key]: prev[key].filter((entry) => entry.id !== id),
     }));
     if (isBrowser) window.dispatchEvent(new Event("admin-data-updated"));
   };

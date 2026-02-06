@@ -1,5 +1,9 @@
 export function errorMiddleware(err, req, res, next) {
-  console.error(err);
   const status = err.status || 500;
-  res.status(status).json({ error: err.message || 'server_error' });
+  const isProd = process.env.NODE_ENV === 'production';
+  if (!isProd) {
+    console.error(err);
+  }
+  const message = status >= 500 && isProd ? 'server_error' : err.message || 'server_error';
+  res.status(status).json({ error: message });
 }
