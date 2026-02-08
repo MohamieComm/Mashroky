@@ -1117,17 +1117,19 @@ const collectionConfigs: CollectionConfigMap = {
   },
   apiKeys: {
     table: "api_keys",
-    select: "id, name, provider, status",
+    select: "id, name, provider, key, status",
     fromDb: (row) => ({
       id: asString(row.id),
       name: asString(row.name),
       provider: asString(row.provider),
+      key: asString(row.key),
       status: (asString(row.status, "disabled") as ApiKeyItem["status"]) || "disabled",
     }),
     toDb: (item: ApiKeyItem) => ({
       id: item.id,
       name: item.name,
       provider: item.provider,
+      key: item.key ?? null,
       status: item.status,
     }),
   },

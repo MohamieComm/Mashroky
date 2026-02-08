@@ -5,7 +5,6 @@ import {
   Search,
   Plane,
   Hotel,
-  Calendar,
   Users,
   MapPin,
   PlayCircle,
@@ -13,11 +12,20 @@ import {
 import { stats } from "@/data/content";
 import { usePromoVideoUrl } from "@/data/adminStore";
 import { getMediaTypeFromUrl } from "@/lib/media";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { AIRPORTS, formatAirportLabel, getInputLanguage, resolveAirportCode } from "@/data/airports";
+import DatePickerField from "@/components/DatePickerField";
 
 export function HeroSection() {
   const [searchType, setSearchType] = useState<"flights" | "hotels">("flights");
+  const [tripType, setTripType] = useState<"roundtrip" | "oneway">("roundtrip");
+  const [originInput, setOriginInput] = useState("");
+  const [destinationInput, setDestinationInput] = useState("");
+  const [departureDate, setDepartureDate] = useState("");
+  const [returnDate, setReturnDate] = useState("");
+  const [passengers, setPassengers] = useState("1");
+  const navigate = useNavigate();
   const supabasePromoUrl = usePromoVideoUrl();
   const promoVideoUrl =
     (import.meta.env.VITE_PROMO_VIDEO_URL as string | undefined) || supabasePromoUrl;
@@ -29,6 +37,35 @@ export function HeroSection() {
     () => (searchType === "flights" ? "رحلات الطيران" : "الفنادق"),
     [searchType]
   );
+
+  const originLang = getInputLanguage(originInput);
+  const destinationLang = getInputLanguage(destinationInput);
+  const dateLocale = originLang === "en" || destinationLang === "en" ? "en" : "ar";
+
+  const handleHeroSearch = () => {
+    if (searchType !== "flights") return;
+    const originCode = resolveAirportCode(originInput, AIRPORTS);
+    const destinationCode = resolveAirportCode(destinationInput, AIRPORTS);
+    if (!originCode || !destinationCode || !departureDate) {
+      alert("يرجى اختيار المدن والتاريخ من القائمة.");
+      return;
+    }
+    if (tripType === "roundtrip" && !returnDate) {
+      alert("يرجى تحديد تاريخ العودة لرحلات الذهاب والعودة.");
+      return;
+    }
+    const params = new URLSearchParams({
+      origin: originCode,
+      destination: destinationCode,
+      departureDate,
+      passengers: passengers || "1",
+      tripType,
+    });
+    if (tripType === "roundtrip" && returnDate) {
+      params.set("returnDate", returnDate);
+    }
+    navigate(`/trips?${params.toString()}`);
+  };
 
   return (
     <section className="relative min-h-[85vh] flex items-center overflow-hidden">
@@ -100,40 +137,109 @@ export function HeroSection() {
                 </span>
               </div>
 
+              {searchType === "flights" && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <button
+                    onClick={() => setTripType("roundtrip")}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                      tripType === "roundtrip"
+                        ? "hero-gradient text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:bg-accent"
+                    }`}
+                  >
+                    ذهاب وعودة
+                  </button>
+                  <button
+                    onClick={() => setTripType("oneway")}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                      tripType === "oneway"
+                        ? "hero-gradient text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:bg-accent"
+                    }`}
+                  >
+                    ذهاب فقط
+                  </button>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="relative">
                   <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
+                    list="hero-origin-airports"
                     placeholder={searchType === "flights" ? "من أين؟" : "الوجهة"}
                     className="pr-10 h-12 bg-muted border-0"
+                    value={originInput}
+                    onChange={(event) => setOriginInput(event.target.value)}
                   />
+                  <datalist id="hero-origin-airports">
+                    {AIRPORTS.map((airport) => (
+                      <option key={airport.code} value={formatAirportLabel(airport, originLang)} />
+                    ))}
+                  </datalist>
                 </div>
                 {searchType === "flights" && (
                   <div className="relative">
                     <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input
+                      list="hero-destination-airports"
                       placeholder="إلى أين؟"
                       className="pr-10 h-12 bg-muted border-0"
+                      value={destinationInput}
+                      onChange={(event) => setDestinationInput(event.target.value)}
                     />
+                    <datalist id="hero-destination-airports">
+                      {AIRPORTS.map((airport) => (
+                        <option key={airport.code} value={formatAirportLabel(airport, destinationLang)} />
+                      ))}
+                    </datalist>
                   </div>
                 )}
                 <div className="relative">
-                  <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    placeholder="التاريخ"
-                    className="pr-10 h-12 bg-muted border-0"
+                  <DatePickerField
+                    value={departureDate}
+                    onChange={setDepartureDate}
+                    locale={dateLocale}
+                    buttonClassName="bg-muted border-0"
                   />
                 </div>
-                <div className="relative">
-                  <Users className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    placeholder="عدد المسافرين"
-                    className="pr-10 h-12 bg-muted border-0"
-                  />
-                </div>
+                {searchType === "flights" && tripType === "roundtrip" ? (
+                  <div className="relative">
+                    <DatePickerField
+                      value={returnDate}
+                      onChange={setReturnDate}
+                      locale={dateLocale}
+                      buttonClassName="bg-muted border-0"
+                    />
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <Users className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      placeholder="عدد المسافرين"
+                      className="pr-10 h-12 bg-muted border-0"
+                      value={passengers}
+                      onChange={(event) => setPassengers(event.target.value)}
+                    />
+                  </div>
+                )}
               </div>
 
-              <Button variant="hero" size="lg" className="w-full md:w-auto mt-6 gap-2">
+              {searchType === "flights" && tripType === "roundtrip" && (
+                <div className="mt-3">
+                  <div className="relative max-w-xs">
+                    <Users className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      placeholder="عدد المسافرين"
+                      className="pr-10 h-12 bg-muted border-0"
+                      value={passengers}
+                      onChange={(event) => setPassengers(event.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <Button variant="hero" size="lg" className="w-full md:w-auto mt-6 gap-2" onClick={handleHeroSearch}>
                 <Search className="w-5 h-5" />
                 ابحث الآن
               </Button>

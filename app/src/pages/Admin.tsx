@@ -1056,6 +1056,12 @@ export default function Admin() {
                   <div>
                     <h2 className="text-2xl font-bold">{activeConfig.title}</h2>
                     <p className="text-sm text-muted-foreground mt-2">{activeConfig.description}</p>
+                    {activeSection === "api" && (
+                      <div className="mt-3 text-xs text-muted-foreground space-y-1">
+                        <p>Admitad: استخدم provider=admitad و name=campaign_code وضع الكود داخل قيمة المفتاح.</p>
+                        <p>فعّل الحالة (مفعل) حتى يتم استخدام المفتاح في الواجهة.</p>
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="relative">

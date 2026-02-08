@@ -1,6 +1,8 @@
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { CreditCard, ShieldCheck, Key, CheckCircle } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { useCart } from "@/hooks/useCart";
 
 const paymentMethods = [
   "Samsung Pay",
@@ -10,7 +12,116 @@ const paymentMethods = [
   "Mastercard",
 ];
 
+const ORDER_SNAPSHOT_KEY = "mashrouk-last-order";
+
+type StoredOrder = {
+  orderNumber?: string;
+  currency?: string;
+  discountCode?: string;
+  total?: number;
+  items?: Array<{
+    id?: string;
+    title?: string;
+    price?: number;
+    quantity?: number;
+  }>;
+};
+
 export default function Payments() {
+  const { items, total } = useCart();
+  const paymentStatus = useMemo(() => {
+    if (typeof window === "undefined") return "";
+    const params = new URLSearchParams(window.location.search);
+    return params.get("payment") || "";
+  }, []);
+
+  useEffect(() => {
+    if (paymentStatus !== "success" || typeof window === "undefined") return;
+    let storedOrder: StoredOrder | null = null;
+    try {
+      const raw = localStorage.getItem(ORDER_SNAPSHOT_KEY);
+      storedOrder = raw ? (JSON.parse(raw) as StoredOrder) : null;
+    } catch {
+      storedOrder = null;
+    }
+
+    const orderNumber = storedOrder?.orderNumber || `ORD-${Date.now()}`;
+    const trackedKey = `admitad-sale-tracked:${orderNumber}`;
+    if (sessionStorage.getItem(trackedKey)) return;
+    sessionStorage.setItem(trackedKey, "1");
+
+    const w = window as typeof window & { ADMITAD?: any; getSourceCookie?: () => string | undefined; cookie_name?: string };
+    w.ADMITAD = w.ADMITAD || {};
+    w.ADMITAD.Invoice = w.ADMITAD.Invoice || {};
+
+    const cookieName = w.cookie_name || "deduplication_cookie";
+    const getSourceCookie =
+      w.getSourceCookie ||
+      function () {
+        const matches = document.cookie.match(
+          new RegExp(
+            "(?:^|; )" +
+              cookieName.replace(/([\.$?*|{}\(\)\[\]\\/\+^])/g, "\\$1") +
+              "=([^;]*)"
+          )
+        );
+        return matches ? decodeURIComponent(matches[1]) : undefined;
+      };
+
+    const deduplicationCookieValue = "admitad";
+
+    if (!getSourceCookie()) {
+      w.ADMITAD.Invoice.broker = "na";
+    } else if (getSourceCookie() !== deduplicationCookieValue) {
+      w.ADMITAD.Invoice.broker = getSourceCookie();
+    } else {
+      w.ADMITAD.Invoice.broker = "adm";
+    }
+
+    w.ADMITAD.Invoice.category = "1";
+    const orderCurrency = storedOrder?.currency || "SAR";
+    const sourceItems = storedOrder?.items?.length ? storedOrder.items : items;
+    const orderedItem = (sourceItems || [])
+      .filter((item) => Number(item?.price || 0) > 0)
+      .map((item) => ({
+        Product: {
+          productID: String(item?.id || item?.title || orderNumber),
+          category: "1",
+          price: String(Number(item?.price || 0)),
+          priceCurrency: orderCurrency,
+        },
+        orderQuantity: String(item?.quantity || 1),
+        additionalType: "sale",
+      }));
+
+    if (!orderedItem.length) {
+      const fallbackTotal = storedOrder?.total ?? total ?? 0;
+      if (fallbackTotal > 0) {
+        orderedItem.push({
+          Product: {
+            productID: orderNumber,
+            category: "1",
+            price: String(fallbackTotal),
+            priceCurrency: orderCurrency,
+          },
+          orderQuantity: "1",
+          additionalType: "sale",
+        });
+      }
+    }
+
+    w.ADMITAD.Invoice.referencesOrder = w.ADMITAD.Invoice.referencesOrder || [];
+    w.ADMITAD.Invoice.referencesOrder.push({
+      orderNumber,
+      discountCode: storedOrder?.discountCode || "",
+      orderedItem,
+    });
+
+    if (w.ADMITAD.Tracking && typeof w.ADMITAD.Tracking.processPositions === "function") {
+      w.ADMITAD.Tracking.processPositions();
+    }
+  }, [items, paymentStatus, total]);
+
   return (
     <Layout>
       <section className="hero-gradient py-20">

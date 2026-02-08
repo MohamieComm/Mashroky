@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
@@ -22,7 +22,7 @@ import {
   useAdminCollection,
   useAdminSettings,
 } from "@/data/adminStore";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { adminBenefitCards, popularDestinationsByRegion } from "@/data/content";
 import { useCart } from "@/hooks/useCart";
 import FlightSearchForm, { type FlightSearchData } from "@/components/FlightSearchForm";
@@ -137,8 +137,13 @@ export default function Trips() {
   };
 
   const [flightResults, setFlightResults] = useState<FlightOffer[]>([]);
+  const [returnResults, setReturnResults] = useState<FlightOffer[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [activeTripType, setActiveTripType] = useState<"oneway" | "roundtrip">("oneway");
+  const [selectedOutboundKey, setSelectedOutboundKey] = useState<string | null>(null);
+  const [selectedReturnKey, setSelectedReturnKey] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
   const flightErrorMessages: Record<string, string> = {
     amadeus_not_configured: "خدمة الرحلات غير مهيأة بعد على الخادم.",
     invalid_airport_code: "رمز المطار غير صحيح.",
@@ -148,35 +153,127 @@ export default function Trips() {
     server_error: "تعذر جلب الرحلات بسبب خطأ في الخادم.",
   };
 
+  const getOfferKey = (offer: FlightOffer, index: number) =>
+    offer.providerOfferId || `offer-${index}`;
+
+  const getOfferPrice = (offer: FlightOffer) => {
+    const raw = offer.pricing?.total;
+    if (typeof raw === "number") return raw;
+    if (!raw) return Number.NaN;
+    const cleaned = String(raw).replace(/[^\d.]/g, "");
+    const value = Number(cleaned);
+    return Number.isFinite(value) ? value : Number.NaN;
+  };
+
+  const sortOffersByPrice = (offers: FlightOffer[]) =>
+    offers
+      .slice()
+      .sort((a, b) => {
+        const priceA = getOfferPrice(a);
+        const priceB = getOfferPrice(b);
+        const safeA = Number.isFinite(priceA) ? priceA : Number.POSITIVE_INFINITY;
+        const safeB = Number.isFinite(priceB) ? priceB : Number.POSITIVE_INFINITY;
+        return safeA - safeB;
+      });
+
+  const getOfferSummary = (offer: FlightOffer) => {
+    const firstSlice = Array.isArray(offer.slices?.[0]) ? offer.slices[0] : [];
+    const firstSegment = firstSlice[0] || {};
+    const lastSegment = firstSlice[firstSlice.length - 1] || {};
+    const origin = firstSegment.origin || "";
+    const destination = lastSegment.destination || "";
+    const carrier = firstSegment.marketingCarrier || "";
+    const carrierName = airlines.find((airline) => airline.code === carrier)?.name || "";
+    const durationMinutes = firstSegment.durationMinutes ?? 0;
+    const priceValue = getOfferPrice(offer);
+    return {
+      origin,
+      destination,
+      carrier,
+      carrierName,
+      durationMinutes,
+      priceValue: Number.isFinite(priceValue) ? priceValue : 0,
+      currency: offer.pricing?.currency,
+      priceLabel: offer.pricing?.total,
+      cabins: offer.cabins?.join("، "),
+    };
+  };
+
   const handleFlightSearch = async (searchData: FlightSearchData) => {
     setLoading(true);
     setError("");
+    setReturnResults([]);
+    setActiveTripType(searchData.tripType);
+    setSelectedOutboundKey(null);
+    setSelectedReturnKey(null);
     try {
       const apiUrl = `${flightApiBaseUrl.replace(/\/$/, "")}/api/flights/search`;
-      const res = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          provider: "amadeus",
-          origin: searchData.origin,
-          destination: searchData.destination,
-          departureDate: searchData.departureDate,
-          adults: Number(searchData.passengers) || 1,
-          airline: searchData.airline || undefined,
-        }),
+      const runSearch = async (payload: {
+        origin: string;
+        destination: string;
+        departureDate: string;
+      }) => {
+        const res = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            provider: "amadeus",
+            origin: payload.origin,
+            destination: payload.destination,
+            departureDate: payload.departureDate,
+            adults: Number(searchData.passengers) || 1,
+            airline: searchData.airline || undefined,
+          }),
+        });
+        if (!res.ok) {
+          const errorBody = await res.json().catch(() => ({}));
+          throw new Error(errorBody?.error || "flight_search_failed");
+        }
+        const data = await res.json();
+        return Array.isArray(data.results) ? data.results : [];
+      };
+
+      const outbound = await runSearch({
+        origin: searchData.origin,
+        destination: searchData.destination,
+        departureDate: searchData.departureDate,
       });
-      if (!res.ok) {
-        const errorBody = await res.json().catch(() => ({}));
-        throw new Error(errorBody?.error || "flight_search_failed");
+      setFlightResults(sortOffersByPrice(outbound));
+
+      if (searchData.tripType === "roundtrip" && searchData.returnDate) {
+        const inbound = await runSearch({
+          origin: searchData.destination,
+          destination: searchData.origin,
+          departureDate: searchData.returnDate,
+        });
+        setReturnResults(sortOffersByPrice(inbound));
       }
-      const data = await res.json();
-      setFlightResults(Array.isArray(data.results) ? data.results : []);
     } catch (err) {
       const code = err instanceof Error ? err.message : "flight_search_failed";
       setError(flightErrorMessages[code] || "فشل جلب الرحلات. تأكد من الاتصال بالخادم.");
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    const origin = searchParams.get("origin") || "";
+    const destination = searchParams.get("destination") || "";
+    const departureDate = searchParams.get("departureDate") || "";
+    const tripType = (searchParams.get("tripType") || "oneway") as "oneway" | "roundtrip";
+    const returnDate = searchParams.get("returnDate") || "";
+    if (!origin || !destination || !departureDate) return;
+    const passengers = Number(searchParams.get("passengers") || "1") || 1;
+    handleFlightSearch({
+      tripType,
+      origin,
+      destination,
+      departureDate,
+      returnDate: tripType === "roundtrip" ? returnDate : undefined,
+      passengers,
+      cabinClass: "economy",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const destinationList = useMemo(() => {
     const fromAdmin = destinations
@@ -194,6 +291,35 @@ export default function Trips() {
       destinationList.slice(index * chunkSize, (index + 1) * chunkSize)
     ).filter((col) => col.length);
   }, [destinationList]);
+
+  const selectedOutbound =
+    selectedOutboundKey &&
+    flightResults.find((offer, index) => getOfferKey(offer, index) === selectedOutboundKey);
+  const selectedReturn =
+    selectedReturnKey &&
+    returnResults.find((offer, index) => getOfferKey(offer, index) === selectedReturnKey);
+  const selectedOutboundSummary = selectedOutbound ? getOfferSummary(selectedOutbound) : null;
+  const selectedReturnSummary = selectedReturn ? getOfferSummary(selectedReturn) : null;
+  const canBookRoundtrip =
+    activeTripType === "roundtrip" && Boolean(selectedOutboundSummary && selectedReturnSummary);
+  const roundtripCurrency =
+    selectedOutbound?.pricing?.currency || selectedReturn?.pricing?.currency || "SAR";
+  const outboundPrice = selectedOutbound ? getOfferPrice(selectedOutbound) : 0;
+  const returnPrice = selectedReturn ? getOfferPrice(selectedReturn) : 0;
+  const safeOutboundPrice = Number.isFinite(outboundPrice) ? outboundPrice : 0;
+  const safeReturnPrice = Number.isFinite(returnPrice) ? returnPrice : 0;
+  const roundtripTotal = safeOutboundPrice + safeReturnPrice;
+
+  const handleRoundtripBook = () => {
+    if (!selectedOutboundSummary || !selectedReturnSummary) return;
+    addItem({
+      id: `flight-roundtrip-${Date.now()}`,
+      title: `${selectedOutboundSummary.origin} → ${selectedOutboundSummary.destination} + ${selectedReturnSummary.origin} → ${selectedReturnSummary.destination}`,
+      price: roundtripTotal,
+      details: `ذهاب: ${selectedOutboundSummary.durationMinutes} دقيقة • عودة: ${selectedReturnSummary.durationMinutes} دقيقة`,
+    });
+    navigate("/cart");
+  };
 
   return (
     <Layout>
@@ -225,42 +351,149 @@ export default function Trips() {
           {loading && <div className="text-center text-lg">جاري البحث عن الرحلات...</div>}
           {error && <div className="text-center text-destructive text-lg">{error}</div>}
           {!loading && flightResults.length > 0 && (
-            <div className="grid md:grid-cols-2 gap-6 mt-6">
+            <div className="mt-6">
+              <div className="text-center text-sm text-muted-foreground mb-4">
+                تم العثور على {flightResults.length} عرضًا للمقارنة (الأرخص أولًا)
+              </div>
+              {activeTripType === "roundtrip" && (
+                <div className="bg-muted rounded-2xl p-4 mb-6">
+                  <div className="text-sm text-muted-foreground">
+                    اختر رحلة الذهاب والعودة ثم اضغط زر الحجز الموحد.
+                  </div>
+                  {canBookRoundtrip ? (
+                    <div className="mt-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                      <div className="text-sm">
+                        <div>
+                          الذهاب: {selectedOutboundSummary?.origin} →{" "}
+                          {selectedOutboundSummary?.destination}
+                        </div>
+                        <div>
+                          العودة: {selectedReturnSummary?.origin} →{" "}
+                          {selectedReturnSummary?.destination}
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-2 md:items-end">
+                        <div className="text-sm font-semibold">
+                          الإجمالي: {roundtripTotal} {roundtripCurrency}
+                        </div>
+                        <Button variant="hero" onClick={handleRoundtripBook}>
+                          احجز الذهاب والعودة
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-2 text-sm text-muted-foreground">
+                      لم يتم اختيار رحلتي الذهاب والعودة بعد.
+                    </div>
+                  )}
+                </div>
+              )}
+              <div className="grid md:grid-cols-2 gap-6">
               {flightResults.map((offer, idx) => {
-                const firstSlice = Array.isArray(offer.slices?.[0]) ? offer.slices[0] : [];
-                const firstSegment = firstSlice[0] || {};
-                const lastSegment = firstSlice[firstSlice.length - 1] || {};
-                const origin = firstSegment.origin || "";
-                const destination = lastSegment.destination || "";
-                const carrier = firstSegment.marketingCarrier || "";
-                const durationMinutes = firstSegment.durationMinutes ?? 0;
+                const offerKey = getOfferKey(offer, idx);
+                const summary = getOfferSummary(offer);
+                const isSelected = selectedOutboundKey === offerKey;
                 return (
-                  <div key={offer.providerOfferId || idx} className="bg-card rounded-2xl p-6 shadow-card">
+                  <div key={offerKey} className="bg-card rounded-2xl p-6 shadow-card">
                     <div className="flex items-center gap-3 mb-2">
                       <Plane className="w-5 h-5 text-primary" />
-                      <span className="font-bold text-lg">{origin} → {destination}</span>
+                      <span className="font-bold text-lg">
+                        {summary.origin} → {summary.destination}
+                      </span>
                     </div>
                     <div className="mb-2">رقم الرحلة: {offer.providerOfferId}</div>
-                    <div className="mb-2">السعر: {offer.pricing?.total} {offer.pricing?.currency}</div>
-                    <div className="mb-2">الدرجة: {offer.cabins?.join("، ")}</div>
-                    <div className="mb-2">شركة الطيران: {carrier}</div>
-                    <Button
-                      variant="hero"
-                      onClick={() =>
-                        handleBook({
-                          id: offer.providerOfferId,
-                          from: origin,
-                          to: destination,
-                          price: offer.pricing?.total,
-                          duration: `${durationMinutes} دقيقة`,
-                        })
-                      }
-                    >
-                      احجز الآن
-                    </Button>
-                  </div>
-                );
-              })}
+                    <div className="mb-2">
+                      السعر: {summary.priceLabel} {summary.currency}
+                    </div>
+                    <div className="mb-2">الدرجة: {summary.cabins || "غير محدد"}</div>
+                    <div className="mb-2">
+                      شركة الطيران:{" "}
+                      {summary.carrierName ? `${summary.carrierName} (${summary.carrier})` : summary.carrier}
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      {activeTripType === "roundtrip" && (
+                        <Button
+                          variant={isSelected ? "hero" : "outline"}
+                          onClick={() => setSelectedOutboundKey(isSelected ? null : offerKey)}
+                        >
+                          {isSelected ? "تم اختيار رحلة الذهاب" : "اختر رحلة الذهاب"}
+                        </Button>
+                      )}
+                      <Button
+                        variant={activeTripType === "roundtrip" ? "outline" : "hero"}
+                        onClick={() =>
+                          handleBook({
+                            id: offer.providerOfferId,
+                            from: summary.origin,
+                            to: summary.destination,
+                            price: offer.pricing?.total ?? summary.priceValue,
+                            duration: `${summary.durationMinutes} دقيقة`,
+                          })
+                        }
+                      >
+                        احجز الآن
+                      </Button>
+                    </div>
+                </div>
+              );
+            })}
+              </div>
+            </div>
+          )}
+
+          {!loading && activeTripType === "roundtrip" && returnResults.length > 0 && (
+            <div className="mt-10">
+              <div className="text-center text-sm text-muted-foreground mb-4">
+                تم العثور على {returnResults.length} رحلة للعودة (الأرخص أولًا)
+              </div>
+              <div className="grid md:grid-cols-2 gap-6">
+                {returnResults.map((offer, idx) => {
+                  const offerKey = getOfferKey(offer, idx);
+                  const summary = getOfferSummary(offer);
+                  const isSelected = selectedReturnKey === offerKey;
+                  return (
+                    <div key={offerKey} className="bg-card rounded-2xl p-6 shadow-card">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Plane className="w-5 h-5 text-primary" />
+                        <span className="font-bold text-lg">
+                          {summary.origin} → {summary.destination}
+                        </span>
+                      </div>
+                      <div className="mb-2">رقم الرحلة: {offer.providerOfferId}</div>
+                      <div className="mb-2">
+                        السعر: {summary.priceLabel} {summary.currency}
+                      </div>
+                      <div className="mb-2">الدرجة: {summary.cabins || "غير محدد"}</div>
+                      <div className="mb-2">
+                        شركة الطيران:{" "}
+                        {summary.carrierName ? `${summary.carrierName} (${summary.carrier})` : summary.carrier}
+                      </div>
+                      <div className="flex flex-wrap gap-3">
+                        <Button
+                          variant={isSelected ? "hero" : "outline"}
+                          onClick={() => setSelectedReturnKey(isSelected ? null : offerKey)}
+                        >
+                          {isSelected ? "تم اختيار رحلة العودة" : "اختر رحلة العودة"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() =>
+                            handleBook({
+                              id: offer.providerOfferId,
+                              from: summary.origin,
+                              to: summary.destination,
+                              price: offer.pricing?.total ?? summary.priceValue,
+                              duration: `${summary.durationMinutes} دقيقة`,
+                            })
+                          }
+                        >
+                          احجز الآن
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
           {!loading && flightResults.length === 0 && !error && (

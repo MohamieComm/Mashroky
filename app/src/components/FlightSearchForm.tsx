@@ -11,11 +11,12 @@ import { Input } from "@/components/ui/input";
 import {
   Plane,
   MapPin,
-  Calendar,
   Users,
   Filter,
   ArrowLeftRight,
 } from "lucide-react";
+import { AIRPORTS, formatAirportLabel, getInputLanguage, resolveAirportCode } from "@/data/airports";
+import DatePickerField from "@/components/DatePickerField";
 
 type AirlineOption = { code: string; name: string; country?: string };
 type ApiAirline = {
@@ -44,30 +45,7 @@ export const AIRLINES: AirlineOption[] = [
   { code: "UA", name: "يونايتد إيرلاينز", country: "أمريكا" },
 ];
 
-// بيانات المطارات
-export const AIRPORTS = [
-  // السعودية
-  { code: "RUH", city: "الرياض", country: "السعودية", region: "saudi" },
-  { code: "JED", city: "جدة", country: "السعودية", region: "saudi" },
-  { code: "DMM", city: "الدمام", country: "السعودية", region: "saudi" },
-  { code: "AHB", city: "أبها", country: "السعودية", region: "saudi" },
-  { code: "TIF", city: "الطائف", country: "السعودية", region: "saudi" },
-  
-  // الإمارات
-  { code: "DXB", city: "دبي", country: "الإمارات", region: "middle_east" },
-  { code: "AUH", city: "أبو ظبي", country: "الإمارات", region: "middle_east" },
-  
-  // مصر
-  { code: "CAI", city: "القاهرة", country: "مصر", region: "middle_east" },
-  { code: "HRG", city: "الغردقة", country: "مصر", region: "middle_east" },
-  
-  // دول أخرى
-  { code: "IST", city: "إسطنبول", country: "تركيا", region: "international" },
-  { code: "LHR", city: "لندن", country: "المملكة المتحدة", region: "international" },
-  { code: "CDG", city: "باريس", country: "فرنسا", region: "international" },
-  { code: "FCO", city: "روما", country: "إيطاليا", region: "international" },
-  { code: "AMS", city: "أمستردام", country: "هولندا", region: "international" },
-];
+// بيانات المطارات الآن في data/airports.ts
 
 interface FlightSearchFormProps {
   onSearch?: (data: FlightSearchData) => void;
@@ -90,8 +68,8 @@ const isCabinClass = (value: string): value is FlightSearchData["cabinClass"] =>
 
 export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFormProps) {
   const [tripType, setTripType] = useState<"roundtrip" | "oneway">("roundtrip");
-  const [origin, setOrigin] = useState("");
-  const [destination, setDestination] = useState("");
+  const [originInput, setOriginInput] = useState("");
+  const [destinationInput, setDestinationInput] = useState("");
   const [originCountry, setOriginCountry] = useState("all");
   const [destinationCountry, setDestinationCountry] = useState("all");
   const [departureDate, setDepartureDate] = useState("");
@@ -105,15 +83,24 @@ export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFo
     "https://jubilant-hope-production-a334.up.railway.app";
 
   const handleSearch = () => {
-    if (!origin || !destination || !departureDate) {
+    const originCode =
+      resolveAirportCode(originInput, originAirports) || resolveAirportCode(originInput, AIRPORTS);
+    const destinationCode =
+      resolveAirportCode(destinationInput, destinationAirports) ||
+      resolveAirportCode(destinationInput, AIRPORTS);
+    if (!originCode || !destinationCode || !departureDate) {
       alert("يرجى ملء جميع الحقول المطلوبة");
+      return;
+    }
+    if (tripType === "roundtrip" && !returnDate) {
+      alert("يرجى تحديد تاريخ العودة لرحلات الذهاب والعودة");
       return;
     }
 
     const searchData: FlightSearchData = {
       tripType,
-      origin,
-      destination,
+      origin: originCode,
+      destination: destinationCode,
       departureDate,
       returnDate: tripType === "roundtrip" ? returnDate : undefined,
       passengers: parseInt(passengers),
@@ -169,17 +156,9 @@ export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFo
     return AIRPORTS.filter((airport) => airport.country === destinationCountry);
   }, [destinationCountry]);
 
-  useEffect(() => {
-    if (origin && !originAirports.find((airport) => airport.code === origin)) {
-      setOrigin("");
-    }
-  }, [origin, originAirports]);
-
-  useEffect(() => {
-    if (destination && !destinationAirports.find((airport) => airport.code === destination)) {
-      setDestination("");
-    }
-  }, [destination, destinationAirports]);
+  const originLang = getInputLanguage(originInput);
+  const destinationLang = getInputLanguage(destinationInput);
+  const dateLocale = originLang === "en" || destinationLang === "en" ? "en" : "ar";
 
   return (
     <div className="bg-card rounded-2xl p-6 shadow-hover max-w-6xl mx-auto">
@@ -231,19 +210,21 @@ export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFo
 
         <div>
           <label className="block text-sm font-semibold mb-2 text-foreground">مدينة المغادرة</label>
-          <Select value={origin} onValueChange={setOrigin}>
-            <SelectTrigger className="bg-muted border-0 h-12">
-              <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
-              <SelectValue placeholder="اختر المدينة" />
-            </SelectTrigger>
-            <SelectContent>
-              {originAirports.map((airport) => (
-                <SelectItem key={airport.code} value={airport.code}>
-                  {airport.city} ({airport.code})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="relative">
+            <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <Input
+              list="origin-airports"
+              placeholder="اكتب المدينة أو الكود"
+              value={originInput}
+              onChange={(event) => setOriginInput(event.target.value)}
+              className="pr-10 h-12 bg-muted border-0"
+            />
+          </div>
+          <datalist id="origin-airports">
+            {originAirports.map((airport) => (
+              <option key={airport.code} value={formatAirportLabel(airport, originLang)} />
+            ))}
+          </datalist>
         </div>
 
         <div>
@@ -266,19 +247,21 @@ export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFo
 
         <div>
           <label className="block text-sm font-semibold mb-2 text-foreground">مدينة الوصول</label>
-          <Select value={destination} onValueChange={setDestination}>
-            <SelectTrigger className="bg-muted border-0 h-12">
-              <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
-              <SelectValue placeholder="اختر المدينة" />
-            </SelectTrigger>
-            <SelectContent>
-              {destinationAirports.map((airport) => (
-                <SelectItem key={airport.code} value={airport.code}>
-                  {airport.city} ({airport.code})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="relative">
+            <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <Input
+              list="destination-airports"
+              placeholder="اكتب المدينة أو الكود"
+              value={destinationInput}
+              onChange={(event) => setDestinationInput(event.target.value)}
+              className="pr-10 h-12 bg-muted border-0"
+            />
+          </div>
+          <datalist id="destination-airports">
+            {destinationAirports.map((airport) => (
+              <option key={airport.code} value={formatAirportLabel(airport, destinationLang)} />
+            ))}
+          </datalist>
         </div>
       </div>
 
@@ -286,31 +269,25 @@ export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFo
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-6">
         <div>
           <label className="block text-sm font-semibold mb-2 text-foreground">تاريخ الذهاب</label>
-          <div className="relative">
-            <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
-            <Input
-              type="date"
-              value={departureDate}
-              onChange={(e) => setDepartureDate(e.target.value)}
-              className="pr-10 h-12 bg-muted border-0"
-            />
-          </div>
+          <DatePickerField
+            value={departureDate}
+            onChange={setDepartureDate}
+            locale={dateLocale}
+            buttonClassName="bg-muted border-0"
+          />
         </div>
 
         <div>
           <label className="block text-sm font-semibold mb-2 text-foreground">تاريخ العودة</label>
-          <div className="relative">
-            <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
-            <Input
-              type="date"
-              value={tripType === "roundtrip" ? returnDate : ""}
-              onChange={(e) => {
-                if (tripType === "roundtrip") setReturnDate(e.target.value);
-              }}
-              disabled={tripType !== "roundtrip"}
-              className="pr-10 h-12 bg-muted border-0"
-            />
-          </div>
+          <DatePickerField
+            value={tripType === "roundtrip" ? returnDate : ""}
+            onChange={(nextValue) => {
+              if (tripType === "roundtrip") setReturnDate(nextValue);
+            }}
+            disabled={tripType !== "roundtrip"}
+            locale={dateLocale}
+            buttonClassName="bg-muted border-0"
+          />
         </div>
       </div>
 

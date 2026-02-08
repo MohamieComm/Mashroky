@@ -57,8 +57,8 @@ export async function createPayment(req, res, next) {
       amount: rawAmount,
       currency,
       description,
-      successUrl: `${baseUrl}/cart?payment=success`,
-      backUrl: `${baseUrl}/cart?payment=cancelled`,
+      successUrl: `${baseUrl}/payments?payment=success`,
+      backUrl: `${baseUrl}/payments?payment=cancelled`,
       callbackUrl: `${backendUrl}/api/payments/webhook`,
       metadata: bookingId ? { bookingId } : undefined,
     });

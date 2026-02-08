@@ -36,3 +36,7 @@ Payy/
 # Node backend for payments (placeholder)
 /server
 /server/node_modules
+
+# Android release binaries
+NewAppMoh/*.apk
+NewAppMoh/*.aab

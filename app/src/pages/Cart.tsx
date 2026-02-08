@@ -4,6 +4,8 @@ import { Trash2, CreditCard } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { useState } from "react";
 
+const ORDER_SNAPSHOT_KEY = "mashrouk-last-order";
+
 export default function Cart() {
   const { items, removeItem, clear, total } = useCart();
   const hasItems = items.length > 0;
@@ -12,6 +14,7 @@ export default function Cart() {
   const finalTotal = Math.max(subtotal - discount, 0);
   const [processing, setProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState("");
+  const [promoCode, setPromoCode] = useState("");
   const flightApiBaseUrl =
     (import.meta.env.VITE_FLIGHT_API_URL as string | undefined) ||
     "https://jubilant-hope-production-a334.up.railway.app";
@@ -32,6 +35,22 @@ export default function Cart() {
       return;
     }
     try {
+      const orderNumber = `ORD-${Date.now()}`;
+      const snapshot = {
+        orderNumber,
+        currency: "SAR",
+        discountCode: promoCode.trim(),
+        total: finalTotal,
+        items: items.map((item) => ({
+          id: item.id,
+          title: item.title,
+          price: item.price,
+          quantity: 1,
+        })),
+        createdAt: new Date().toISOString(),
+      };
+      localStorage.setItem(ORDER_SNAPSHOT_KEY, JSON.stringify(snapshot));
+
       const apiUrl = `${flightApiBaseUrl.replace(/\/$/, "")}/api/payments/create`;
       const res = await fetch(apiUrl, {
         method: "POST",
@@ -103,7 +122,12 @@ export default function Cart() {
             <div className="bg-muted rounded-2xl p-6 shadow-card">
               <h4 className="font-semibold mb-2">كوبون خصم</h4>
               <div className="flex gap-3">
-                <input className="h-11 rounded-xl border border-input px-4 flex-1" placeholder="أدخل الكود" />
+                <input
+                  className="h-11 rounded-xl border border-input px-4 flex-1"
+                  placeholder="أدخل الكود"
+                  value={promoCode}
+                  onChange={(event) => setPromoCode(event.target.value)}
+                />
                 <Button variant="outline">تفعيل</Button>
               </div>
             </div>

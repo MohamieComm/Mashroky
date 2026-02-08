@@ -10,6 +10,10 @@ export const amadeusEnv = {
   clientSecret: process.env.AMADEUS_CLIENT_SECRET || '',
 };
 
+export const openAiEnv = {
+  apiKey: process.env.OPENAI_API_KEY || '',
+};
+
 export const skyscannerEnv = {
   apiKey: process.env.SKYSCANNER_API_KEY || '',
 };
@@ -27,6 +31,8 @@ export const moyasarEnv = {
 export const supabaseEnv = {
   url: process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '',
   serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+  anonKey: process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '',
+  jwtSecret: process.env.SUPABASE_JWT_SECRET || '',
 };
 
 export const allowedOrigins = [
@@ -34,4 +40,10 @@ export const allowedOrigins = [
   'https://mashrok.online',
   'https://mashroky-production.up.railway.app',
   'https://jubilant-hope-production-a334.up.railway.app',
+  'https://mashrukt.up.railway.app',
+  'https://mashrukt-production.up.railway.app',
 ];
+
+export const adminApiKey = process.env.ADMIN_API_KEY || '';
+
+export const nodeEnv = process.env.NODE_ENV || 'development';
