@@ -9,6 +9,7 @@ import mediaRoutes from './media.routes.js';
 import aiRoutes from './ai.routes.js';
 import statsRoutes from './stats.routes.js';
 import webhooksRoutes from './webhooks.routes.js';
+import flightBookingsRoutes from './flight-bookings.routes.js';
 import { getPublicConfig } from '../controllers/public-config.controller.js';
 
 const router = express.Router();
@@ -25,5 +26,6 @@ router.use('/media', mediaRoutes);
 router.use('/ai', aiRoutes);
 router.use('/stats', statsRoutes);
 router.use('/webhooks', webhooksRoutes);
+router.use('/flight-bookings', flightBookingsRoutes);
 
 export default router;

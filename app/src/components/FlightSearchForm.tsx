@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { AIRPORTS, formatAirportLabel, getInputLanguage, resolveAirportCode } from "@/data/airports";
 import DatePickerField from "@/components/DatePickerField";
+import { useAdminCollection, getActiveApiKeyByProvider } from "@/data/adminStore";
 
 type AirlineOption = { code: string; name: string; country?: string };
 type ApiAirline = {
@@ -81,6 +82,10 @@ export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFo
   const flightApiBaseUrl =
     (import.meta.env.VITE_FLIGHT_API_URL as string | undefined) ||
     "https://jubilant-hope-production-a334.up.railway.app";
+
+  // جلب مفاتيح API من لوحة الإدارة
+  const apiKeys = useAdminCollection("apiKeys", []);
+  const amadeusKey = getActiveApiKeyByProvider(apiKeys, "amadeus");
 
   const handleSearch = () => {
     const originCode =

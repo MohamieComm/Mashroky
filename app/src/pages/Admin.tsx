@@ -81,6 +81,7 @@ const sidebarItems = [
   { name: "الوجهات", icon: MapPinned, id: "destinations" },
   { name: "المقالات", icon: Newspaper, id: "articles" },
   { name: "المشتركين", icon: Users, id: "users" },
+  { name: "الحجوزات", icon: CalendarCheck, id: "bookings" },
   { name: "الشركاء (Affiliate)", icon: Link2, id: "affiliate" },
   { name: "خطوط الطيران", icon: Plane, id: "airlines" },
   { name: "API Keys", icon: Key, id: "api" },
@@ -341,9 +342,22 @@ const parseNumber = (value: string) => {
 const asAdminItem = <K extends SectionKey>(item: Record<string, unknown>, _key: K) =>
   item as AdminData[K][number];
 
+type FlightBooking = {
+  id?: string;
+  booking_reference?: string | null;
+  provider_order_id?: string | null;
+  total?: number | null;
+  currency?: string | null;
+  trip_type?: string | null;
+  summary?: { outbound?: string; inbound?: string } | null;
+  email?: string | null;
+  travelers_count?: number | null;
+  created_at?: string | null;
+};
+
 export default function Admin() {
   const navigate = useNavigate();
-  const { isAdmin, loading: authLoading, user, profile } = useAuth();
+  const { isAdmin, loading: authLoading, user, profile, session } = useAuth();
   const [activeSection, setActiveSection] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -370,10 +384,16 @@ export default function Admin() {
   const [contactAddressDraft, setContactAddressDraft] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [authFailed, setAuthFailed] = useState(false);
+  const [flightBookings, setFlightBookings] = useState<FlightBooking[]>([]);
+  const [flightBookingsLoading, setFlightBookingsLoading] = useState(false);
+  const [flightBookingsError, setFlightBookingsError] = useState("");
   const isPageLoading = authLoading || adminLoading;
   const paymentProvider = (import.meta.env.VITE_PAYMENT_PROVIDER || "").toLowerCase();
   const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
   const moyasarPublicKey = import.meta.env.VITE_MOYASAR_PUBLISHABLE_KEY || "";
+  const flightApiBaseUrl =
+    (import.meta.env.VITE_FLIGHT_API_URL as string | undefined) ||
+    "https://jubilant-hope-production-a334.up.railway.app";
   const promoMediaType = getMediaTypeFromUrl(promoDraft);
   const isPromoVideo = promoMediaType === "video";
   const isPromoImage = promoMediaType === "image" || promoMediaType === "unknown";
@@ -396,6 +416,40 @@ export default function Admin() {
     setDraft(nextDraft);
     setEditingId(null);
     setSearchTerm("");
+  }, [activeSection]);
+
+  const loadFlightBookings = async () => {
+    setFlightBookingsLoading(true);
+    setFlightBookingsError("");
+    try {
+      if (!session?.access_token) {
+        throw new Error("missing_session");
+      }
+      const res = await fetch(`${flightApiBaseUrl.replace(/\/$/, "")}/api/flight-bookings`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.error || "failed_to_load");
+      }
+      const data = await res.json();
+      setFlightBookings(Array.isArray(data.items) ? data.items : []);
+    } catch (err) {
+      const code = err instanceof Error ? err.message : "failed_to_load";
+      setFlightBookingsError(
+        code === "missing_session"
+          ? "لا توجد جلسة صالحة. يرجى إعادة تسجيل الدخول."
+          : "تعذر تحميل الحجوزات من الخادم."
+      );
+    } finally {
+      setFlightBookingsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeSection !== "bookings") return;
+    loadFlightBookings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSection]);
 
   useEffect(() => {

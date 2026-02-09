@@ -1,3 +1,8 @@
+// جلب أول مفتاح مفعّل لمزود معين (amadeus, supabase, moyasar...)
+export function getActiveApiKeyByProvider(apiKeys: ApiKeyItem[], provider: string): string | undefined {
+  const found = apiKeys.find((k) => k.provider.toLowerCase() === provider.toLowerCase() && k.status === "enabled" && k.key);
+  return found?.key;
+}
 export type SeasonOffer = {
   id: string;
   title: string;

@@ -1,3 +1,42 @@
+// --- Amadeus API integration helpers ---
+const FLIGHT_PRICED_OFFER_KEY = "mashrouk-flight-priced-offer";
+// use the same checkout key used by FlightTravelerDetails
+const FLIGHT_BOOKING_PAYLOAD_KEY = "mashrouk-flight-checkout";
+const FLIGHT_BOOKING_RESULT_KEY = "mashrouk-flight-booking-result";
+
+async function priceSelectedOffers(offers: any[], apiBaseUrl: string) {
+  const apiUrl = `${apiBaseUrl.replace(/\/$/, "")}/api/flights/price`;
+  const res = await fetch(apiUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ flightOffers: offers }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body?.error || "flight_price_failed");
+  }
+  const data = await res.json();
+  // توقع أن data.results أو data.flightOffers
+  const priced = Array.isArray(data.results) ? data.results : data.flightOffers || [];
+  localStorage.setItem(FLIGHT_PRICED_OFFER_KEY, JSON.stringify(priced));
+  return priced;
+}
+
+async function bookSelectedOffers(pricedOffers: any[], travelers: any[], apiBaseUrl: string) {
+  const apiUrl = `${apiBaseUrl.replace(/\/$/, "")}/api/flights/book`;
+  const res = await fetch(apiUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ flightOffers: pricedOffers, travelers }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body?.error || "flight_book_failed");
+  }
+  const data = await res.json();
+  localStorage.setItem(FLIGHT_BOOKING_RESULT_KEY, JSON.stringify(data));
+  return data;
+}
 import { useEffect, useMemo, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -111,6 +150,24 @@ export default function Trips() {
     navigate("/cart");
   };
 
+  const handleFlightCheckout = (offer: FlightOffer, summary: ReturnType<typeof getOfferSummary>) => {
+    if (!offer.raw) {
+      alert("يرجى إعادة البحث عن الرحلات.");
+      return;
+    }
+    const checkoutPayload = {
+      tripType: "oneway",
+      passengers: lastSearchData?.passengers || 1,
+      cabinClass: lastSearchData?.cabinClass || "economy",
+      offers: [offer.raw],
+      summary: {
+        outbound: `${summary.origin} → ${summary.destination}`,
+      },
+    };
+    localStorage.setItem("mashrouk-flight-checkout", JSON.stringify(checkoutPayload));
+    navigate("/flight/traveler-details");
+  };
+
   const handleServiceAdd = (service: { name: string; description: string; price: string }) => {
     const serviceDetails = additionalServices.find((item) => item.name === service.name)?.details || [];
     addItem({
@@ -131,6 +188,7 @@ export default function Trips() {
 
   type FlightOffer = {
     providerOfferId?: string;
+    raw?: any;
     slices?: FlightSlice[][];
     pricing?: { total?: number | string; currency?: string };
     cabins?: string[];
@@ -140,6 +198,7 @@ export default function Trips() {
   const [returnResults, setReturnResults] = useState<FlightOffer[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [lastSearchData, setLastSearchData] = useState<FlightSearchData | null>(null);
   const [activeTripType, setActiveTripType] = useState<"oneway" | "roundtrip">("oneway");
   const [selectedOutboundKey, setSelectedOutboundKey] = useState<string | null>(null);
   const [selectedReturnKey, setSelectedReturnKey] = useState<string | null>(null);
@@ -151,6 +210,12 @@ export default function Trips() {
     invalid_passenger_count: "عدد المسافرين غير صالح.",
     unknown_provider: "مزود الرحلات غير معروف.",
     server_error: "تعذر جلب الرحلات بسبب خطأ في الخادم.",
+  };
+
+  const travelClassMap: Record<FlightSearchData["cabinClass"], string> = {
+    economy: "ECONOMY",
+    business: "BUSINESS",
+    first: "FIRST",
   };
 
   const getOfferKey = (offer: FlightOffer, index: number) =>
@@ -203,6 +268,7 @@ export default function Trips() {
     setLoading(true);
     setError("");
     setReturnResults([]);
+    setLastSearchData(searchData);
     setActiveTripType(searchData.tripType);
     setSelectedOutboundKey(null);
     setSelectedReturnKey(null);
@@ -223,6 +289,7 @@ export default function Trips() {
             departureDate: payload.departureDate,
             adults: Number(searchData.passengers) || 1,
             airline: searchData.airline || undefined,
+            travelClass: travelClassMap[searchData.cabinClass] || undefined,
           }),
         });
         if (!res.ok) {
@@ -310,15 +377,34 @@ export default function Trips() {
   const safeReturnPrice = Number.isFinite(returnPrice) ? returnPrice : 0;
   const roundtripTotal = safeOutboundPrice + safeReturnPrice;
 
-  const handleRoundtripBook = () => {
+  // استدعاء التسعير قبل الدفع، ثم حفظ النتائج للخطوة التالية
+  const handleRoundtripBook = async () => {
     if (!selectedOutboundSummary || !selectedReturnSummary) return;
-    addItem({
-      id: `flight-roundtrip-${Date.now()}`,
-      title: `${selectedOutboundSummary.origin} → ${selectedOutboundSummary.destination} + ${selectedReturnSummary.origin} → ${selectedReturnSummary.destination}`,
-      price: roundtripTotal,
-      details: `ذهاب: ${selectedOutboundSummary.durationMinutes} دقيقة • عودة: ${selectedReturnSummary.durationMinutes} دقيقة`,
-    });
-    navigate("/cart");
+    const outboundRaw = selectedOutbound?.raw;
+    const returnRaw = selectedReturn?.raw;
+    if (!outboundRaw || !returnRaw) {
+      alert("يرجى إعادة البحث عن الرحلات.");
+      return;
+    }
+    try {
+      // 1. تسعير العروض المختارة
+      const priced = await priceSelectedOffers([outboundRaw, returnRaw], flightApiBaseUrl);
+      // 2. حفظ بيانات الحجز للخطوة التالية (صفحة بيانات المسافرين)
+      const checkoutPayload = {
+        tripType: "roundtrip",
+        passengers: lastSearchData?.passengers || 1,
+        cabinClass: lastSearchData?.cabinClass || "economy",
+        offers: priced,
+        summary: {
+          outbound: `${selectedOutboundSummary.origin} → ${selectedOutboundSummary.destination}`,
+          inbound: `${selectedReturnSummary.origin} → ${selectedReturnSummary.destination}`,
+        },
+      };
+      localStorage.setItem(FLIGHT_BOOKING_PAYLOAD_KEY, JSON.stringify(checkoutPayload));
+      navigate("/flight/traveler-details");
+    } catch (err) {
+      alert("فشل تسعير الرحلات. يرجى المحاولة لاحقًا.");
+    }
   };
 
   return (
@@ -421,15 +507,7 @@ export default function Trips() {
                       )}
                       <Button
                         variant={activeTripType === "roundtrip" ? "outline" : "hero"}
-                        onClick={() =>
-                          handleBook({
-                            id: offer.providerOfferId,
-                            from: summary.origin,
-                            to: summary.destination,
-                            price: offer.pricing?.total ?? summary.priceValue,
-                            duration: `${summary.durationMinutes} دقيقة`,
-                          })
-                        }
+                        onClick={() => handleFlightCheckout(offer, summary)}
                       >
                         احجز الآن
                       </Button>
@@ -478,13 +556,7 @@ export default function Trips() {
                         <Button
                           variant="outline"
                           onClick={() =>
-                            handleBook({
-                              id: offer.providerOfferId,
-                              from: summary.origin,
-                              to: summary.destination,
-                              price: offer.pricing?.total ?? summary.priceValue,
-                              duration: `${summary.durationMinutes} دقيقة`,
-                            })
+                            handleFlightCheckout(offer, summary)
                           }
                         >
                           احجز الآن

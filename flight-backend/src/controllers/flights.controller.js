@@ -2,6 +2,7 @@ import * as amadeusService from '../services/amadeus.service.js';
 import * as skyscannerService from '../services/skyscanner.service.js';
 import * as duffelService from '../services/duffel.service.js';
 import { createMockMoyasarPayment } from '../services/moyasar.service.js';
+import { sendBookingEmail } from '../services/email.service.js';
 
 const DEFAULT_AIRLINE_CODES = [
   'SV',
@@ -19,6 +20,12 @@ const DEFAULT_AIRLINE_CODES = [
 const AIRPORT_CODE_RE = /^[A-Z]{3}$/;
 const AIRLINE_CODE_RE = /^[A-Z0-9]{2,3}$/;
 const MAX_AIRLINE_CODES = 50;
+const TRAVEL_CLASS_OPTIONS = new Set([
+  'ECONOMY',
+  'PREMIUM_ECONOMY',
+  'BUSINESS',
+  'FIRST',
+]);
 
 const normalizeCode = (value) => String(value || '').trim().toUpperCase();
 const isValidDate = (value) => Number.isFinite(Date.parse(value));
@@ -30,8 +37,10 @@ export async function searchFlights(req, res, next) {
       origin,
       destination,
       departureDate,
+      returnDate,
       adults,
       airline,
+      travelClass,
     } = req.body || {};
 
     const originCode = normalizeCode(origin);
@@ -45,6 +54,9 @@ export async function searchFlights(req, res, next) {
     if (!departureDate || !isValidDate(departureDate)) {
       return res.status(400).json({ error: 'invalid_departure_date' });
     }
+    if (returnDate && !isValidDate(returnDate)) {
+      return res.status(400).json({ error: 'invalid_return_date' });
+    }
     if (!Number.isFinite(adultCount) || adultCount < 1 || adultCount > 9) {
       return res.status(400).json({ error: 'invalid_passenger_count' });
     }
@@ -53,8 +65,12 @@ export async function searchFlights(req, res, next) {
       origin: originCode,
       destination: destinationCode,
       departureDate,
+      returnDate: returnDate || undefined,
       adults: adultCount,
       airline: AIRLINE_CODE_RE.test(airlineCode) ? airlineCode : undefined,
+      travelClass: TRAVEL_CLASS_OPTIONS.has(String(travelClass || '').toUpperCase())
+        ? String(travelClass).toUpperCase()
+        : undefined,
     };
 
     let results = [];
@@ -103,10 +119,36 @@ export async function priceAmadeus(req, res, next) {
 
 export async function bookAmadeus(req, res, next) {
   try {
-    const { flightOffers, travelers, payment } = req.body || {};
+    const { flightOffers, travelers, payment, sendEmail, customerEmail } = req.body || {};
     const result = await amadeusService.bookFlights({ flightOffers, travelers });
     if (payment?.amount) {
       result.paymentInfo = createMockMoyasarPayment(payment);
+    }
+    if (sendEmail) {
+      const passengerEmail =
+        customerEmail ||
+        result?.passengers?.find((p) => p.email)?.email ||
+        travelers?.find((t) => t?.contact?.emailAddress)?.contact?.emailAddress ||
+        null;
+      if (passengerEmail) {
+        const bookingRef = result?.bookingReference || result?.providerOrderId || '';
+        const total = result?.offers?.reduce((sum, offer) => sum + Number(offer?.pricing?.total || 0), 0) || 0;
+        const currency = result?.offers?.[0]?.pricing?.currency || 'SAR';
+        await sendBookingEmail({
+          to: passengerEmail,
+          subject: 'تأكيد حجز مشروك',
+          text: `تم إصدار الحجز بنجاح. رقم الحجز: ${bookingRef}. الإجمالي: ${total} ${currency}.`,
+          html: `
+            <div style="font-family:Arial,sans-serif;direction:rtl;text-align:right;">
+              <h2>تأكيد حجز مشروك</h2>
+              <p>تم إصدار الحجز بنجاح.</p>
+              <p><strong>رقم الحجز:</strong> ${bookingRef}</p>
+              <p><strong>الإجمالي:</strong> ${total} ${currency}</p>
+              <p>شكراً لاختيارك مشروك.</p>
+            </div>
+          `,
+        });
+      }
     }
     res.json(result);
   } catch (err) {
@@ -125,4 +167,12 @@ export async function bookDuffel(req, res, next) {
   } catch (err) {
     next(err);
   }
+}
+
+export async function priceFlights(req, res, next) {
+  return priceAmadeus(req, res, next);
+}
+
+export async function bookFlights(req, res, next) {
+  return bookAmadeus(req, res, next);
 }

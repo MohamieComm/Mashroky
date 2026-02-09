@@ -1,8 +1,10 @@
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { CreditCard, ShieldCheck, Key, CheckCircle } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useCart } from "@/hooks/useCart";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 const paymentMethods = [
   "Samsung Pay",
@@ -13,6 +15,9 @@ const paymentMethods = [
 ];
 
 const ORDER_SNAPSHOT_KEY = "mashrouk-last-order";
+const FLIGHT_BOOKING_KEY = "mashrouk-flight-booking";
+const FLIGHT_BOOKING_STATUS_KEY = "mashrouk-flight-booking-status";
+const FLIGHT_BOOKING_RESULT_KEY = "mashrouk-flight-booking-result";
 
 type StoredOrder = {
   orderNumber?: string;
@@ -29,6 +34,16 @@ type StoredOrder = {
 
 export default function Payments() {
   const { items, total } = useCart();
+  const { isAdmin } = useAuth();
+  const navigate = useNavigate();
+  const [flightBookingState, setFlightBookingState] = useState<{
+    status: "idle" | "processing" | "success" | "error";
+    message?: string;
+    results?: any[];
+  }>({ status: "idle" });
+  const flightApiBaseUrl =
+    (import.meta.env.VITE_FLIGHT_API_URL as string | undefined) ||
+    "https://jubilant-hope-production-a334.up.railway.app";
   const paymentStatus = useMemo(() => {
     if (typeof window === "undefined") return "";
     const params = new URLSearchParams(window.location.search);
@@ -122,6 +137,94 @@ export default function Payments() {
     }
   }, [items, paymentStatus, total]);
 
+  useEffect(() => {
+    if (paymentStatus !== "success" || typeof window === "undefined") return;
+    const raw = localStorage.getItem(FLIGHT_BOOKING_KEY);
+    if (!raw) return;
+    const status = localStorage.getItem(FLIGHT_BOOKING_STATUS_KEY);
+    if (status === "booked") {
+      const cached = localStorage.getItem(FLIGHT_BOOKING_RESULT_KEY);
+      setFlightBookingState({
+        status: "success",
+        results: cached ? JSON.parse(cached) : [],
+      });
+      return;
+    }
+
+    const payload = JSON.parse(raw);
+    const offers = Array.isArray(payload?.offers) ? payload.offers : [];
+    const travelers = Array.isArray(payload?.travelers) ? payload.travelers : [];
+    if (!offers.length || !travelers.length) return;
+
+    const runBooking = async () => {
+      setFlightBookingState({ status: "processing" });
+      try {
+        const results: any[] = [];
+        const primaryEmail =
+          payload?.travelers?.find((t: any) => t?.contact?.emailAddress)?.contact?.emailAddress ||
+          payload?.travelers?.[0]?.contact?.emailAddress ||
+          "";
+        let bookingReference = "";
+        let providerOrderId = "";
+        for (let idx = 0; idx < offers.length; idx += 1) {
+          const offer = offers[idx];
+          const res = await fetch(`${flightApiBaseUrl.replace(/\/$/, "")}/api/flights/book`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              flightOffers: [offer],
+              travelers,
+              sendEmail: idx === 0,
+              customerEmail: primaryEmail,
+            }),
+          });
+          if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            throw new Error(body?.error || "flight_booking_failed");
+          }
+          const bookingResult = await res.json();
+          results.push(bookingResult);
+          bookingReference = bookingReference || bookingResult?.bookingReference || "";
+          providerOrderId = providerOrderId || bookingResult?.providerOrderId || "";
+        }
+        localStorage.setItem(FLIGHT_BOOKING_STATUS_KEY, "booked");
+        localStorage.setItem(FLIGHT_BOOKING_RESULT_KEY, JSON.stringify(results));
+        setFlightBookingState({ status: "success", results });
+
+        const bookingPayload = payload || {};
+        await fetch(`${flightApiBaseUrl.replace(/\/$/, "")}/api/flight-bookings`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            bookingReference,
+            providerOrderId,
+            total: bookingPayload?.total || 0,
+            currency: bookingPayload?.currency || "SAR",
+            tripType: bookingPayload?.tripType || null,
+            summary: bookingPayload?.summary || null,
+            email: primaryEmail || null,
+            travelersCount: bookingPayload?.travelers?.length || 0,
+            raw: results,
+          }),
+        });
+        setTimeout(() => {
+          navigate("/flight/confirmation");
+        }, 1500);
+      } catch (err) {
+        const code = err instanceof Error ? err.message : "flight_booking_failed";
+        setFlightBookingState({
+          status: "error",
+          message:
+            code === "flight_booking_failed"
+              ? "تعذر إصدار التذاكر بعد الدفع. يرجى التواصل مع الدعم."
+              : "حدث خطأ غير متوقع أثناء إصدار التذاكر.",
+        });
+      }
+    };
+
+    runBooking();
+  }, [paymentStatus, flightApiBaseUrl]);
+
   return (
     <Layout>
       <section className="hero-gradient py-20">
@@ -131,7 +234,9 @@ export default function Payments() {
             دفع آمن ومباشر
           </h1>
           <p className="text-primary-foreground/80 mt-4 max-w-2xl mx-auto">
-            بوابات دفع متعددة مع لوحة تحكم لإدارة مفاتيح التكامل وصلاحيات الفريق.
+            {isAdmin
+              ? "بوابات دفع متعددة مع لوحة تحكم لإدارة مفاتيح التكامل وصلاحيات الفريق."
+              : "بوابات دفع متعددة وتجربة دفع آمنة ومباشرة للمستخدمين."}
           </p>
         </div>
       </section>
@@ -157,36 +262,83 @@ export default function Payments() {
                   <h3 className="font-semibold mb-2">أمان متقدم</h3>
                   <p className="text-sm text-muted-foreground">تشفير المدفوعات ومراقبة العمليات لحماية المستخدمين.</p>
                 </div>
-                <div className="bg-muted rounded-2xl p-5">
-                  <Key className="w-6 h-6 text-primary mb-3" />
-                  <h3 className="font-semibold mb-2">إدارة API Key</h3>
-                  <p className="text-sm text-muted-foreground">تحكم في مفاتيح الربط مع مزود الدفع من لوحة الإدارة.</p>
-                </div>
+                {isAdmin && (
+                  <div className="bg-muted rounded-2xl p-5">
+                    <Key className="w-6 h-6 text-primary mb-3" />
+                    <h3 className="font-semibold mb-2">إدارة API Key</h3>
+                    <p className="text-sm text-muted-foreground">تحكم في مفاتيح الربط مع مزود الدفع من لوحة الإدارة.</p>
+                  </div>
+                )}
               </div>
             </div>
 
-            <div className="bg-muted rounded-3xl p-8 shadow-card">
-              <h3 className="text-xl font-bold mb-4">تكامل منصة ميسر</h3>
-              <p className="text-muted-foreground mb-6">
-                اربط منصة الدفع مباشرة من لوحة التحكم وحدد صلاحيات الموظفين لإدارة العمليات.
-              </p>
-              <div className="space-y-3 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-primary" />
-                  دعم الدفع المباشر وبطاقات الائتمان.
+            {isAdmin ? (
+              <div className="bg-muted rounded-3xl p-8 shadow-card">
+                <h3 className="text-xl font-bold mb-4">تكامل منصة ميسر</h3>
+                <p className="text-muted-foreground mb-6">
+                  اربط منصة الدفع مباشرة من لوحة التحكم وحدد صلاحيات الموظفين لإدارة العمليات.
+                </p>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-primary" />
+                    دعم الدفع المباشر وبطاقات الائتمان.
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-primary" />
+                    إدارة استرداد المبالغ من نفس اللوحة.
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-primary" />
+                    تقارير فورية عن المدفوعات والطلبات.
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-primary" />
-                  إدارة استرداد المبالغ من نفس اللوحة.
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-primary" />
-                  تقارير فورية عن المدفوعات والطلبات.
+                <Button variant="hero" className="mt-6 w-full">إعداد بوابة الدفع</Button>
+              </div>
+            ) : (
+              <div className="bg-muted rounded-3xl p-8 shadow-card">
+                <h3 className="text-xl font-bold mb-4">دفع سريع وآمن</h3>
+                <p className="text-muted-foreground mb-6">
+                  أكمل عمليات الدفع من خلال السلة، وسنحوّلك تلقائيًا إلى بوابة الدفع الآمنة.
+                </p>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-primary" />
+                    حماية بيانات الدفع بتشفير متقدم.
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-primary" />
+                    تأكيد فوري للحجز بعد الدفع.
+                  </div>
                 </div>
               </div>
-              <Button variant="hero" className="mt-6 w-full">إعداد بوابة الدفع</Button>
-            </div>
+            )}
           </div>
+
+          {flightBookingState.status !== "idle" && (
+            <div className="mt-10 bg-card rounded-3xl p-8 shadow-card">
+              <h3 className="text-xl font-bold mb-3">حالة إصدار التذاكر</h3>
+              {flightBookingState.status === "processing" && (
+                <p className="text-muted-foreground">جاري إصدار التذاكر من Amadeus...</p>
+              )}
+              {flightBookingState.status === "error" && (
+                <p className="text-destructive">{flightBookingState.message}</p>
+              )}
+              {flightBookingState.status === "success" && (
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>تم إصدار التذاكر بنجاح.</p>
+                  {(flightBookingState.results || []).map((result, index) => (
+                    <div key={index} className="bg-muted rounded-xl p-4">
+                      <div>رقم الحجز: {result?.bookingReference || "غير متوفر"}</div>
+                      <div>رقم الطلب: {result?.providerOrderId || "غير متوفر"}</div>
+                    </div>
+                  ))}
+                  <Button variant="hero" className="mt-4" onClick={() => navigate("/flight/confirmation")}>
+                    عرض صفحة التأكيد
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </section>
     </Layout>
