@@ -1,4 +1,4 @@
-// جلب أول مفتاح مفعّل لمزود معين (amadeus, supabase, moyasar...)
+﻿// ط¬ظ„ط¨ ط£ظˆظ„ ظ…ظپطھط§ط­ ظ…ظپط¹ظ‘ظ„ ظ„ظ…ط²ظˆط¯ ظ…ط¹ظٹظ† (amadeus, supabase, moyasar...)
 export function getActiveApiKeyByProvider(apiKeys: ApiKeyItem[], provider: string): string | undefined {
   const found = apiKeys.find((k) => k.provider.toLowerCase() === provider.toLowerCase() && k.status === "enabled" && k.key);
   return found?.key;
@@ -15,30 +15,30 @@ export type SeasonOffer = {
 export const defaultSeasons: SeasonOffer[] = [
   {
     id: "season-ramadan",
-    title: "رحلات رمضان إلى مكة المكرمة",
+    title: "ط±ط­ظ„ط§طھ ط±ظ…ط¶ط§ظ† ط¥ظ„ظ‰ ظ…ظƒط© ط§ظ„ظ…ظƒط±ظ…ط©",
     season: "ramadan",
-    description: "باقة شاملة للإقامة في مكة المكرمة خلال شهر رمضان المبارك، تشمل السكن والمواصلات وخدمات إضافية حسب اختيار العميل.",
+    description: "ط¨ط§ظ‚ط© ط´ط§ظ…ظ„ط© ظ„ظ„ط¥ظ‚ط§ظ…ط© ظپظٹ ظ…ظƒط© ط§ظ„ظ…ظƒط±ظ…ط© ط®ظ„ط§ظ„ ط´ظ‡ط± ط±ظ…ط¶ط§ظ† ط§ظ„ظ…ط¨ط§ط±ظƒطŒ طھط´ظ…ظ„ ط§ظ„ط³ظƒظ† ظˆط§ظ„ظ…ظˆط§طµظ„ط§طھ ظˆط®ط¯ظ…ط§طھ ط¥ط¶ط§ظپظٹط© ط­ط³ط¨ ط§ط®طھظٹط§ط± ط§ظ„ط¹ظ…ظٹظ„.",
     image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800",
     price: "2,500",
-    options: ["سكن 4 نجوم", "مواصلات خاصة", "إفطار يومي"],
+    options: ["ط³ظƒظ† 4 ظ†ط¬ظˆظ…", "ظ…ظˆط§طµظ„ط§طھ ط®ط§طµط©", "ط¥ظپط·ط§ط± ظٹظˆظ…ظٹ"],
   },
   {
     id: "season-hajj",
-    title: "باقة الحج الكاملة",
+    title: "ط¨ط§ظ‚ط© ط§ظ„ط­ط¬ ط§ظ„ظƒط§ظ…ظ„ط©",
     season: "hajj",
-    description: "رحلة الحج مع خدمات السكن والمواصلات والإرشاد، باقات متنوعة تناسب جميع الاحتياجات.",
+    description: "ط±ط­ظ„ط© ط§ظ„ط­ط¬ ظ…ط¹ ط®ط¯ظ…ط§طھ ط§ظ„ط³ظƒظ† ظˆط§ظ„ظ…ظˆط§طµظ„ط§طھ ظˆط§ظ„ط¥ط±ط´ط§ط¯طŒ ط¨ط§ظ‚ط§طھ ظ…طھظ†ظˆط¹ط© طھظ†ط§ط³ط¨ ط¬ظ…ظٹط¹ ط§ظ„ط§ط­طھظٹط§ط¬ط§طھ.",
     image: "https://images.unsplash.com/photo-1464983953574-0892a716854b?w=800",
     price: "7,500",
-    options: ["سكن قريب من الحرم", "مواصلات مكيفة", "إرشاد ديني"],
+    options: ["ط³ظƒظ† ظ‚ط±ظٹط¨ ظ…ظ† ط§ظ„ط­ط±ظ…", "ظ…ظˆط§طµظ„ط§طھ ظ…ظƒظٹظپط©", "ط¥ط±ط´ط§ط¯ ط¯ظٹظ†ظٹ"],
   },
   {
     id: "season-summer",
-    title: "دراسة اللغة الإنجليزية في الخارج (الصيف)",
+    title: "ط¯ط±ط§ط³ط© ط§ظ„ظ„ط؛ط© ط§ظ„ط¥ظ†ط¬ظ„ظٹط²ظٹط© ظپظٹ ط§ظ„ط®ط§ط±ط¬ (ط§ظ„طµظٹظپ)",
     season: "summer",
-    description: "فرصة لدراسة اللغة الإنجليزية في بريطانيا أو أمريكا خلال الإجازة الصيفية، تشمل السكن والدراسة والمواصلات.",
+    description: "ظپط±طµط© ظ„ط¯ط±ط§ط³ط© ط§ظ„ظ„ط؛ط© ط§ظ„ط¥ظ†ط¬ظ„ظٹط²ظٹط© ظپظٹ ط¨ط±ظٹط·ط§ظ†ظٹط§ ط£ظˆ ط£ظ…ط±ظٹظƒط§ ط®ظ„ط§ظ„ ط§ظ„ط¥ط¬ط§ط²ط© ط§ظ„طµظٹظپظٹط©طŒ طھط´ظ…ظ„ ط§ظ„ط³ظƒظ† ظˆط§ظ„ط¯ط±ط§ط³ط© ظˆط§ظ„ظ…ظˆط§طµظ„ط§طھ.",
     image: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?w=800",
     price: "12,000",
-    options: ["سكن عائلي أو طلابي", "دروس لغة مكثفة", "رحلات سياحية"],
+    options: ["ط³ظƒظ† ط¹ط§ط¦ظ„ظٹ ط£ظˆ ط·ظ„ط§ط¨ظٹ", "ط¯ط±ظˆط³ ظ„ط؛ط© ظ…ظƒط«ظپط©", "ط±ط­ظ„ط§طھ ط³ظٹط§ط­ظٹط©"],
   },
 ];
 import { useEffect, useState } from "react";
@@ -139,6 +139,7 @@ export type ApiKeyItem = {
   name: string;
   provider: string;
   key?: string;
+  baseUrl?: string;
   status: "enabled" | "disabled";
 };
 
@@ -200,79 +201,79 @@ export type AdminData = {
 export const defaultFlights: Flight[] = [
   {
     id: "flight-1",
-    from: "الرياض",
-    to: "دبي",
-    airline: "الخطوط السعودية",
+    from: "ط§ظ„ط±ظٹط§ط¶",
+    to: "ط¯ط¨ظٹ",
+    airline: "ط§ظ„ط®ط·ظˆط· ط§ظ„ط³ط¹ظˆط¯ظٹط©",
     departTime: "08:00",
     arriveTime: "10:00",
-    duration: "2 ساعة",
+    duration: "2 ط³ط§ط¹ط©",
     price: "650",
-    stops: "مباشر",
+    stops: "ظ…ط¨ط§ط´ط±",
     rating: 4.8,
     image: "https://images.unsplash.com/photo-1520425155577-aaad47db1d1f?w=400",
   },
   {
     id: "flight-2",
-    from: "جدة",
-    to: "إسطنبول",
-    airline: "طيران ناس",
+    from: "ط¬ط¯ط©",
+    to: "ط¥ط³ط·ظ†ط¨ظˆظ„",
+    airline: "ط·ظٹط±ط§ظ† ظ†ط§ط³",
     departTime: "14:30",
     arriveTime: "19:00",
-    duration: "4.5 ساعة",
+    duration: "4.5 ط³ط§ط¹ط©",
     price: "1,200",
-    stops: "مباشر",
+    stops: "ظ…ط¨ط§ط´ط±",
     rating: 4.5,
     image: "https://images.unsplash.com/photo-1502933691298-84fc14542831?w=400",
   },
   {
     id: "flight-3",
-    from: "الرياض",
-    to: "القاهرة",
-    airline: "مصر للطيران",
+    from: "ط§ظ„ط±ظٹط§ط¶",
+    to: "ط§ظ„ظ‚ط§ظ‡ط±ط©",
+    airline: "ظ…طµط± ظ„ظ„ط·ظٹط±ط§ظ†",
     departTime: "06:00",
     arriveTime: "08:30",
-    duration: "2.5 ساعة",
+    duration: "2.5 ط³ط§ط¹ط©",
     price: "800",
-    stops: "مباشر",
+    stops: "ظ…ط¨ط§ط´ط±",
     rating: 4.6,
     image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400",
   },
   {
     id: "flight-4",
-    from: "الدمام",
-    to: "باريس",
-    airline: "الخطوط الفرنسية",
+    from: "ط§ظ„ط¯ظ…ط§ظ…",
+    to: "ط¨ط§ط±ظٹط³",
+    airline: "ط§ظ„ط®ط·ظˆط· ط§ظ„ظپط±ظ†ط³ظٹط©",
     departTime: "22:00",
     arriveTime: "06:00",
-    duration: "8 ساعات",
+    duration: "8 ط³ط§ط¹ط§طھ",
     price: "3,500",
-    stops: "محطة واحدة",
+    stops: "ظ…ط­ط·ط© ظˆط§ط­ط¯ط©",
     rating: 4.9,
     image: "https://images.unsplash.com/photo-1500422017585-53bff1160f14?w=400",
   },
   {
     id: "flight-5",
-    from: "الرياض",
-    to: "لندن",
-    airline: "الخطوط البريطانية",
+    from: "ط§ظ„ط±ظٹط§ط¶",
+    to: "ظ„ظ†ط¯ظ†",
+    airline: "ط§ظ„ط®ط·ظˆط· ط§ظ„ط¨ط±ظٹط·ط§ظ†ظٹط©",
     departTime: "13:45",
     arriveTime: "19:30",
-    duration: "6.5 ساعة",
+    duration: "6.5 ط³ط§ط¹ط©",
     price: "2,900",
-    stops: "مباشر",
+    stops: "ظ…ط¨ط§ط´ط±",
     rating: 4.7,
     image: "https://images.unsplash.com/photo-1505236858576-d1b2c6ce53b9?w=400",
   },
   {
     id: "flight-6",
-    from: "جدة",
-    to: "بانكوك",
-    airline: "الخطوط التايلندية",
+    from: "ط¬ط¯ط©",
+    to: "ط¨ط§ظ†ظƒظˆظƒ",
+    airline: "ط§ظ„ط®ط·ظˆط· ط§ظ„طھط§ظٹظ„ظ†ط¯ظٹط©",
     departTime: "23:00",
     arriveTime: "09:30",
-    duration: "8.5 ساعة",
+    duration: "8.5 ط³ط§ط¹ط©",
     price: "2,400",
-    stops: "محطة واحدة",
+    stops: "ظ…ط­ط·ط© ظˆط§ط­ط¯ط©",
     rating: 4.4,
     image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400",
   },
@@ -281,253 +282,253 @@ export const defaultFlights: Flight[] = [
 export const defaultHotels: HotelItem[] = [
   {
     id: "hotel-1",
-    name: "فندق برج العرب جميرا",
-    location: "دبي، الإمارات العربية المتحدة",
+    name: "ظپظ†ط¯ظ‚ ط¨ط±ط¬ ط§ظ„ط¹ط±ط¨ ط¬ظ…ظٹط±ط§",
+    location: "ط¯ط¨ظٹطŒ ط§ظ„ط¥ظ…ط§ط±ط§طھ ط§ظ„ط¹ط±ط¨ظٹط© ط§ظ„ظ…طھط­ط¯ط©",
     image: "https://images.unsplash.com/photo-1512453995560-851157e9a028?w=800",
     rating: 5,
     reviews: 2450,
     price: "3,500",
-    priceNote: "لليلة الواحدة",
-    description: "فندق 7 نجوم يقدم تجربة فاخرة لا مثيل لها مع إطلالات خلابة على الخليج العربي",
+    priceNote: "ظ„ظ„ظٹظ„ط© ط§ظ„ظˆط§ط­ط¯ط©",
+    description: "ظپظ†ط¯ظ‚ 7 ظ†ط¬ظˆظ… ظٹظ‚ط¯ظ… طھط¬ط±ط¨ط© ظپط§ط®ط±ط© ظ„ط§ ظ…ط«ظٹظ„ ظ„ظ‡ط§ ظ…ط¹ ط¥ط·ظ„ط§ظ„ط§طھ ط®ظ„ط§ط¨ط© ط¹ظ„ظ‰ ط§ظ„ط®ظ„ظٹط¬ ط§ظ„ط¹ط±ط¨ظٹ",
     amenities: ["wifi", "parking", "breakfast", "gym", "pool", "restaurant"],
     distances: [
-      { name: "المطار", distance: "25 دقيقة" },
-      { name: "دبي مول", distance: "15 دقيقة" },
-      { name: "برج خليفة", distance: "20 دقيقة" },
+      { name: "ط§ظ„ظ…ط·ط§ط±", distance: "25 ط¯ظ‚ظٹظ‚ط©" },
+      { name: "ط¯ط¨ظٹ ظ…ظˆظ„", distance: "15 ط¯ظ‚ظٹظ‚ط©" },
+      { name: "ط¨ط±ط¬ ط®ظ„ظٹظپط©", distance: "20 ط¯ظ‚ظٹظ‚ط©" },
     ],
-    cuisine: "مأكولات عالمية متنوعة - 9 مطاعم فاخرة",
-    tag: "الأكثر فخامة",
+    cuisine: "ظ…ط£ظƒظˆظ„ط§طھ ط¹ط§ظ„ظ…ظٹط© ظ…طھظ†ظˆط¹ط© - 9 ظ…ط·ط§ط¹ظ… ظپط§ط®ط±ط©",
+    tag: "ط§ظ„ط£ظƒط«ط± ظپط®ط§ظ…ط©",
   },
   {
     id: "hotel-2",
-    name: "فندق فور سيزونز البوسفور",
-    location: "إسطنبول، تركيا",
+    name: "ظپظ†ط¯ظ‚ ظپظˆط± ط³ظٹط²ظˆظ†ط² ط§ظ„ط¨ظˆط³ظپظˆط±",
+    location: "ط¥ط³ط·ظ†ط¨ظˆظ„طŒ طھط±ظƒظٹط§",
     image: "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?w=800",
     rating: 4.9,
     reviews: 1890,
     price: "1,800",
-    priceNote: "لليلة الواحدة",
-    description: "فندق تاريخي على ضفاف البوسفور يجمع بين الأصالة العثمانية والفخامة العصرية",
+    priceNote: "ظ„ظ„ظٹظ„ط© ط§ظ„ظˆط§ط­ط¯ط©",
+    description: "ظپظ†ط¯ظ‚ طھط§ط±ظٹط®ظٹ ط¹ظ„ظ‰ ط¶ظپط§ظپ ط§ظ„ط¨ظˆط³ظپظˆط± ظٹط¬ظ…ط¹ ط¨ظٹظ† ط§ظ„ط£طµط§ظ„ط© ط§ظ„ط¹ط«ظ…ط§ظ†ظٹط© ظˆط§ظ„ظپط®ط§ظ…ط© ط§ظ„ط¹طµط±ظٹط©",
     amenities: ["wifi", "parking", "breakfast", "gym", "pool"],
     distances: [
-      { name: "المطار", distance: "40 دقيقة" },
-      { name: "البازار الكبير", distance: "10 دقائق" },
-      { name: "آيا صوفيا", distance: "5 دقائق" },
+      { name: "ط§ظ„ظ…ط·ط§ط±", distance: "40 ط¯ظ‚ظٹظ‚ط©" },
+      { name: "ط§ظ„ط¨ط§ط²ط§ط± ط§ظ„ظƒط¨ظٹط±", distance: "10 ط¯ظ‚ط§ط¦ظ‚" },
+      { name: "ط¢ظٹط§ طµظˆظپظٹط§", distance: "5 ط¯ظ‚ط§ط¦ظ‚" },
     ],
-    cuisine: "مأكولات تركية وعالمية - 3 مطاعم",
-    tag: "إطلالة البوسفور",
+    cuisine: "ظ…ط£ظƒظˆظ„ط§طھ طھط±ظƒظٹط© ظˆط¹ط§ظ„ظ…ظٹط© - 3 ظ…ط·ط§ط¹ظ…",
+    tag: "ط¥ط·ظ„ط§ظ„ط© ط§ظ„ط¨ظˆط³ظپظˆط±",
   },
   {
     id: "hotel-3",
-    name: "منتجع أنانتارا المالديف",
-    location: "جزر المالديف",
+    name: "ظ…ظ†طھط¬ط¹ ط£ظ†ط§ظ†طھط§ط±ط§ ط§ظ„ظ…ط§ظ„ط¯ظٹظپ",
+    location: "ط¬ط²ط± ط§ظ„ظ…ط§ظ„ط¯ظٹظپ",
     image: "https://images.unsplash.com/photo-1551244072-5d12893278ab?w=800",
     rating: 5,
     reviews: 980,
     price: "5,200",
-    priceNote: "لليلة الواحدة",
-    description: "فيلات فاخرة فوق الماء مع مسابح خاصة وإطلالات لا تُنسى على المحيط الهندي",
+    priceNote: "ظ„ظ„ظٹظ„ط© ط§ظ„ظˆط§ط­ط¯ط©",
+    description: "ظپظٹظ„ط§طھ ظپط§ط®ط±ط© ظپظˆظ‚ ط§ظ„ظ…ط§ط، ظ…ط¹ ظ…ط³ط§ط¨ط­ ط®ط§طµط© ظˆط¥ط·ظ„ط§ظ„ط§طھ ظ„ط§ طھظڈظ†ط³ظ‰ ط¹ظ„ظ‰ ط§ظ„ظ…ط­ظٹط· ط§ظ„ظ‡ظ†ط¯ظٹ",
     amenities: ["wifi", "breakfast", "gym", "pool", "restaurant"],
     distances: [
-      { name: "المطار المائي", distance: "30 دقيقة بالقارب" },
-      { name: "مركز الغوص", distance: "في المنتجع" },
+      { name: "ط§ظ„ظ…ط·ط§ط± ط§ظ„ظ…ط§ط¦ظٹ", distance: "30 ط¯ظ‚ظٹظ‚ط© ط¨ط§ظ„ظ‚ط§ط±ط¨" },
+      { name: "ظ…ط±ظƒط² ط§ظ„ط؛ظˆطµ", distance: "ظپظٹ ط§ظ„ظ…ظ†طھط¬ط¹" },
     ],
-    cuisine: "مأكولات آسيوية وعالمية - 4 مطاعم على الشاطئ",
-    tag: "شهر العسل",
+    cuisine: "ظ…ط£ظƒظˆظ„ط§طھ ط¢ط³ظٹظˆظٹط© ظˆط¹ط§ظ„ظ…ظٹط© - 4 ظ…ط·ط§ط¹ظ… ط¹ظ„ظ‰ ط§ظ„ط´ط§ط·ط¦",
+    tag: "ط´ظ‡ط± ط§ظ„ط¹ط³ظ„",
   },
   {
     id: "hotel-4",
-    name: "فندق ريتز كارلتون باريس",
-    location: "باريس، فرنسا",
+    name: "ظپظ†ط¯ظ‚ ط±ظٹطھط² ظƒط§ط±ظ„طھظˆظ† ط¨ط§ط±ظٹط³",
+    location: "ط¨ط§ط±ظٹط³طŒ ظپط±ظ†ط³ط§",
     image: "https://images.unsplash.com/photo-1495195129352-a9d3c9469a46?w=800",
     rating: 4.8,
     reviews: 1560,
     price: "4,200",
-    priceNote: "لليلة الواحدة",
-    description: "فندق أسطوري في قلب باريس يجسد الأناقة الفرنسية والرفاهية الكلاسيكية",
+    priceNote: "ظ„ظ„ظٹظ„ط© ط§ظ„ظˆط§ط­ط¯ط©",
+    description: "ظپظ†ط¯ظ‚ ط£ط³ط·ظˆط±ظٹ ظپظٹ ظ‚ظ„ط¨ ط¨ط§ط±ظٹط³ ظٹط¬ط³ط¯ ط§ظ„ط£ظ†ط§ظ‚ط© ط§ظ„ظپط±ظ†ط³ظٹط© ظˆط§ظ„ط±ظپط§ظ‡ظٹط© ط§ظ„ظƒظ„ط§ط³ظٹظƒظٹط©",
     amenities: ["wifi", "parking", "breakfast", "gym", "restaurant"],
     distances: [
-      { name: "برج إيفل", distance: "10 دقائق" },
-      { name: "اللوفر", distance: "5 دقائق" },
-      { name: "الشانزليزيه", distance: "دقيقتان" },
+      { name: "ط¨ط±ط¬ ط¥ظٹظپظ„", distance: "10 ط¯ظ‚ط§ط¦ظ‚" },
+      { name: "ط§ظ„ظ„ظˆظپط±", distance: "5 ط¯ظ‚ط§ط¦ظ‚" },
+      { name: "ط§ظ„ط´ط§ظ†ط²ظ„ظٹط²ظٹظ‡", distance: "ط¯ظ‚ظٹظ‚طھط§ظ†" },
     ],
-    cuisine: "مأكولات فرنسية راقية - مطعم حائز على نجمة ميشلان",
-    tag: "كلاسيكي فاخر",
+    cuisine: "ظ…ط£ظƒظˆظ„ط§طھ ظپط±ظ†ط³ظٹط© ط±ط§ظ‚ظٹط© - ظ…ط·ط¹ظ… ط­ط§ط¦ط² ط¹ظ„ظ‰ ظ†ط¬ظ…ط© ظ…ظٹط´ظ„ط§ظ†",
+    tag: "ظƒظ„ط§ط³ظٹظƒظٹ ظپط§ط®ط±",
   },
   {
     id: "hotel-5",
-    name: "قصر الإمارات",
-    location: "أبوظبي، الإمارات العربية المتحدة",
+    name: "ظ‚طµط± ط§ظ„ط¥ظ…ط§ط±ط§طھ",
+    location: "ط£ط¨ظˆط¸ط¨ظٹطŒ ط§ظ„ط¥ظ…ط§ط±ط§طھ ط§ظ„ط¹ط±ط¨ظٹط© ط§ظ„ظ…طھط­ط¯ط©",
     image: "https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=800",
     rating: 4.9,
     reviews: 1320,
     price: "2,900",
-    priceNote: "لليلة الواحدة",
-    description: "إقامة ملكية على شاطئ خاص مع خدمات ضيافة راقية ومرافق متكاملة.",
+    priceNote: "ظ„ظ„ظٹظ„ط© ط§ظ„ظˆط§ط­ط¯ط©",
+    description: "ط¥ظ‚ط§ظ…ط© ظ…ظ„ظƒظٹط© ط¹ظ„ظ‰ ط´ط§ط·ط¦ ط®ط§طµ ظ…ط¹ ط®ط¯ظ…ط§طھ ط¶ظٹط§ظپط© ط±ط§ظ‚ظٹط© ظˆظ…ط±ط§ظپظ‚ ظ…طھظƒط§ظ…ظ„ط©.",
     amenities: ["wifi", "parking", "breakfast", "gym", "pool", "restaurant"],
     distances: [
-      { name: "المطار", distance: "35 دقيقة" },
-      { name: "الكورنيش", distance: "10 دقائق" },
-      { name: "قصر الوطن", distance: "8 دقائق" },
+      { name: "ط§ظ„ظ…ط·ط§ط±", distance: "35 ط¯ظ‚ظٹظ‚ط©" },
+      { name: "ط§ظ„ظƒظˆط±ظ†ظٹط´", distance: "10 ط¯ظ‚ط§ط¦ظ‚" },
+      { name: "ظ‚طµط± ط§ظ„ظˆط·ظ†", distance: "8 ط¯ظ‚ط§ط¦ظ‚" },
     ],
-    cuisine: "مأكولات عربية وعالمية - 7 مطاعم",
-    tag: "إقامة ملكية",
+    cuisine: "ظ…ط£ظƒظˆظ„ط§طھ ط¹ط±ط¨ظٹط© ظˆط¹ط§ظ„ظ…ظٹط© - 7 ظ…ط·ط§ط¹ظ…",
+    tag: "ط¥ظ‚ط§ظ…ط© ظ…ظ„ظƒظٹط©",
   },
   {
     id: "hotel-6",
-    name: "منتجع شيبارا البحر الأحمر",
-    location: "البحر الأحمر، السعودية",
+    name: "ظ…ظ†طھط¬ط¹ ط´ظٹط¨ط§ط±ط§ ط§ظ„ط¨ط­ط± ط§ظ„ط£ط­ظ…ط±",
+    location: "ط§ظ„ط¨ط­ط± ط§ظ„ط£ط­ظ…ط±طŒ ط§ظ„ط³ط¹ظˆط¯ظٹط©",
     image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
     rating: 4.8,
     reviews: 610,
     price: "3,800",
-    priceNote: "لليلة الواحدة",
-    description: "فلل ساحلية وتجارب بحرية مميزة مع خدمة نقل خاصة وإطلالات على الجزر.",
+    priceNote: "ظ„ظ„ظٹظ„ط© ط§ظ„ظˆط§ط­ط¯ط©",
+    description: "ظپظ„ظ„ ط³ط§ط­ظ„ظٹط© ظˆطھط¬ط§ط±ط¨ ط¨ط­ط±ظٹط© ظ…ظ…ظٹط²ط© ظ…ط¹ ط®ط¯ظ…ط© ظ†ظ‚ظ„ ط®ط§طµط© ظˆط¥ط·ظ„ط§ظ„ط§طھ ط¹ظ„ظ‰ ط§ظ„ط¬ط²ط±.",
     amenities: ["wifi", "breakfast", "gym", "pool", "restaurant"],
     distances: [
-      { name: "المطار", distance: "45 دقيقة" },
-      { name: "الشاطئ الخاص", distance: "داخل المنتجع" },
+      { name: "ط§ظ„ظ…ط·ط§ط±", distance: "45 ط¯ظ‚ظٹظ‚ط©" },
+      { name: "ط§ظ„ط´ط§ط·ط¦ ط§ظ„ط®ط§طµ", distance: "ط¯ط§ط®ظ„ ط§ظ„ظ…ظ†طھط¬ط¹" },
     ],
-    cuisine: "مأكولات بحرية ومحلية - 3 مطاعم",
-    tag: "وجهة شاطئية",
+    cuisine: "ظ…ط£ظƒظˆظ„ط§طھ ط¨ط­ط±ظٹط© ظˆظ…ط­ظ„ظٹط© - 3 ظ…ط·ط§ط¹ظ…",
+    tag: "ظˆط¬ظ‡ط© ط´ط§ط·ط¦ظٹط©",
   },
 ];
 
 export const defaultOffers: OfferItem[] = [
   {
     id: "offer-1",
-    title: "باقة العُلا التراثية",
-    description: "اكتشف مدائن صالح وتجارب الصحراء في برنامج شامل للطيران والإقامة والجولات.",
+    title: "ط¨ط§ظ‚ط© ط§ظ„ط¹ظڈظ„ط§ ط§ظ„طھط±ط§ط«ظٹط©",
+    description: "ط§ظƒطھط´ظپ ظ…ط¯ط§ط¦ظ† طµط§ظ„ط­ ظˆطھط¬ط§ط±ط¨ ط§ظ„طµط­ط±ط§ط، ظپظٹ ط¨ط±ظ†ط§ظ…ط¬ ط´ط§ظ…ظ„ ظ„ظ„ط·ظٹط±ط§ظ† ظˆط§ظ„ط¥ظ‚ط§ظ…ط© ظˆط§ظ„ط¬ظˆظ„ط§طھ.",
     image: "https://images.unsplash.com/photo-1534080764596-47f3efd8e0d5?w=800",
     discount: 20,
-    validUntil: "حتى نهاية الموسم",
+    validUntil: "ط­طھظ‰ ظ†ظ‡ط§ظٹط© ط§ظ„ظ…ظˆط³ظ…",
     originalPrice: "4,200",
     newPrice: "3,350",
-    season: "الشتاء والربيع",
-    includes: ["طيران داخلي ذهاب وعودة", "إقامة 3 ليالٍ", "جولة أثرية في هِجرا", "تنقلات داخلية"],
+    season: "ط§ظ„ط´طھط§ط، ظˆط§ظ„ط±ط¨ظٹط¹",
+    includes: ["ط·ظٹط±ط§ظ† ط¯ط§ط®ظ„ظٹ ط°ظ‡ط§ط¨ ظˆط¹ظˆط¯ط©", "ط¥ظ‚ط§ظ…ط© 3 ظ„ظٹط§ظ„ظچ", "ط¬ظˆظ„ط© ط£ط«ط±ظٹط© ظپظٹ ظ‡ظگط¬ط±ط§", "طھظ†ظ‚ظ„ط§طھ ط¯ط§ط®ظ„ظٹط©"],
     tips: [
-      "احجز مبكرًا لعروض المخيمات الفاخرة",
-      "يُفضل السفر في الصباح للاستفادة من الطقس",
-      "ارتدِ أحذية مريحة للأنشطة الصحراوية",
+      "ط§ط­ط¬ط² ظ…ط¨ظƒط±ظ‹ط§ ظ„ط¹ط±ظˆط¶ ط§ظ„ظ…ط®ظٹظ…ط§طھ ط§ظ„ظپط§ط®ط±ط©",
+      "ظٹظڈظپط¶ظ„ ط§ظ„ط³ظپط± ظپظٹ ط§ظ„طµط¨ط§ط­ ظ„ظ„ط§ط³طھظپط§ط¯ط© ظ…ظ† ط§ظ„ط·ظ‚ط³",
+      "ط§ط±طھط¯ظگ ط£ط­ط°ظٹط© ظ…ط±ظٹط­ط© ظ„ظ„ط£ظ†ط´ط·ط© ط§ظ„طµط­ط±ط§ظˆظٹط©",
     ],
   },
   {
     id: "offer-2",
-    title: "سحر البحر الأحمر",
-    description: "منتجعات شاطئية وأنشطة بحرية مع برنامج متكامل للعائلات.",
+    title: "ط³ط­ط± ط§ظ„ط¨ط­ط± ط§ظ„ط£ط­ظ…ط±",
+    description: "ظ…ظ†طھط¬ط¹ط§طھ ط´ط§ط·ط¦ظٹط© ظˆط£ظ†ط´ط·ط© ط¨ط­ط±ظٹط© ظ…ط¹ ط¨ط±ظ†ط§ظ…ط¬ ظ…طھظƒط§ظ…ظ„ ظ„ظ„ط¹ط§ط¦ظ„ط§طھ.",
     image: "https://images.unsplash.com/photo-1519046904884-53103b34b206?w=800",
     discount: 18,
-    validUntil: "حتى نهاية الموسم",
+    validUntil: "ط­طھظ‰ ظ†ظ‡ط§ظٹط© ط§ظ„ظ…ظˆط³ظ…",
     originalPrice: "5,600",
     newPrice: "4,600",
-    season: "طوال العام",
-    includes: ["إقامة 4 ليالٍ في منتجع بحري", "أنشطة غوص ورياضات مائية", "تنقلات خاصة"],
+    season: "ط·ظˆط§ظ„ ط§ظ„ط¹ط§ظ…",
+    includes: ["ط¥ظ‚ط§ظ…ط© 4 ظ„ظٹط§ظ„ظچ ظپظٹ ظ…ظ†طھط¬ط¹ ط¨ط­ط±ظٹ", "ط£ظ†ط´ط·ط© ط؛ظˆطµ ظˆط±ظٹط§ط¶ط§طھ ظ…ط§ط¦ظٹط©", "طھظ†ظ‚ظ„ط§طھ ط®ط§طµط©"],
     tips: [
-      "احجز غرفًا بإطلالة بحرية مبكرًا",
-      "اصطحب واقي شمس ومستلزمات الغوص",
-      "أضف رحلة بحرية خاصة عند الغروب",
+      "ط§ط­ط¬ط² ط؛ط±ظپظ‹ط§ ط¨ط¥ط·ظ„ط§ظ„ط© ط¨ط­ط±ظٹط© ظ…ط¨ظƒط±ظ‹ط§",
+      "ط§طµط·ط­ط¨ ظˆط§ظ‚ظٹ ط´ظ…ط³ ظˆظ…ط³طھظ„ط²ظ…ط§طھ ط§ظ„ط؛ظˆطµ",
+      "ط£ط¶ظپ ط±ط­ظ„ط© ط¨ط­ط±ظٹط© ط®ط§طµط© ط¹ظ†ط¯ ط§ظ„ط؛ط±ظˆط¨",
     ],
   },
   {
     id: "offer-3",
-    title: "دبي العائلية الشاملة",
-    description: "باقة تشمل الطيران والفندق والأنشطة الترفيهية والمواصلات.",
+    title: "ط¯ط¨ظٹ ط§ظ„ط¹ط§ط¦ظ„ظٹط© ط§ظ„ط´ط§ظ…ظ„ط©",
+    description: "ط¨ط§ظ‚ط© طھط´ظ…ظ„ ط§ظ„ط·ظٹط±ط§ظ† ظˆط§ظ„ظپظ†ط¯ظ‚ ظˆط§ظ„ط£ظ†ط´ط·ط© ط§ظ„طھط±ظپظٹظ‡ظٹط© ظˆط§ظ„ظ…ظˆط§طµظ„ط§طھ.",
     image: "https://images.unsplash.com/photo-1512453995560-851157e9a028?w=800",
     discount: 30,
-    validUntil: "حتى نهاية الموسم",
+    validUntil: "ط­طھظ‰ ظ†ظ‡ط§ظٹط© ط§ظ„ظ…ظˆط³ظ…",
     originalPrice: "4,500",
     newPrice: "3,150",
-    season: "الشتاء",
-    includes: ["تذكرة طيران ذهاب وعودة", "إقامة 4 ليالٍ", "تذاكر أنشطة عائلية", "تنقلات يومية"],
-    tips: ["احجز تذاكر الفعاليات مسبقًا", "اختر فندقًا قريبًا من المراكز الترفيهية"],
+    season: "ط§ظ„ط´طھط§ط،",
+    includes: ["طھط°ظƒط±ط© ط·ظٹط±ط§ظ† ط°ظ‡ط§ط¨ ظˆط¹ظˆط¯ط©", "ط¥ظ‚ط§ظ…ط© 4 ظ„ظٹط§ظ„ظچ", "طھط°ط§ظƒط± ط£ظ†ط´ط·ط© ط¹ط§ط¦ظ„ظٹط©", "طھظ†ظ‚ظ„ط§طھ ظٹظˆظ…ظٹط©"],
+    tips: ["ط§ط­ط¬ط² طھط°ط§ظƒط± ط§ظ„ظپط¹ط§ظ„ظٹط§طھ ظ…ط³ط¨ظ‚ظ‹ط§", "ط§ط®طھط± ظپظ†ط¯ظ‚ظ‹ط§ ظ‚ط±ظٹط¨ظ‹ط§ ظ…ظ† ط§ظ„ظ…ط±ط§ظƒط² ط§ظ„طھط±ظپظٹظ‡ظٹط©"],
   },
   {
     id: "offer-4",
-    title: "استكشاف إسطنبول التاريخية",
-    description: "جولات ثقافية وأسواق تقليدية مع باقة اقتصادية شاملة.",
+    title: "ط§ط³طھظƒط´ط§ظپ ط¥ط³ط·ظ†ط¨ظˆظ„ ط§ظ„طھط§ط±ظٹط®ظٹط©",
+    description: "ط¬ظˆظ„ط§طھ ط«ظ‚ط§ظپظٹط© ظˆط£ط³ظˆط§ظ‚ طھظ‚ظ„ظٹط¯ظٹط© ظ…ط¹ ط¨ط§ظ‚ط© ط§ظ‚طھطµط§ط¯ظٹط© ط´ط§ظ…ظ„ط©.",
     image: "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?w=800",
     discount: 28,
-    validUntil: "حتى نهاية الموسم",
+    validUntil: "ط­طھظ‰ ظ†ظ‡ط§ظٹط© ط§ظ„ظ…ظˆط³ظ…",
     originalPrice: "5,000",
     newPrice: "3,600",
-    season: "الربيع والخريف",
-    includes: ["طيران + فندق 4 نجوم", "جولة البوسفور", "زيارة الأسواق التراثية"],
-    tips: ["خصص يومًا لزيارة كابادوكيا إذا أمكن", "جرب المطاعم المحلية بعيدًا عن الزحام"],
+    season: "ط§ظ„ط±ط¨ظٹط¹ ظˆط§ظ„ط®ط±ظٹظپ",
+    includes: ["ط·ظٹط±ط§ظ† + ظپظ†ط¯ظ‚ 4 ظ†ط¬ظˆظ…", "ط¬ظˆظ„ط© ط§ظ„ط¨ظˆط³ظپظˆط±", "ط²ظٹط§ط±ط© ط§ظ„ط£ط³ظˆط§ظ‚ ط§ظ„طھط±ط§ط«ظٹط©"],
+    tips: ["ط®طµطµ ظٹظˆظ…ظ‹ط§ ظ„ط²ظٹط§ط±ط© ظƒط§ط¨ط§ط¯ظˆظƒظٹط§ ط¥ط°ط§ ط£ظ…ظƒظ†", "ط¬ط±ط¨ ط§ظ„ظ…ط·ط§ط¹ظ… ط§ظ„ظ…ط­ظ„ظٹط© ط¨ط¹ظٹط¯ظ‹ط§ ط¹ظ† ط§ظ„ط²ط­ط§ظ…"],
   },
   {
     id: "offer-5",
-    title: "شتاء جنيف الفاخر",
-    description: "باقة شتوية تشمل الطيران والفندق الفاخر وتجربة التزلج مع مرشد.",
+    title: "ط´طھط§ط، ط¬ظ†ظٹظپ ط§ظ„ظپط§ط®ط±",
+    description: "ط¨ط§ظ‚ط© ط´طھظˆظٹط© طھط´ظ…ظ„ ط§ظ„ط·ظٹط±ط§ظ† ظˆط§ظ„ظپظ†ط¯ظ‚ ط§ظ„ظپط§ط®ط± ظˆطھط¬ط±ط¨ط© ط§ظ„طھط²ظ„ط¬ ظ…ط¹ ظ…ط±ط´ط¯.",
     image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800",
     discount: 22,
-    validUntil: "حتى نهاية الشتاء",
+    validUntil: "ط­طھظ‰ ظ†ظ‡ط§ظٹط© ط§ظ„ط´طھط§ط،",
     originalPrice: "8,500",
     newPrice: "6,600",
-    season: "الشتاء",
-    includes: ["طيران ذهاب وعودة", "إقامة 4 ليالٍ", "تذاكر تزلج", "تنقلات يومية"],
-    tips: ["احجز معدات التزلج مسبقًا", "اختر الغرفة بإطلالة على البحيرة"],
+    season: "ط§ظ„ط´طھط§ط،",
+    includes: ["ط·ظٹط±ط§ظ† ط°ظ‡ط§ط¨ ظˆط¹ظˆط¯ط©", "ط¥ظ‚ط§ظ…ط© 4 ظ„ظٹط§ظ„ظچ", "طھط°ط§ظƒط± طھط²ظ„ط¬", "طھظ†ظ‚ظ„ط§طھ ظٹظˆظ…ظٹط©"],
+    tips: ["ط§ط­ط¬ط² ظ…ط¹ط¯ط§طھ ط§ظ„طھط²ظ„ط¬ ظ…ط³ط¨ظ‚ظ‹ط§", "ط§ط®طھط± ط§ظ„ط؛ط±ظپط© ط¨ط¥ط·ظ„ط§ظ„ط© ط¹ظ„ظ‰ ط§ظ„ط¨ط­ظٹط±ط©"],
   },
   {
     id: "offer-6",
-    title: "مغامرة كيب تاون",
-    description: "برنامج مغامرات يشمل السفاري والجبال مع إقامة مريحة.",
+    title: "ظ…ط؛ط§ظ…ط±ط© ظƒظٹط¨ طھط§ظˆظ†",
+    description: "ط¨ط±ظ†ط§ظ…ط¬ ظ…ط؛ط§ظ…ط±ط§طھ ظٹط´ظ…ظ„ ط§ظ„ط³ظپط§ط±ظٹ ظˆط§ظ„ط¬ط¨ط§ظ„ ظ…ط¹ ط¥ظ‚ط§ظ…ط© ظ…ط±ظٹط­ط©.",
     image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800",
     discount: 18,
-    validUntil: "حتى نهاية الربيع",
+    validUntil: "ط­طھظ‰ ظ†ظ‡ط§ظٹط© ط§ظ„ط±ط¨ظٹط¹",
     originalPrice: "7,200",
     newPrice: "5,900",
-    season: "الربيع",
-    includes: ["طيران + فندق", "رحلة سفاري", "جولة جبل الطاولة"],
-    tips: ["اجعل جدولك مرنًا للطقس", "أضف زيارة مزارع الكروم"],
+    season: "ط§ظ„ط±ط¨ظٹط¹",
+    includes: ["ط·ظٹط±ط§ظ† + ظپظ†ط¯ظ‚", "ط±ط­ظ„ط© ط³ظپط§ط±ظٹ", "ط¬ظˆظ„ط© ط¬ط¨ظ„ ط§ظ„ط·ط§ظˆظ„ط©"],
+    tips: ["ط§ط¬ط¹ظ„ ط¬ط¯ظˆظ„ظƒ ظ…ط±ظ†ظ‹ط§ ظ„ظ„ط·ظ‚ط³", "ط£ط¶ظپ ط²ظٹط§ط±ط© ظ…ط²ط§ط±ط¹ ط§ظ„ظƒط±ظˆظ…"],
   },
 ];
 
 export const defaultActivities: ActivityItem[] = [
   {
     id: "activity-1",
-    title: "مهرجان البحر الأحمر",
-    location: "جدة",
-    category: "مهرجانات",
+    title: "ظ…ظ‡ط±ط¬ط§ظ† ط§ظ„ط¨ط­ط± ط§ظ„ط£ط­ظ…ط±",
+    location: "ط¬ط¯ط©",
+    category: "ظ…ظ‡ط±ط¬ط§ظ†ط§طھ",
     price: "450",
     image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1200",
   },
   {
     id: "activity-2",
-    title: "سباق الصحارى",
-    location: "العُلا",
-    category: "مغامرات",
+    title: "ط³ط¨ط§ظ‚ ط§ظ„طµط­ط§ط±ظ‰",
+    location: "ط§ظ„ط¹ظڈظ„ط§",
+    category: "ظ…ط؛ط§ظ…ط±ط§طھ",
     price: "650",
     image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200",
   },
   {
     id: "activity-3",
-    title: "كرنفال الرياض",
-    location: "الرياض",
-    category: "فعاليات",
+    title: "ظƒط±ظ†ظپط§ظ„ ط§ظ„ط±ظٹط§ط¶",
+    location: "ط§ظ„ط±ظٹط§ط¶",
+    category: "ظپط¹ط§ظ„ظٹط§طھ",
     price: "300",
     image: "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?w=1200",
   },
   {
     id: "activity-4",
-    title: "رحلة غوص خاصة",
-    location: "البحر الأحمر",
-    category: "أنشطة بحرية",
+    title: "ط±ط­ظ„ط© ط؛ظˆطµ ط®ط§طµط©",
+    location: "ط§ظ„ط¨ط­ط± ط§ظ„ط£ط­ظ…ط±",
+    category: "ط£ظ†ط´ط·ط© ط¨ط­ط±ظٹط©",
     price: "900",
     image: "https://images.unsplash.com/photo-1519046904884-53103b34b206?w=1200",
   },
   {
     id: "activity-5",
-    title: "مهرجان العود الثقافي",
-    location: "الرياض",
-    category: "ثقافة وفنون",
+    title: "ظ…ظ‡ط±ط¬ط§ظ† ط§ظ„ط¹ظˆط¯ ط§ظ„ط«ظ‚ط§ظپظٹ",
+    location: "ط§ظ„ط±ظٹط§ط¶",
+    category: "ط«ظ‚ط§ظپط© ظˆظپظ†ظˆظ†",
     price: "250",
     image: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=1200",
   },
   {
     id: "activity-6",
-    title: "تحدي الربع الخالي",
-    location: "المنطقة الشرقية",
-    category: "مغامرات",
+    title: "طھط­ط¯ظٹ ط§ظ„ط±ط¨ط¹ ط§ظ„ط®ط§ظ„ظٹ",
+    location: "ط§ظ„ظ…ظ†ط·ظ‚ط© ط§ظ„ط´ط±ظ‚ظٹط©",
+    category: "ظ…ط؛ط§ظ…ط±ط§طھ",
     price: "780",
     image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200",
   },
@@ -536,72 +537,72 @@ export const defaultActivities: ActivityItem[] = [
 export const defaultArticles: ArticleItem[] = [
   {
     id: "article-1",
-    title: "أفضل وقت لزيارة العُلا ولماذا يفضّلها عشاق الطبيعة",
-    category: "سياحة السعودية",
-    date: "فبراير 2026",
+    title: "ط£ظپط¶ظ„ ظˆظ‚طھ ظ„ط²ظٹط§ط±ط© ط§ظ„ط¹ظڈظ„ط§ ظˆظ„ظ…ط§ط°ط§ ظٹظپط¶ظ‘ظ„ظ‡ط§ ط¹ط´ط§ظ‚ ط§ظ„ط·ط¨ظٹط¹ط©",
+    category: "ط³ظٹط§ط­ط© ط§ظ„ط³ط¹ظˆط¯ظٹط©",
+    date: "ظپط¨ط±ط§ظٹط± 2026",
     image: "https://images.unsplash.com/photo-1534080764596-47f3efd8e0d5?w=1200",
   },
   {
     id: "article-2",
-    title: "دليل المسافر الذكي: كيف تختار الفندق المناسب لعائلتك؟",
-    category: "نصائح السفر",
-    date: "فبراير 2026",
+    title: "ط¯ظ„ظٹظ„ ط§ظ„ظ…ط³ط§ظپط± ط§ظ„ط°ظƒظٹ: ظƒظٹظپ طھط®طھط§ط± ط§ظ„ظپظ†ط¯ظ‚ ط§ظ„ظ…ظ†ط§ط³ط¨ ظ„ط¹ط§ط¦ظ„طھظƒطں",
+    category: "ظ†طµط§ط¦ط­ ط§ظ„ط³ظپط±",
+    date: "ظپط¨ط±ط§ظٹط± 2026",
     image: "https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=1200",
   },
   {
     id: "article-3",
-    title: "خطوات استخراج التأشيرة السياحية بسهولة للمسافرين السعوديين",
-    category: "إجراءات السفر",
-    date: "فبراير 2026",
+    title: "ط®ط·ظˆط§طھ ط§ط³طھط®ط±ط§ط¬ ط§ظ„طھط£ط´ظٹط±ط© ط§ظ„ط³ظٹط§ط­ظٹط© ط¨ط³ظ‡ظˆظ„ط© ظ„ظ„ظ…ط³ط§ظپط±ظٹظ† ط§ظ„ط³ط¹ظˆط¯ظٹظٹظ†",
+    category: "ط¥ط¬ط±ط§ط،ط§طھ ط§ظ„ط³ظپط±",
+    date: "ظپط¨ط±ط§ظٹط± 2026",
     image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200",
   },
   {
     id: "article-4",
-    title: "أبرز الوجهات العربية للعطلات القصيرة في نهاية الأسبوع",
-    category: "وجهات قريبة",
-    date: "فبراير 2026",
+    title: "ط£ط¨ط±ط² ط§ظ„ظˆط¬ظ‡ط§طھ ط§ظ„ط¹ط±ط¨ظٹط© ظ„ظ„ط¹ط·ظ„ط§طھ ط§ظ„ظ‚طµظٹط±ط© ظپظٹ ظ†ظ‡ط§ظٹط© ط§ظ„ط£ط³ط¨ظˆط¹",
+    category: "ظˆط¬ظ‡ط§طھ ظ‚ط±ظٹط¨ط©",
+    date: "ظپط¨ط±ط§ظٹط± 2026",
     image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200",
   },
   {
     id: "article-5",
-    title: "أفضل المدن الأوروبية المناسبة للعائلات السعودية",
-    category: "وجهات عالمية",
-    date: "فبراير 2026",
+    title: "ط£ظپط¶ظ„ ط§ظ„ظ…ط¯ظ† ط§ظ„ط£ظˆط±ظˆط¨ظٹط© ط§ظ„ظ…ظ†ط§ط³ط¨ط© ظ„ظ„ط¹ط§ط¦ظ„ط§طھ ط§ظ„ط³ط¹ظˆط¯ظٹط©",
+    category: "ظˆط¬ظ‡ط§طھ ط¹ط§ظ„ظ…ظٹط©",
+    date: "ظپط¨ط±ط§ظٹط± 2026",
     image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200",
   },
   {
     id: "article-6",
-    title: "قائمة تجهيزات السفر الذكية للموسم الشتوي",
-    category: "نصائح السفر",
-    date: "فبراير 2026",
+    title: "ظ‚ط§ط¦ظ…ط© طھط¬ظ‡ظٹط²ط§طھ ط§ظ„ط³ظپط± ط§ظ„ط°ظƒظٹط© ظ„ظ„ظ…ظˆط³ظ… ط§ظ„ط´طھظˆظٹ",
+    category: "ظ†طµط§ط¦ط­ ط§ظ„ط³ظپط±",
+    date: "ظپط¨ط±ط§ظٹط± 2026",
     image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200",
   },
   {
     id: "article-7",
-    title: "اتجاهات السياحة العالمية في 2026: الاستدامة والرحلات القصيرة",
-    category: "أخبار عالمية",
-    date: "فبراير 2026",
+    title: "ط§طھط¬ط§ظ‡ط§طھ ط§ظ„ط³ظٹط§ط­ط© ط§ظ„ط¹ط§ظ„ظ…ظٹط© ظپظٹ 2026: ط§ظ„ط§ط³طھط¯ط§ظ…ط© ظˆط§ظ„ط±ط­ظ„ط§طھ ط§ظ„ظ‚طµظٹط±ط©",
+    category: "ط£ط®ط¨ط§ط± ط¹ط§ظ„ظ…ظٹط©",
+    date: "ظپط¨ط±ط§ظٹط± 2026",
     image: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200",
   },
   {
     id: "article-8",
-    title: "أفضل المدن الآسيوية المناسبة للعائلات السعودية",
-    category: "وجهات عالمية",
-    date: "فبراير 2026",
+    title: "ط£ظپط¶ظ„ ط§ظ„ظ…ط¯ظ† ط§ظ„ط¢ط³ظٹظˆظٹط© ط§ظ„ظ…ظ†ط§ط³ط¨ط© ظ„ظ„ط¹ط§ط¦ظ„ط§طھ ط§ظ„ط³ط¹ظˆط¯ظٹط©",
+    category: "ظˆط¬ظ‡ط§طھ ط¹ط§ظ„ظ…ظٹط©",
+    date: "ظپط¨ط±ط§ظٹط± 2026",
     image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200",
   },
   {
     id: "article-9",
-    title: "دليل السفر في مواسم الذروة وكيف تتجنب ارتفاع الأسعار",
-    category: "إرشادات",
-    date: "فبراير 2026",
+    title: "ط¯ظ„ظٹظ„ ط§ظ„ط³ظپط± ظپظٹ ظ…ظˆط§ط³ظ… ط§ظ„ط°ط±ظˆط© ظˆظƒظٹظپ طھطھط¬ظ†ط¨ ط§ط±طھظپط§ط¹ ط§ظ„ط£ط³ط¹ط§ط±",
+    category: "ط¥ط±ط´ط§ط¯ط§طھ",
+    date: "ظپط¨ط±ط§ظٹط± 2026",
     image: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1200",
   },
   {
     id: "article-10",
-    title: "رحلات الكروز: تجربة بحرية تجمع الترفيه والاسترخاء",
-    category: "تجارب سفر",
-    date: "فبراير 2026",
+    title: "ط±ط­ظ„ط§طھ ط§ظ„ظƒط±ظˆط²: طھط¬ط±ط¨ط© ط¨ط­ط±ظٹط© طھط¬ظ…ط¹ ط§ظ„طھط±ظپظٹظ‡ ظˆط§ظ„ط§ط³طھط±ط®ط§ط،",
+    category: "طھط¬ط§ط±ط¨ ط³ظپط±",
+    date: "ظپط¨ط±ط§ظٹط± 2026",
     image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200",
   },
 ];
@@ -609,135 +610,135 @@ export const defaultArticles: ArticleItem[] = [
 export const defaultDestinations: DestinationItem[] = [
   {
     id: "dest-1",
-    title: "جورجيا",
-    country: "تبليسي وباتومي",
+    title: "ط¬ظˆط±ط¬ظٹط§",
+    country: "طھط¨ظ„ظٹط³ظٹ ظˆط¨ط§طھظˆظ…ظٹ",
     region: "international",
-    tag: "شتوية",
-    duration: "5 أيام",
+    tag: "ط´طھظˆظٹط©",
+    duration: "5 ط£ظٹط§ظ…",
     priceFrom: "2,600",
-    description: "طبيعة خضراء، جبال خلابة، وأسواق شعبية تناسب العائلة.",
-    image: "https://source.unsplash.com/featured/?georgia,tbilisi,travel",
+    description: "ط·ط¨ظٹط¹ط© ط®ط¶ط±ط§ط،طŒ ط¬ط¨ط§ظ„ ط®ظ„ط§ط¨ط©طŒ ظˆط£ط³ظˆط§ظ‚ ط´ط¹ط¨ظٹط© طھظ†ط§ط³ط¨ ط§ظ„ط¹ط§ط¦ظ„ط©.",
+    image: "https://source.unsplash.com/1200x800/?georgia,tbilisi,travel",
   },
   {
     id: "dest-2",
-    title: "كابادوكيا",
-    country: "تركيا",
+    title: "ظƒط§ط¨ط§ط¯ظˆظƒظٹط§",
+    country: "طھط±ظƒظٹط§",
     region: "international",
-    tag: "رومانسية",
-    duration: "4 أيام",
+    tag: "ط±ظˆظ…ط§ظ†ط³ظٹط©",
+    duration: "4 ط£ظٹط§ظ…",
     priceFrom: "3,150",
-    description: "مناظر بالونات الهواء وتجارب سياحية مميزة للزوجين.",
-    image: "https://source.unsplash.com/featured/?cappadocia,balloons,travel",
+    description: "ظ…ظ†ط§ط¸ط± ط¨ط§ظ„ظˆظ†ط§طھ ط§ظ„ظ‡ظˆط§ط، ظˆطھط¬ط§ط±ط¨ ط³ظٹط§ط­ظٹط© ظ…ظ…ظٹط²ط© ظ„ظ„ط²ظˆط¬ظٹظ†.",
+    image: "https://source.unsplash.com/1200x800/?cappadocia,balloons,travel",
   },
   {
     id: "dest-3",
-    title: "المالديف",
-    country: "المحيط الهندي",
+    title: "ط§ظ„ظ…ط§ظ„ط¯ظٹظپ",
+    country: "ط§ظ„ظ…ط­ظٹط· ط§ظ„ظ‡ظ†ط¯ظٹ",
     region: "international",
-    tag: "فاخر",
-    duration: "6 أيام",
+    tag: "ظپط§ط®ط±",
+    duration: "6 ط£ظٹط§ظ…",
     priceFrom: "6,900",
-    description: "منتجعات فخمة على الماء وتجارب بحرية حصرية.",
-    image: "https://source.unsplash.com/featured/?maldives,beach,resort",
+    description: "ظ…ظ†طھط¬ط¹ط§طھ ظپط®ظ…ط© ط¹ظ„ظ‰ ط§ظ„ظ…ط§ط، ظˆطھط¬ط§ط±ط¨ ط¨ط­ط±ظٹط© ط­طµط±ظٹط©.",
+    image: "https://source.unsplash.com/1200x800/?maldives,beach,resort",
   },
   {
     id: "dest-4",
-    title: "الرياض والدرعية",
-    country: "السعودية",
+    title: "ط§ظ„ط±ظٹط§ط¶ ظˆط§ظ„ط¯ط±ط¹ظٹط©",
+    country: "ط§ظ„ط³ط¹ظˆط¯ظٹط©",
     region: "saudi",
-    tag: "تراث",
-    duration: "3 أيام",
+    tag: "طھط±ط§ط«",
+    duration: "3 ط£ظٹط§ظ…",
     priceFrom: "1,200",
-    description: "تراث سعودي أصيل وتجارب حضارية ومعارض ثقافية.",
-    image: "https://source.unsplash.com/featured/?riyadh,diriyah,saudi",
+    description: "طھط±ط§ط« ط³ط¹ظˆط¯ظٹ ط£طµظٹظ„ ظˆطھط¬ط§ط±ط¨ ط­ط¶ط§ط±ظٹط© ظˆظ…ط¹ط§ط±ط¶ ط«ظ‚ط§ظپظٹط©.",
+    image: "https://source.unsplash.com/1200x800/?riyadh,diriyah,saudi",
   },
   {
     id: "dest-5",
-    title: "أذربيجان",
-    country: "باكو وقوبا",
+    title: "ط£ط°ط±ط¨ظٹط¬ط§ظ†",
+    country: "ط¨ط§ظƒظˆ ظˆظ‚ظˆط¨ط§",
     region: "international",
-    tag: "عائلي",
-    duration: "5 أيام",
+    tag: "ط¹ط§ط¦ظ„ظٹ",
+    duration: "5 ط£ظٹط§ظ…",
     priceFrom: "3,400",
-    description: "طبيعة جبلية وأسواق حديثة وأنشطة مناسبة للعائلة.",
-    image: "https://source.unsplash.com/featured/?baku,azerbaijan,travel",
+    description: "ط·ط¨ظٹط¹ط© ط¬ط¨ظ„ظٹط© ظˆط£ط³ظˆط§ظ‚ ط­ط¯ظٹط«ط© ظˆط£ظ†ط´ط·ط© ظ…ظ†ط§ط³ط¨ط© ظ„ظ„ط¹ط§ط¦ظ„ط©.",
+    image: "https://source.unsplash.com/1200x800/?baku,azerbaijan,travel",
   },
   {
     id: "dest-6",
-    title: "صلالة",
-    country: "سلطنة عمان",
+    title: "طµظ„ط§ظ„ط©",
+    country: "ط³ظ„ط·ظ†ط© ط¹ظ…ط§ظ†",
     region: "middleeast",
-    tag: "صيفية",
-    duration: "4 أيام",
+    tag: "طµظٹظپظٹط©",
+    duration: "4 ط£ظٹط§ظ…",
     priceFrom: "2,100",
-    description: "خريف صلالة، شلالات وضباب وجولات طبيعية منعشة.",
-    image: "https://source.unsplash.com/featured/?salalah,oman,landscape",
+    description: "ط®ط±ظٹظپ طµظ„ط§ظ„ط©طŒ ط´ظ„ط§ظ„ط§طھ ظˆط¶ط¨ط§ط¨ ظˆط¬ظˆظ„ط§طھ ط·ط¨ظٹط¹ظٹط© ظ…ظ†ط¹ط´ط©.",
+    image: "https://source.unsplash.com/1200x800/?salalah,oman,landscape",
   },
   {
     id: "dest-7",
-    title: "العُلا",
-    country: "السعودية",
+    title: "ط§ظ„ط¹ظڈظ„ط§",
+    country: "ط§ظ„ط³ط¹ظˆط¯ظٹط©",
     region: "saudi",
-    tag: "تراث",
-    duration: "3 أيام",
+    tag: "طھط±ط§ط«",
+    duration: "3 ط£ظٹط§ظ…",
     priceFrom: "1,450",
-    description: "مغامرات صحراوية ومواقع تراث عالمي وتجارب ثقافية حية.",
-    image: "https://source.unsplash.com/featured/?alula,saudi,desert",
+    description: "ظ…ط؛ط§ظ…ط±ط§طھ طµط­ط±ط§ظˆظٹط© ظˆظ…ظˆط§ظ‚ط¹ طھط±ط§ط« ط¹ط§ظ„ظ…ظٹ ظˆطھط¬ط§ط±ط¨ ط«ظ‚ط§ظپظٹط© ط­ظٹط©.",
+    image: "https://source.unsplash.com/1200x800/?alula,saudi,desert",
   },
   {
     id: "dest-8",
-    title: "جدة",
-    country: "السعودية",
+    title: "ط¬ط¯ط©",
+    country: "ط§ظ„ط³ط¹ظˆط¯ظٹط©",
     region: "saudi",
-    tag: "بحرية",
-    duration: "3 أيام",
+    tag: "ط¨ط­ط±ظٹط©",
+    duration: "3 ط£ظٹط§ظ…",
     priceFrom: "980",
-    description: "كورنيش ساحر وأسواق تاريخية وتجارب بحرية ممتعة.",
-    image: "https://source.unsplash.com/featured/?jeddah,saudi,sea",
+    description: "ظƒظˆط±ظ†ظٹط´ ط³ط§ط­ط± ظˆط£ط³ظˆط§ظ‚ طھط§ط±ظٹط®ظٹط© ظˆطھط¬ط§ط±ط¨ ط¨ط­ط±ظٹط© ظ…ظ…طھط¹ط©.",
+    image: "https://source.unsplash.com/1200x800/?jeddah,saudi,sea",
   },
   {
     id: "dest-9",
-    title: "دبي",
-    country: "الإمارات",
+    title: "ط¯ط¨ظٹ",
+    country: "ط§ظ„ط¥ظ…ط§ط±ط§طھ",
     region: "middleeast",
-    tag: "عائلي",
-    duration: "4 أيام",
+    tag: "ط¹ط§ط¦ظ„ظٹ",
+    duration: "4 ط£ظٹط§ظ…",
     priceFrom: "2,350",
-    description: "تجارب تسوق وترفيه ومطاعم عالمية تناسب العائلة.",
-    image: "https://source.unsplash.com/featured/?dubai,skyline,travel",
+    description: "طھط¬ط§ط±ط¨ طھط³ظˆظ‚ ظˆطھط±ظپظٹظ‡ ظˆظ…ط·ط§ط¹ظ… ط¹ط§ظ„ظ…ظٹط© طھظ†ط§ط³ط¨ ط§ظ„ط¹ط§ط¦ظ„ط©.",
+    image: "https://source.unsplash.com/1200x800/?dubai,skyline,travel",
   },
   {
     id: "dest-10",
-    title: "الدوحة",
-    country: "قطر",
+    title: "ط§ظ„ط¯ظˆط­ط©",
+    country: "ظ‚ط·ط±",
     region: "middleeast",
-    tag: "ثقافية",
-    duration: "3 أيام",
+    tag: "ط«ظ‚ط§ظپظٹط©",
+    duration: "3 ط£ظٹط§ظ…",
     priceFrom: "1,950",
-    description: "متاحف عالمية وأسواق تقليدية وإطلالة بحرية أنيقة.",
-    image: "https://source.unsplash.com/featured/?doha,qatar,corniche",
+    description: "ظ…طھط§ط­ظپ ط¹ط§ظ„ظ…ظٹط© ظˆط£ط³ظˆط§ظ‚ طھظ‚ظ„ظٹط¯ظٹط© ظˆط¥ط·ظ„ط§ظ„ط© ط¨ط­ط±ظٹط© ط£ظ†ظٹظ‚ط©.",
+    image: "https://source.unsplash.com/1200x800/?doha,qatar,corniche",
   },
   {
     id: "dest-11",
-    title: "لندن",
-    country: "المملكة المتحدة",
+    title: "ظ„ظ†ط¯ظ†",
+    country: "ط§ظ„ظ…ظ…ظ„ظƒط© ط§ظ„ظ…طھط­ط¯ط©",
     region: "international",
-    tag: "تعليم",
-    duration: "6 أيام",
+    tag: "طھط¹ظ„ظٹظ…",
+    duration: "6 ط£ظٹط§ظ…",
     priceFrom: "4,750",
-    description: "مدينة ثقافية مناسبة للدراسة والخدمات المتنوعة.",
-    image: "https://source.unsplash.com/featured/?london,uk,travel",
+    description: "ظ…ط¯ظٹظ†ط© ط«ظ‚ط§ظپظٹط© ظ…ظ†ط§ط³ط¨ط© ظ„ظ„ط¯ط±ط§ط³ط© ظˆط§ظ„ط®ط¯ظ…ط§طھ ط§ظ„ظ…طھظ†ظˆط¹ط©.",
+    image: "https://source.unsplash.com/1200x800/?london,uk,travel",
   },
   {
     id: "dest-12",
-    title: "باريس",
-    country: "فرنسا",
+    title: "ط¨ط§ط±ظٹط³",
+    country: "ظپط±ظ†ط³ط§",
     region: "international",
-    tag: "رومانسية",
-    duration: "5 أيام",
+    tag: "ط±ظˆظ…ط§ظ†ط³ظٹط©",
+    duration: "5 ط£ظٹط§ظ…",
     priceFrom: "4,200",
-    description: "تجارب فنية ومطاعم راقية ومعالم تاريخية خلابة.",
-    image: "https://source.unsplash.com/featured/?paris,eiffel,travel",
+    description: "طھط¬ط§ط±ط¨ ظپظ†ظٹط© ظˆظ…ط·ط§ط¹ظ… ط±ط§ظ‚ظٹط© ظˆظ…ط¹ط§ظ„ظ… طھط§ط±ظٹط®ظٹط© ط®ظ„ط§ط¨ط©.",
+    image: "https://source.unsplash.com/1200x800/?paris,eiffel,travel",
   },
 ];
 
@@ -745,14 +746,14 @@ export const defaultPartners: PartnerItem[] = [
   {
     id: "partner-1",
     name: "Booking.com",
-    type: "فنادق",
+    type: "ظپظ†ط§ط¯ظ‚",
     website: "https://www.booking.com",
     commission: "8%",
   },
   {
     id: "partner-2",
     name: "Skyscanner",
-    type: "طيران",
+    type: "ط·ظٹط±ط§ظ†",
     website: "https://www.skyscanner.net",
     commission: "6%",
   },
@@ -761,7 +762,7 @@ export const defaultPartners: PartnerItem[] = [
 export const defaultAirlines: AirlineItem[] = [
   {
     id: "airline-1",
-    name: "الخطوط السعودية",
+    name: "ط§ظ„ط®ط·ظˆط· ط§ظ„ط³ط¹ظˆط¯ظٹط©",
     code: "SV",
     website: "https://www.saudia.com",
     phone: "+966 920022222",
@@ -769,7 +770,7 @@ export const defaultAirlines: AirlineItem[] = [
   },
   {
     id: "airline-2",
-    name: "طيران ناس",
+    name: "ط·ظٹط±ط§ظ† ظ†ط§ط³",
     code: "XY",
     website: "https://www.flynas.com",
     phone: "+966 920001234",
@@ -777,7 +778,7 @@ export const defaultAirlines: AirlineItem[] = [
   },
   {
     id: "airline-3",
-    name: "طيران الإمارات",
+    name: "ط·ظٹط±ط§ظ† ط§ظ„ط¥ظ…ط§ط±ط§طھ",
     code: "EK",
     website: "https://www.emirates.com",
     phone: "+971 600555555",
@@ -785,7 +786,7 @@ export const defaultAirlines: AirlineItem[] = [
   },
   {
     id: "airline-4",
-    name: "الخطوط القطرية",
+    name: "ط§ظ„ط®ط·ظˆط· ط§ظ„ظ‚ط·ط±ظٹط©",
     code: "QR",
     website: "https://www.qatarairways.com",
     phone: "+974 40230000",
@@ -793,7 +794,7 @@ export const defaultAirlines: AirlineItem[] = [
   },
   {
     id: "airline-5",
-    name: "مصر للطيران",
+    name: "ظ…طµط± ظ„ظ„ط·ظٹط±ط§ظ†",
     code: "MS",
     website: "https://www.egyptair.com",
     phone: "+202 2598 0000",
@@ -801,7 +802,7 @@ export const defaultAirlines: AirlineItem[] = [
   },
   {
     id: "airline-6",
-    name: "العربية للطيران",
+    name: "ط§ظ„ط¹ط±ط¨ظٹط© ظ„ظ„ط·ظٹط±ط§ظ†",
     code: "G9",
     website: "https://www.airarabia.com",
     phone: "+971 600508001",
@@ -824,14 +825,14 @@ export const defaultApiKeys: ApiKeyItem[] = [
 export const defaultUsers: ManagedUserItem[] = [
   {
     id: "user-1",
-    name: "أحمد العتيبي",
+    name: "ط£ط­ظ…ط¯ ط§ظ„ط¹طھظٹط¨ظٹ",
     email: "ahmed@example.com",
     role: "user",
     status: "active",
   },
   {
     id: "user-2",
-    name: "فريق الإدارة",
+    name: "ظپط±ظٹظ‚ ط§ظ„ط¥ط¯ط§ط±ط©",
     email: "admin@mashrouk.com",
     role: "admin",
     status: "active",
@@ -841,15 +842,15 @@ export const defaultUsers: ManagedUserItem[] = [
 export const defaultPages: PageItem[] = [
   {
     id: "page-1",
-    title: "عن المنصة",
+    title: "ط¹ظ† ط§ظ„ظ…ظ†طµط©",
     slug: "/about",
-    summary: "تعريف بالمنصة ولماذا نثق بها.",
+    summary: "طھط¹ط±ظٹظپ ط¨ط§ظ„ظ…ظ†طµط© ظˆظ„ظ…ط§ط°ط§ ظ†ط«ظ‚ ط¨ظ‡ط§.",
   },
   {
     id: "page-2",
-    title: "سياسة الخصوصية",
+    title: "ط³ظٹط§ط³ط© ط§ظ„ط®طµظˆطµظٹط©",
     slug: "/privacy",
-    summary: "سياسة الخصوصية وحماية البيانات.",
+    summary: "ط³ظٹط§ط³ط© ط§ظ„ط®طµظˆطµظٹط© ظˆط­ظ…ط§ظٹط© ط§ظ„ط¨ظٹط§ظ†ط§طھ.",
   },
 ];
 
@@ -864,7 +865,7 @@ export const defaultAdminSettings: AdminSettings = {
   contactPhone: "+966 54 245 4094",
   contactEmail: "ibrahemest@outlook.sa",
   contactWhatsapp: "+966542454094",
-  contactAddress: "الرياض، المملكة العربية السعودية",
+  contactAddress: "ط§ظ„ط±ظٹط§ط¶طŒ ط§ظ„ظ…ظ…ظ„ظƒط© ط§ظ„ط¹ط±ط¨ظٹط© ط§ظ„ط³ط¹ظˆط¯ظٹط©",
 };
 
 export const defaultAdminData: AdminData = {
@@ -894,6 +895,19 @@ export const defaultAdminData: AdminData = {
 };
 
 const isBrowser = typeof window !== "undefined";
+const ADMIN_FETCH_TIMEOUT_MS = 8000;
+
+const withTimeout = async <T,>(promise: Promise<T>, ms = ADMIN_FETCH_TIMEOUT_MS): Promise<T> => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<T>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error("timeout")), ms);
+  });
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
+};
 
 type CollectionKey =
   | "flights"
@@ -1122,12 +1136,13 @@ const collectionConfigs: CollectionConfigMap = {
   },
   apiKeys: {
     table: "api_keys",
-    select: "id, name, provider, key, status",
+    select: "id, name, provider, key, base_url, status",
     fromDb: (row) => ({
       id: asString(row.id),
       name: asString(row.name),
       provider: asString(row.provider),
       key: asString(row.key),
+      baseUrl: asString(row.base_url),
       status: (asString(row.status, "disabled") as ApiKeyItem["status"]) || "disabled",
     }),
     toDb: (item: ApiKeyItem) => ({
@@ -1135,6 +1150,7 @@ const collectionConfigs: CollectionConfigMap = {
       name: item.name,
       provider: item.provider,
       key: item.key ?? null,
+      base_url: item.baseUrl ?? null,
       status: item.status,
     }),
   },
@@ -1198,28 +1214,34 @@ const emptyOrFallback = <T,>(items: T[] | null | undefined, fallback: T[]) =>
 
 const fetchAdminSettings = async (): Promise<AdminSettings> => {
   if (!isBrowser) return defaultAdminSettings;
-  const { data, error } = await supabase
-    .from("admin_settings")
-    .select(
-      "promo_video_url, app_download_image_url, app_download_link, featured_image_url, featured_title, featured_description, featured_link, contact_phone, contact_email, contact_whatsapp, contact_address, updated_at"
-    )
-    .order("updated_at", { ascending: false })
-    .limit(1);
-  if (error) return defaultAdminSettings;
-  const row = data?.[0] ?? {};
-  return {
-    promoVideoUrl: row.promo_video_url ?? "",
-    appDownloadImageUrl: row.app_download_image_url ?? "",
-    appDownloadLink: row.app_download_link ?? "",
-    featuredImageUrl: row.featured_image_url ?? "",
-    featuredTitle: row.featured_title ?? "",
-    featuredDescription: row.featured_description ?? "",
-    featuredLink: row.featured_link ?? "",
-    contactPhone: row.contact_phone ?? defaultAdminSettings.contactPhone,
-    contactEmail: row.contact_email ?? defaultAdminSettings.contactEmail,
-    contactWhatsapp: row.contact_whatsapp ?? defaultAdminSettings.contactWhatsapp,
-    contactAddress: row.contact_address ?? defaultAdminSettings.contactAddress,
-  };
+  try {
+    const { data, error } = await withTimeout(
+      supabase
+        .from("admin_settings")
+        .select(
+          "promo_video_url, app_download_image_url, app_download_link, featured_image_url, featured_title, featured_description, featured_link, contact_phone, contact_email, contact_whatsapp, contact_address, updated_at"
+        )
+        .order("updated_at", { ascending: false })
+        .limit(1)
+    );
+    if (error) return defaultAdminSettings;
+    const row = data?.[0] ?? {};
+    return {
+      promoVideoUrl: row.promo_video_url ?? "",
+      appDownloadImageUrl: row.app_download_image_url ?? "",
+      appDownloadLink: row.app_download_link ?? "",
+      featuredImageUrl: row.featured_image_url ?? "",
+      featuredTitle: row.featured_title ?? "",
+      featuredDescription: row.featured_description ?? "",
+      featuredLink: row.featured_link ?? "",
+      contactPhone: row.contact_phone ?? defaultAdminSettings.contactPhone,
+      contactEmail: row.contact_email ?? defaultAdminSettings.contactEmail,
+      contactWhatsapp: row.contact_whatsapp ?? defaultAdminSettings.contactWhatsapp,
+      contactAddress: row.contact_address ?? defaultAdminSettings.contactAddress,
+    };
+  } catch {
+    return defaultAdminSettings;
+  }
 };
 
 export const saveAdminSettings = async (settings: AdminSettings, userId?: string | null) => {
@@ -1247,13 +1269,17 @@ const fetchAdminCollection = async <K extends CollectionKey>(
 ): Promise<AdminData[K]> => {
   if (!isBrowser) return fallback;
   const config = collectionConfigs[key];
-  const { data, error } = await supabase
-    .from(config.table)
-    .select(config.select ?? "*");
-  if (error) return fallback;
-  const rows = (data || []) as DbRow[];
-  const mapped = rows.map(config.fromDb);
-  return emptyOrFallback(mapped, fallback);
+  try {
+    const { data, error } = await withTimeout(
+      supabase.from(config.table).select(config.select ?? "*")
+    );
+    if (error) return fallback;
+    const rows = (data || []) as DbRow[];
+    const mapped = rows.map(config.fromDb);
+    return emptyOrFallback(mapped, fallback);
+  } catch {
+    return fallback;
+  }
 };
 
 export const useAdminCollection = <K extends CollectionKey>(
@@ -1299,6 +1325,10 @@ export const useAdminData = () => {
 
   const refresh = async () => {
     setLoading(true);
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+    }, ADMIN_FETCH_TIMEOUT_MS + 4000);
+
     const [
       flights,
       hotels,
@@ -1344,6 +1374,7 @@ export const useAdminData = () => {
       ...adminSettings,
       seasons,
     });
+    clearTimeout(timeoutId);
     setLoading(false);
   };
 
@@ -1453,3 +1484,4 @@ export const usePromoVideoUrl = () => {
 };
 
 export const getPromoVideoUrl = () => "";
+

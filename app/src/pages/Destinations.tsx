@@ -5,6 +5,7 @@ import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { ServiceCard } from "@/components/ServiceCard";
 import { defaultAirlines, defaultDestinations, useAdminCollection, useAdminSettings } from "@/data/adminStore";
 import { adminBenefitCards, popularDestinationsByRegion } from "@/data/content";
+import { getAirlineLogoCandidates } from "@/lib/media";
 import { ArrowLeft, MapPin, Sparkles, Star, FileText, CalendarCheck, Smartphone } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
@@ -138,13 +139,20 @@ export default function Destinations() {
           <div className="flex flex-wrap items-center gap-4 mb-16">
             {airlines.map((airline) => (
               <div key={airline.id} className="bg-card rounded-xl px-4 py-3 shadow-card flex items-center gap-3">
-                <ImageWithFallback
-                  src={airline.logo}
-                  alt={airline.name}
-                  className="w-20 h-8 object-contain"
-                  fallbackClassName="w-20 h-8 object-contain bg-muted"
-                  fallbackSrc="/airline-placeholder.svg"
-                />
+                {(() => {
+                  const logoCandidates = getAirlineLogoCandidates(airline.code, airline.website);
+                  const logoSrc = airline.logo || logoCandidates[0];
+                  return (
+                    <ImageWithFallback
+                      src={logoSrc}
+                      alt={airline.name}
+                      className="w-20 h-8 object-contain"
+                      fallbackClassName="w-20 h-8 object-contain bg-muted"
+                      fallbackSources={logoCandidates}
+                      fallbackSrc="/airline-placeholder.svg"
+                    />
+                  );
+                })()}
                 <span className="text-sm font-semibold">{airline.name}</span>
               </div>
             ))}

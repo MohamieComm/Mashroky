@@ -1,0 +1,2 @@
+ALTER TABLE public.api_keys
+ADD COLUMN IF NOT EXISTS base_url TEXT;

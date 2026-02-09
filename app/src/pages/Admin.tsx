@@ -259,6 +259,7 @@ const sectionConfigs: Record<string, SectionConfig> = {
       { key: "name", label: "اسم المفتاح" },
       { key: "provider", label: "المزود" },
       { key: "key", label: "قيمة المفتاح" },
+      { key: "baseUrl", label: "رابط الاستدعاء (API URL)" },
       {
         key: "status",
         label: "الحالة",
@@ -390,8 +391,18 @@ export default function Admin() {
   const [revealedKeyId, setRevealedKeyId] = useState<string | null>(null);
   const isPageLoading = authLoading || adminLoading;
   const paymentProvider = (import.meta.env.VITE_PAYMENT_PROVIDER || "").toLowerCase();
-  const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
-  const moyasarPublicKey = import.meta.env.VITE_MOYASAR_PUBLISHABLE_KEY || "";
+  const apiKeysList = adminData?.apiKeys || [];
+  const findApiKey = (provider: string, name: string) =>
+    apiKeysList.find(
+      (item) =>
+        item.provider?.toLowerCase() === provider.toLowerCase() &&
+        item.name?.toLowerCase() === name.toLowerCase() &&
+        item.status === "enabled"
+    )?.key || "";
+  const stripePublicKey =
+    import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || findApiKey("stripe", "publishable_key");
+  const moyasarPublicKey =
+    import.meta.env.VITE_MOYASAR_PUBLISHABLE_KEY || findApiKey("moyasar", "publishable_key");
   const flightApiBaseUrl =
     (import.meta.env.VITE_FLIGHT_API_URL as string | undefined) ||
     "https://jubilant-hope-production-a334.up.railway.app";
@@ -1114,6 +1125,8 @@ export default function Admin() {
                     {activeSection === "api" && (
                       <div className="mt-3 text-xs text-muted-foreground space-y-1">
                         <p>Admitad: استخدم provider=admitad و name=campaign_code وضع الكود داخل قيمة المفتاح.</p>
+                        <p>رابط الاستدعاء (API URL): استخدم الحقل المخصص لذلك أو name=base_url إن كنت تخزن الرابط كمفتاح.</p>
+                        <p>مفاتيح المدفوعات: Moyasar → provider=moyasar مع name=secret_key و name=publishable_key.</p>
                         <p>فعّل الحالة (مفعل) حتى يتم استخدام المفتاح في الواجهة.</p>
                       </div>
                     )}

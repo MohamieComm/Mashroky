@@ -41,6 +41,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { getAirlineLogoCandidates } from "@/lib/media";
 import { ServiceCard } from "@/components/ServiceCard";
 import { 
   Plane, 
@@ -636,13 +637,20 @@ export default function Trips() {
                 key={airline.id}
                 className="bg-card rounded-xl px-4 py-3 shadow-card flex items-center gap-3"
               >
+                {(() => {
+                  const logoCandidates = getAirlineLogoCandidates(airline.code, airline.website);
+                  const logoSrc = airline.logo || logoCandidates[0];
+                  return (
                 <ImageWithFallback
-                  src={airline.logo}
+                  src={logoSrc}
                   alt={airline.name}
                   className="w-20 h-8 object-contain"
                   fallbackClassName="w-20 h-8 object-contain bg-muted"
+                  fallbackSources={logoCandidates}
                   fallbackSrc="/airline-placeholder.svg"
                 />
+                  );
+                })()}
                 <div className="text-sm font-semibold">{airline.name}</div>
               </div>
             ))}

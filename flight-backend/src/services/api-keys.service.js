@@ -16,7 +16,7 @@ export async function listEnabledApiKeys() {
   }
   const { data, error } = await client
     .from('api_keys')
-    .select('id, name, provider, key, status');
+    .select('id, name, provider, key, base_url, status');
   if (error) {
     cache = { ts: Date.now(), data: [] };
     return [];
@@ -36,3 +36,18 @@ export async function getApiKeyValue(provider, name) {
   return match?.key ? String(match.key) : '';
 }
 
+export async function getApiBaseUrl(provider) {
+  const keys = await listEnabledApiKeys();
+  const targetProvider = normalize(provider);
+  const direct = keys.find(
+    (row) => normalize(row.provider) === targetProvider && row.base_url
+  );
+  if (direct?.base_url) return String(direct.base_url);
+  const fallback = keys.find(
+    (row) =>
+      normalize(row.provider) === targetProvider &&
+      normalize(row.name) === 'base_url' &&
+      row.key
+  );
+  return fallback?.key ? String(fallback.key) : '';
+}

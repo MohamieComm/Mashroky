@@ -1,21 +1,15 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import { supabase } from "@/integrations/supabase/client";
 import {
   MapPin,
-  Calendar,
   Clock,
   Star,
-  Users,
   Check,
   AlertTriangle,
   FileText,
@@ -49,21 +43,11 @@ export default function TripDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
   const { addItem } = useCart();
 
   const [trip, setTrip] = useState<Trip | null>(null);
   const [loading, setLoading] = useState(true);
-  const [bookingLoading, setBookingLoading] = useState(false);
-  const [showBookingForm, setShowBookingForm] = useState(false);
   const [activeTab, setActiveTab] = useState<"details" | "description">("description");
-
-  const [bookingData, setBookingData] = useState({
-    travelDate: "",
-    numTravelers: 1,
-    contactPhone: "",
-    specialRequests: "",
-  });
 
   useEffect(() => {
     fetchTrip();
@@ -89,53 +73,6 @@ export default function TripDetails() {
       setTrip(data as Trip);
     }
     setLoading(false);
-  };
-
-  const handleBooking = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!user) {
-      toast({
-        title: "يجب تسجيل الدخول",
-        description: "قم بتسجيل الدخول أولاً لإتمام الحجز",
-        variant: "destructive",
-      });
-      navigate("/auth");
-      return;
-    }
-
-    if (!trip) return;
-
-    setBookingLoading(true);
-
-    const totalPrice = trip.price * bookingData.numTravelers;
-
-    const { error } = await supabase.from("bookings").insert({
-      user_id: user.id,
-      trip_id: trip.id,
-      travel_date: bookingData.travelDate,
-      num_travelers: bookingData.numTravelers,
-      total_price: totalPrice,
-      contact_phone: bookingData.contactPhone,
-      special_requests: bookingData.specialRequests,
-    });
-
-    setBookingLoading(false);
-
-    if (error) {
-      toast({
-        title: "خطأ في الحجز",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "تم الحجز بنجاح! 🎉",
-        description: "سنتواصل معك قريباً لتأكيد الحجز",
-      });
-      setShowBookingForm(false);
-      navigate("/profile");
-    }
   };
 
   const handleCartBook = () => {
@@ -413,124 +350,37 @@ export default function TripDetails() {
 
             <div className="lg:col-span-1">
               <div className="bg-card rounded-2xl p-6 shadow-hover sticky top-24">
-                {!showBookingForm ? (
-                  <>
-                    <div className="text-center mb-6">
-                      <div className="w-16 h-16 hero-gradient rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <Plane className="w-8 h-8 text-primary-foreground" />
-                      </div>
-                      <h3 className="text-xl font-bold">احجز هذه الرحلة</h3>
-                      <p className="text-muted-foreground text-sm mt-1">تواصل معنا لتأكيد حجزك</p>
-                    </div>
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 hero-gradient rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Plane className="w-8 h-8 text-primary-foreground" />
+                  </div>
+                  <h3 className="text-xl font-bold">أضف الرحلة إلى السلة</h3>
+                  <p className="text-muted-foreground text-sm mt-1">تابع الدفع من صفحة السلة عند جاهزيتك</p>
+                </div>
 
-                    <div className="space-y-4 mb-6">
-                      <div className="flex justify-between items-center py-3 border-b border-border">
-                        <span className="text-muted-foreground">السعر</span>
-                        <span className="font-bold text-primary">{trip.price.toLocaleString()} ر.س</span>
-                      </div>
-                      <div className="flex justify-between items-center py-3 border-b border-border">
-                        <span className="text-muted-foreground">المدة</span>
-                        <span className="font-semibold">{trip.duration_days} أيام</span>
-                      </div>
-                      <div className="flex justify-between items-center py-3">
-                        <span className="text-muted-foreground">الوجهة</span>
-                        <span className="font-semibold">{trip.country}</span>
-                      </div>
-                    </div>
+                <div className="space-y-4 mb-6">
+                  <div className="flex justify-between items-center py-3 border-b border-border">
+                    <span className="text-muted-foreground">السعر</span>
+                    <span className="font-bold text-primary">{trip.price.toLocaleString()} ر.س</span>
+                  </div>
+                  <div className="flex justify-between items-center py-3 border-b border-border">
+                    <span className="text-muted-foreground">المدة</span>
+                    <span className="font-semibold">{trip.duration_days} أيام</span>
+                  </div>
+                  <div className="flex justify-between items-center py-3">
+                    <span className="text-muted-foreground">الوجهة</span>
+                    <span className="font-semibold">{trip.country}</span>
+                  </div>
+                </div>
 
-                    <Button
-                      variant="hero"
-                      size="lg"
-                      className="w-full"
-                      onClick={handleCartBook}
-                    >
-                      احجز الآن
-                    </Button>
-                  </>
-                ) : (
-                  <form onSubmit={handleBooking} className="space-y-4">
-                    <h3 className="text-xl font-bold text-center mb-4">نموذج الحجز</h3>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="travelDate">تاريخ السفر</Label>
-                      <div className="relative">
-                        <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                        <Input
-                          id="travelDate"
-                          type="date"
-                          className="pr-10"
-                          required
-                          value={bookingData.travelDate}
-                          onChange={(e) => setBookingData({ ...bookingData, travelDate: e.target.value })}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="numTravelers">عدد المسافرين</Label>
-                      <div className="relative">
-                        <Users className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                        <Input
-                          id="numTravelers"
-                          type="number"
-                          min="1"
-                          max="20"
-                          className="pr-10"
-                          required
-                          value={bookingData.numTravelers}
-                          onChange={(e) =>
-                            setBookingData({
-                              ...bookingData,
-                              numTravelers: parseInt(e.target.value) || 1,
-                            })
-                          }
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="contactPhone">رقم الجوال</Label>
-                      <Input
-                        id="contactPhone"
-                        type="tel"
-                        placeholder="+966 5X XXX XXXX"
-                        required
-                        value={bookingData.contactPhone}
-                        onChange={(e) => setBookingData({ ...bookingData, contactPhone: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="specialRequests">طلبات خاصة (اختياري)</Label>
-                      <Textarea
-                        id="specialRequests"
-                        placeholder="أي طلبات أو ملاحظات إضافية..."
-                        value={bookingData.specialRequests}
-                        onChange={(e) =>
-                          setBookingData({ ...bookingData, specialRequests: e.target.value })
-                        }
-                      />
-                    </div>
-
-                    <div className="bg-muted rounded-xl p-4">
-                      <div className="flex justify-between items-center">
-                        <span>المجموع</span>
-                        <span className="text-2xl font-bold text-primary">
-                          {(trip.price * bookingData.numTravelers).toLocaleString()} ر.س
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-3">
-                      <Button type="button" variant="outline" className="flex-1" onClick={() => setShowBookingForm(false)}>
-                        إلغاء
-                      </Button>
-                      <Button type="submit" variant="hero" className="flex-1" disabled={bookingLoading}>
-                        {bookingLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "تأكيد الحجز"}
-                      </Button>
-                    </div>
-                  </form>
-                )}
+                <Button
+                  variant="hero"
+                  size="lg"
+                  className="w-full"
+                  onClick={handleCartBook}
+                >
+                  احجز الآن
+                </Button>
 
                 <div className="mt-6 pt-6 border-t border-border">
                   <div className="flex items-center gap-2 mb-3">

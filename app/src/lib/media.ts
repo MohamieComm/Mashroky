@@ -19,3 +19,28 @@ export const getMediaTypeFromUrl = (url?: string | null): MediaType => {
   return "unknown";
 };
 
+const normalizeDomain = (website?: string | null) => {
+  if (!website) return "";
+  try {
+    const url = website.startsWith("http") ? website : `https://${website}`;
+    const parsed = new URL(url);
+    return parsed.hostname.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+};
+
+export const getAirlineLogoCandidates = (code?: string | null, website?: string | null) => {
+  const iata = String(code || "").trim().toUpperCase();
+  const domain = normalizeDomain(website);
+  const candidates: string[] = [];
+  if (iata) {
+    candidates.push(`https://www.gstatic.com/flights/airline_logos/70px/${iata}.png`);
+    candidates.push(`https://images.kiwi.com/airlines/64/${iata}.png`);
+  }
+  if (domain) {
+    candidates.push(`https://logo.clearbit.com/${domain}`);
+    candidates.push(`https://www.google.com/s2/favicons?domain=${domain}&sz=128`);
+  }
+  return candidates;
+};
