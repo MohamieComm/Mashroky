@@ -31,7 +31,11 @@ export const moyasarEnv = {
 export const supabaseEnv = {
   url: process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '',
   serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
-  anonKey: process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '',
+  anonKey:
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.VITE_SUPABASE_ANON_KEY ||
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    '',
   jwtSecret: process.env.SUPABASE_JWT_SECRET || '',
 };
 
