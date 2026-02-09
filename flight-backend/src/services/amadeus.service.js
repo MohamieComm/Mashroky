@@ -1,263 +1,183 @@
 import axios from 'axios';
-import { amadeusClient } from '../config/amadeus.config.js';
-import { amadeusEnv } from '../config/env.config.js';
-import { parseISODurationToMinutes } from '../utils/duration.js';
 import { logAmadeusError } from '../utils/amadeus-logger.js';
 
-const ensureAmadeusConfigured = () => {
-  if (!amadeusEnv.clientId || !amadeusEnv.clientSecret) {
+// In-memory token cache to reduce token requests.
+const tokenCache = {
+  accessToken: null,
+  tokenType: 'Bearer',
+  expiresAt: 0,
+  raw: null,
+};
+
+const DEFAULT_TEST_BASE = 'https://test.api.amadeus.com';
+const DEFAULT_PROD_BASE = 'https://api.amadeus.com';
+
+function resolveBaseUrl() {
+  const explicit = String(process.env.AMADEUS_BASE_URL || '').trim();
+  if (explicit) return explicit.replace(/\/$/, '');
+  const env = String(process.env.AMADEUS_ENV || '').toLowerCase();
+  return env === 'production' ? DEFAULT_PROD_BASE : DEFAULT_TEST_BASE;
+}
+
+function ensureConfigured() {
+  if (!process.env.AMADEUS_CLIENT_ID || !process.env.AMADEUS_CLIENT_SECRET) {
     const err = new Error('amadeus_not_configured');
     err.status = 500;
     throw err;
   }
-};
+}
 
-const resolveAmadeusBaseUrl = () => {
-  const base = String(process.env.AMADEUS_BASE_URL || '').trim();
-  if (base) return base.replace(/\/$/, '');
-  const env = String(process.env.AMADEUS_ENV || '').toLowerCase();
-  return env === 'production' || env === 'prod'
-    ? 'https://api.amadeus.com'
-    : 'https://test.api.amadeus.com';
-};
+async function requestNewToken() {
+  ensureConfigured();
+  const tokenUrl = `${resolveBaseUrl()}/v1/security/oauth2/token`;
+  const params = new URLSearchParams();
+  params.set('grant_type', 'client_credentials');
+  params.set('client_id', process.env.AMADEUS_CLIENT_ID);
+  params.set('client_secret', process.env.AMADEUS_CLIENT_SECRET);
 
-const normalizeTravelClass = (value) => {
-  const raw = String(value || '').trim();
-  if (!raw) return '';
-  const upper = raw.toUpperCase();
-  if (upper === 'ECONOMY' || upper === 'BUSINESS' || upper === 'FIRST' || upper === 'PREMIUM_ECONOMY') {
-    return upper;
-  }
-  const map = {
-    economy: 'ECONOMY',
-    premiumeconomy: 'PREMIUM_ECONOMY',
-    premium_economy: 'PREMIUM_ECONOMY',
-    business: 'BUSINESS',
-    first: 'FIRST',
-  };
-  return map[raw.toLowerCase()] || '';
-};
+  const res = await axios.post(tokenUrl, params.toString(), {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    timeout: 15000,
+  });
+  return res.data || {};
+}
 
 export async function getAccessToken() {
-  ensureAmadeusConfigured();
-  const tokenUrl = `${resolveAmadeusBaseUrl()}/v1/security/oauth2/token`;
-  try {
-    const body = new URLSearchParams();
-    body.set('grant_type', 'client_credentials');
-    body.set('client_id', amadeusEnv.clientId);
-    body.set('client_secret', amadeusEnv.clientSecret);
-
-    const response = await axios.post(tokenUrl, body.toString(), {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      timeout: 15000,
-    });
-
-    const data = response?.data || {};
+  // Return cached token when still valid (5s early buffer)
+  const now = Date.now();
+  if (tokenCache.accessToken && tokenCache.expiresAt - 5000 > now) {
     return {
-      accessToken: data.access_token || '',
-      tokenType: data.token_type || 'Bearer',
-      expiresIn: data.expires_in || 0,
-      raw: data,
+      accessToken: tokenCache.accessToken,
+      tokenType: tokenCache.tokenType,
+      expiresIn: Math.max(0, Math.floor((tokenCache.expiresAt - now) / 1000)),
+      raw: tokenCache.raw,
     };
+  }
+
+  try {
+    const data = await requestNewToken();
+    const accessToken = data.access_token || '';
+    const tokenType = data.token_type || 'Bearer';
+    const expiresIn = Number(data.expires_in || 0);
+    const expiresAt = Date.now() + (expiresIn > 0 ? expiresIn * 1000 : 60 * 1000);
+
+    tokenCache.accessToken = accessToken;
+    tokenCache.tokenType = tokenType;
+    tokenCache.expiresAt = expiresAt;
+    tokenCache.raw = data;
+
+    return { accessToken, tokenType, expiresIn, raw: data };
+  } catch (err) {
+    const payload = err?.response?.data || err?.message || err;
+    await logAmadeusError('token_error', { error: payload });
+    const e = new Error('amadeus_token_failed');
+    e.cause = payload;
+    e.status = 502;
+    throw e;
+  }
+}
+
+function buildAuthHeader(tokenObj) {
+  const tokenType = tokenObj?.tokenType || 'Bearer';
+  const accessToken = tokenObj?.accessToken || tokenObj?.access_token || '';
+  return `${tokenType} ${accessToken}`.trim();
+}
+
+export async function searchFlights(params = {}) {
+  ensureConfigured();
+  const base = resolveBaseUrl();
+  try {
+    const token = await getAccessToken();
+    const res = await axios.get(`${base}/v2/shopping/flight-offers`, {
+      params,
+      headers: {
+        Authorization: buildAuthHeader(token),
+        'Content-Type': 'application/json',
+      },
+      timeout: 20000,
+    });
+    return res?.data || {};
   } catch (error) {
-    const errorPayload = error?.response?.data || error?.message || error;
-    console.error('amadeus_token_error', errorPayload);
-    await logAmadeusError('amadeus_token_error', { error: errorPayload });
-    const err = new Error('amadeus_token_failed');
-    err.status = 502;
-    throw err;
+    const payload = error?.response?.data || error?.message || error;
+    await logAmadeusError('search_error', { params, error: payload });
+    throw error;
+  }
+}
+
+export async function priceFlights(body = {}) {
+  ensureConfigured();
+  const base = resolveBaseUrl();
+  try {
+    const token = await getAccessToken();
+    // Amadeus expects a `data` object for pricing; accept either full body or a simplified shape
+    const payload = body && body.data ? body : { data: { type: 'flight-offers-pricing', flightOffers: body.flightOffers || body } };
+    const res = await axios.post(`${base}/v1/shopping/flight-offers/pricing`, payload, {
+      headers: {
+        Authorization: buildAuthHeader(token),
+        'Content-Type': 'application/json',
+      },
+      timeout: 20000,
+    });
+    return res?.data || {};
+  } catch (error) {
+    const payload = error?.response?.data || error?.message || error;
+    await logAmadeusError('price_error', { body, error: payload });
+    throw error;
+  }
+}
+
+export async function createOrder(body = {}) {
+  ensureConfigured();
+  const base = resolveBaseUrl();
+  try {
+    const token = await getAccessToken();
+    const payload = body && body.data ? body : { data: { type: 'flight-order', flightOffers: body.flightOffers || [], travelers: body.travelers || [] } };
+    const res = await axios.post(`${base}/v1/booking/flight-orders`, payload, {
+      headers: {
+        Authorization: buildAuthHeader(token),
+        'Content-Type': 'application/json',
+      },
+      timeout: 30000,
+    });
+    return res?.data || {};
+  } catch (error) {
+    const payload = error?.response?.data || error?.message || error;
+    await logAmadeusError('booking_error', { body, error: payload });
+    throw error;
   }
 }
 
 export function mapAmadeusOfferToDTO(offer) {
-  const slices = (offer.itineraries || []).map((itinerary) =>
-    (itinerary.segments || []).map((seg) => {
-      const dep = seg.departure || {};
-      const arr = seg.arrival || {};
-      const durationMinutes = parseISODurationToMinutes(seg.duration);
-      return {
-        marketingCarrier: seg.carrierCode,
-        operatingCarrier: seg.operating?.carrierCode || seg.carrierCode,
-        flightNumber: seg.number,
-        origin: dep.iataCode,
-        destination: arr.iataCode,
-        departureTime: dep.at,
-        arrivalTime: arr.at,
-        durationMinutes,
-        aircraft: seg.aircraft?.code || null,
-      };
-    })
-  );
-
+  if (!offer) return null;
   const price = offer.price || {};
-  const fees = Array.isArray(price.fees) ? price.fees : [];
-  const taxes =
-    fees.length > 0
-      ? fees.reduce((sum, f) => sum + Number(f.amount || 0), 0)
-      : null;
-
-  const cabinsSet = new Set();
-  (offer.travelerPricings || []).forEach((tp) => {
-    (tp.fareDetailsBySegment || []).forEach((fd) => {
-      if (fd.cabin) cabinsSet.add(String(fd.cabin).toUpperCase());
-    });
-  });
+  const itineraries = (offer.itineraries || []).map((iti) => ({
+    segments: (iti.segments || []).map((seg) => ({
+      departure: seg.departure,
+      arrival: seg.arrival,
+      carrierCode: seg.carrierCode,
+      number: seg.number || seg.flightNumber || null,
+      duration: seg.duration,
+      raw: seg,
+    })),
+    raw: iti,
+  }));
 
   return {
     provider: 'amadeus',
     providerOfferId: offer.id,
-    slices,
     raw: offer,
+    itineraries,
     pricing: {
-      currency: price.currency || 'USD',
-      total: Number(price.total || 0),
-      base: price.base ? Number(price.base) : null,
-      taxes,
+      total: price.total || null,
+      currency: price.currency || null,
     },
-    cabins: Array.from(cabinsSet),
-    refundable: null,
-    baggageInfo: {},
   };
 }
 
-function mapAmadeusOrderToDTO(order) {
-  const data = order?.data || order || {};
-
-  let bookingReference = null;
-  if (Array.isArray(data.associatedRecords) && data.associatedRecords.length > 0) {
-    bookingReference = data.associatedRecords[0].reference || null;
-  }
-
-  const passengers = (data.travelers || []).map((t) => ({
-    id: t.id,
-    firstName: t.name?.firstName,
-    lastName: t.name?.lastName,
-    title: undefined,
-    email: t.contact?.emailAddress,
-    phone: t.contact?.phones?.[0]
-      ? `+${t.contact.phones[0].countryCallingCode}${t.contact.phones[0].number}`
-      : undefined,
-  }));
-
-  const offers = (data.flightOffers || []).map((fo) => mapAmadeusOfferToDTO(fo));
-  const createdAt = data.bookingDate || data.creationDate || null;
-
-  return {
-    provider: 'amadeus',
-    providerOrderId: data.id,
-    bookingReference,
-    createdAt,
-    passengers,
-    offers,
-    status: 'CONFIRMED',
-    raw: order,
-  };
-}
-
-export async function searchFlights({
-  origin,
-  destination,
-  departureDate,
-  returnDate,
-  adults = 1,
-  airline,
-  travelClass,
-}) {
-  ensureAmadeusConfigured();
-  const params = {
-    originLocationCode: origin,
-    destinationLocationCode: destination,
-    departureDate,
-    adults: String(adults),
-    currencyCode: 'SAR',
-    max: 30,
-  };
-  if (returnDate) params.returnDate = returnDate;
-  const airlineCodes = Array.isArray(airline)
-    ? airline.filter(Boolean).join(',')
-    : String(airline || '').trim();
-  if (airlineCodes) params.includedAirlineCodes = airlineCodes;
-  const normalizedClass = normalizeTravelClass(travelClass);
-  if (normalizedClass) params.travelClass = normalizedClass;
-  try {
-    const response = await amadeusClient.shopping.flightOffersSearch.get(params);
-    const result = response.result;
-    const offers = result?.data || result || [];
-    return offers.map(mapAmadeusOfferToDTO);
-  } catch (error) {
-    const errorPayload = error?.response?.data || error?.message || error;
-    console.error('amadeus_search_error', errorPayload);
-    await logAmadeusError('amadeus_search_error', {
-      params,
-      error: errorPayload,
-    });
-    throw error;
-  }
-}
-
-export async function listAirlines({ codes }) {
-  ensureAmadeusConfigured();
-  if (!codes) return [];
-  try {
-    const response = await amadeusClient.referenceData.airlines.get({
-      airlineCodes: codes,
-    });
-    const result = response.result;
-    const list = result?.data || result || [];
-    return list.map((item) => ({
-      code: item.iataCode || item.icaoCode || item.airlineCode || item.code,
-      name: item.commonName || item.businessName || item.name || item.airlineName,
-    }));
-  } catch (error) {
-    const errorPayload = error?.response?.data || error?.message || error;
-    console.error('amadeus_airlines_error', errorPayload);
-    await logAmadeusError('amadeus_airlines_error', { codes, error: errorPayload });
-    throw error;
-  }
-}
-
-export async function priceFlights({ flightOffers }) {
-  ensureAmadeusConfigured();
-  try {
-    const response = await amadeusClient.shopping.flightOffers.pricing.post(
-      JSON.stringify({
-        data: {
-          type: 'flight-offers-pricing',
-          flightOffers,
-        },
-      })
-    );
-    return response.result;
-  } catch (error) {
-    const errorPayload = error?.response?.data || error?.message || error;
-    console.error('amadeus_price_error', errorPayload);
-    await logAmadeusError('amadeus_price_error', {
-      error: errorPayload,
-    });
-    throw error;
-  }
-}
-
-export async function bookFlights({ flightOffers, travelers }) {
-  ensureAmadeusConfigured();
-  try {
-    const response = await amadeusClient.booking.flightOrders.post(
-      JSON.stringify({
-        data: {
-          type: 'flight-order',
-          flightOffers,
-          travelers,
-        },
-      })
-    );
-    const result = response.result;
-    return mapAmadeusOrderToDTO(result);
-  } catch (error) {
-    const errorPayload = error?.response?.data || error?.message || error;
-    console.error('amadeus_booking_error', errorPayload);
-    await logAmadeusError('amadeus_booking_error', {
-      error: errorPayload,
-    });
-    throw error;
-  }
-}
+export default {
+  getAccessToken,
+  searchFlights,
+  priceFlights,
+  createOrder,
+  mapAmadeusOfferToDTO,
+};
