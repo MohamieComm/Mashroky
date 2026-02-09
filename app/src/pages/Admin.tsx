@@ -1127,6 +1127,10 @@ export default function Admin() {
                         <p>Admitad: استخدم provider=admitad و name=campaign_code وضع الكود داخل قيمة المفتاح.</p>
                         <p>رابط الاستدعاء (API URL): استخدم الحقل المخصص لذلك أو name=base_url إن كنت تخزن الرابط كمفتاح.</p>
                         <p>مفاتيح المدفوعات: Moyasar → provider=moyasar مع name=secret_key و name=publishable_key.</p>
+                        <p>الفنادق (Amadeus): provider=amadeus مع name=client_id و name=client_secret و baseUrl=https://test.api.amadeus.com.</p>
+                        <p>السيارات: provider=car_rental مع name=api_key أو client_id/client_secret + token_url + base_url.</p>
+                        <p>الجولات: provider=tours مع name=api_key أو client_id/client_secret + token_url + base_url.</p>
+                        <p>النقل الخاص: provider=transfers مع name=api_key أو client_id/client_secret + token_url + base_url.</p>
                         <p>فعّل الحالة (مفعل) حتى يتم استخدام المفتاح في الواجهة.</p>
                       </div>
                     )}
