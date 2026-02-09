@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { logAmadeusError } from '../utils/amadeus-logger.js';
+import { getApiKeyValue } from './api-keys.service.js';
 
 // In-memory token cache to reduce token requests.
 const tokenCache = {
@@ -19,21 +20,35 @@ function resolveBaseUrl() {
   return env === 'production' ? DEFAULT_PROD_BASE : DEFAULT_TEST_BASE;
 }
 
-function ensureConfigured() {
-  if (!process.env.AMADEUS_CLIENT_ID || !process.env.AMADEUS_CLIENT_SECRET) {
+async function resolveAmadeusCredentials() {
+  // prefer environment variables, fall back to admin-managed api_keys in Supabase
+  let clientId = process.env.AMADEUS_CLIENT_ID || '';
+  let clientSecret = process.env.AMADEUS_CLIENT_SECRET || '';
+  const baseUrl = (process.env.AMADEUS_BASE_URL || '').trim() || undefined;
+
+  try {
+    if (!clientId) clientId = await getApiKeyValue('amadeus', 'client_id');
+    if (!clientSecret) clientSecret = await getApiKeyValue('amadeus', 'client_secret');
+  } catch (e) {
+    // log but continue to allow env-based config
+    await logAmadeusError('credential_lookup_error', { error: e?.message || e });
+  }
+
+  return { clientId, clientSecret, baseUrl };
+}
+
+async function requestNewToken() {
+  const creds = await resolveAmadeusCredentials();
+  if (!creds.clientId || !creds.clientSecret) {
     const err = new Error('amadeus_not_configured');
     err.status = 500;
     throw err;
   }
-}
-
-async function requestNewToken() {
-  ensureConfigured();
-  const tokenUrl = `${resolveBaseUrl()}/v1/security/oauth2/token`;
+  const tokenUrl = `${(creds.baseUrl || resolveBaseUrl())}/v1/security/oauth2/token`;
   const params = new URLSearchParams();
   params.set('grant_type', 'client_credentials');
-  params.set('client_id', process.env.AMADEUS_CLIENT_ID);
-  params.set('client_secret', process.env.AMADEUS_CLIENT_SECRET);
+  params.set('client_id', creds.clientId);
+  params.set('client_secret', creds.clientSecret);
 
   const res = await axios.post(tokenUrl, params.toString(), {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

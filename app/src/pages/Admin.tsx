@@ -387,6 +387,7 @@ export default function Admin() {
   const [flightBookings, setFlightBookings] = useState<FlightBooking[]>([]);
   const [flightBookingsLoading, setFlightBookingsLoading] = useState(false);
   const [flightBookingsError, setFlightBookingsError] = useState("");
+  const [revealedKeyId, setRevealedKeyId] = useState<string | null>(null);
   const isPageLoading = authLoading || adminLoading;
   const paymentProvider = (import.meta.env.VITE_PAYMENT_PROVIDER || "").toLowerCase();
   const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
@@ -1252,6 +1253,23 @@ export default function Admin() {
                             </p>
                           );
                         }
+                        // mask sensitive keys in the API Keys list
+                        if (activeConfig.listKey === 'apiKeys' && field.key === 'key') {
+                          const isRevealed = String(item.id) === revealedKeyId;
+                          return (
+                            <p key={field.key}>
+                              <span className="font-semibold text-foreground">{field.label}: </span>
+                              <span className="mr-2">{isRevealed ? String(value) : '••••••••••'}</span>
+                              <button
+                                className="text-sm text-primary underline"
+                                onClick={() => setRevealedKeyId(isRevealed ? null : String(item.id))}
+                              >
+                                {isRevealed ? 'إخفاء' : 'عرض'}
+                              </button>
+                            </p>
+                          );
+                        }
+
                         return (
                           <p key={field.key}>
                             <span className="font-semibold text-foreground">{field.label}: </span>

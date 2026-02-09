@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { moyasarEnv } from '../config/env.config.js';
+import { getApiKeyValue } from './api-keys.service.js';
 
 const MOYASAR_BASE_URL = process.env.MOYASAR_BASE_URL || 'https://api.moyasar.com/v1';
 
@@ -30,7 +31,17 @@ export async function createMoyasarInvoice({
   callbackUrl,
   metadata,
 }) {
-  if (!moyasarEnv.secretKey) {
+  let secretKey = moyasarEnv.secretKey || '';
+  try {
+    if (!secretKey) {
+      // try admin-managed api_keys table: provider=moyasar name=secret_key
+      secretKey = await getApiKeyValue('moyasar', 'secret_key');
+    }
+  } catch (e) {
+    // ignore lookup errors — we'll handle missing key below
+  }
+
+  if (!secretKey) {
     throw new Error('moyasar_not_configured');
   }
   const payload = {
@@ -44,7 +55,7 @@ export async function createMoyasarInvoice({
   };
 
   const response = await axios.post(`${MOYASAR_BASE_URL}/invoices`, payload, {
-    auth: { username: moyasarEnv.secretKey, password: '' },
+    auth: { username: secretKey, password: '' },
   });
 
   return response.data;
