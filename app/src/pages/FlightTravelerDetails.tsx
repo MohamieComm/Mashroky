@@ -110,26 +110,26 @@ export default function FlightTravelerDetails() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (!traveler.firstName) errors.firstName = "����� ����� �����";
-    if (!traveler.lastName) errors.lastName = "��� ������� �����";
-    if (!traveler.dateOfBirth) errors.dateOfBirth = "����� ������� �����";
-    if (!traveler.gender) errors.gender = "����� �����";
-    if (!traveler.nationality) errors.nationality = "������� ������";
+    if (!traveler.firstName) errors.firstName = "????? ????? ?????";
+    if (!traveler.lastName) errors.lastName = "??? ??????? ?????";
+    if (!traveler.dateOfBirth) errors.dateOfBirth = "????? ??????? ?????";
+    if (!traveler.gender) errors.gender = "????? ?????";
+    if (!traveler.nationality) errors.nationality = "??????? ??????";
     else if (!nationalityRegex.test(traveler.nationality))
-      errors.nationality = "��� ������� ��� �� ���� 2-3 ����";
-    if (!traveler.passportNumber) errors.passportNumber = "��� ������ �����";
-    else if (!passportRegex.test(traveler.passportNumber)) errors.passportNumber = "��� ������ ��� ����";
-    if (!traveler.passportExpiry) errors.passportExpiry = "����� ������ ������ �����";
+    if (!traveler.nationality) errors.nationality = "??????? ??????";
+    if (!traveler.passportNumber) errors.passportNumber = "??? ?????? ?????";
+    else if (!passportRegex.test(traveler.passportNumber)) errors.passportNumber = "??? ?????? ??? ????";
+    if (!traveler.passportExpiry) errors.passportExpiry = "????? ?????? ?????? ?????";
     else {
       const expiry = new Date(traveler.passportExpiry);
-      if (Number.isNaN(expiry.getTime())) errors.passportExpiry = "����� ������ ������ ��� ����";
-      else if (expiry < today) errors.passportExpiry = "����� ������ ������ ��� �� ���� ���������";
+      if (Number.isNaN(expiry.getTime())) errors.passportExpiry = "????? ?????? ?????? ??? ????";
+      else if (expiry < today) errors.passportExpiry = "??? ?? ???? ????? ???????? ????????";
     }
-    if (!traveler.email) errors.email = "������ ���������� �����";
-    else if (!emailRegex.test(traveler.email)) errors.email = "���� ������ ��� �����";
-    if (!traveler.phoneCountryCode) errors.phoneCountryCode = "��� ������ �����";
-    if (!traveler.phoneNumber) errors.phoneNumber = "��� ������ �����";
-    else if (!/^[0-9]{5,15}$/.test(traveler.phoneNumber)) errors.phoneNumber = "��� ������ ��� ����";
+    if (!traveler.email) errors.email = "?????? ?????????? ?????";
+    else if (!emailRegex.test(traveler.email)) errors.email = "?????? ?????????? ??? ????";
+    if (!traveler.phoneCountryCode) errors.phoneCountryCode = "??? ?????? ?????";
+    if (!traveler.phoneNumber) errors.phoneNumber = "??? ?????? ?????";
+    else if (!/^[0-9]{5,15}$/.test(traveler.phoneNumber)) errors.phoneNumber = "??? ?????? ??? ????";
 
     return errors;
   };
@@ -173,7 +173,7 @@ export default function FlightTravelerDetails() {
   const handleSubmit = async () => {
     if (!checkout) return;
     if (!validateAll()) {
-      setError("���� ����� ������ ��������� ��� ��������.");
+      setError("???? ????? ???? ???????? ???????? ???? ????.");
       return;
     }
     setProcessing(true);
@@ -207,13 +207,13 @@ export default function FlightTravelerDetails() {
       localStorage.setItem(BOOKING_STATUS_KEY, "pending");
 
       const orderNumber = `ORD-${Date.now()}`;
-      const orderSnapshot = { orderNumber, currency, total, items: [{ id: orderNumber, title: checkout.summary?.outbound || "��� �����", price: total, quantity: 1 }] };
+              {checkout.summary?.outbound && <div>???? ??????: {checkout.summary.outbound}</div>}
       localStorage.setItem(ORDER_SNAPSHOT_KEY, JSON.stringify(orderSnapshot));
 
       const paymentRes = await fetch(`${flightApiBaseUrl.replace(/\/$/, "")}/api/payments/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: total, currency, description: "��� �����", returnUrl: window.location.origin }),
+        body: JSON.stringify({ amount: total, currency, description: "??? ???? ?????", returnUrl: window.location.origin }),
       });
       if (!paymentRes.ok) throw new Error("payment_failed");
       const paymentData = await paymentRes.json();
@@ -224,7 +224,7 @@ export default function FlightTravelerDetails() {
       throw new Error("missing_payment_url");
     } catch (err) {
       const code = err instanceof Error ? err.message : "unknown_error";
-      setError(code === "flight_price_failed" ? "���� ����� ������. ���� ��� ����." : "���� ��� �����. ���� �� �������� �� ��� ��������.");
+      setError(code === "flight_price_failed" ? "???? ????? ??????. ???? ???????? ??????." : "???? ????? ?????. ???? ???????? ??? ???? ?? ??????? ?? ?????.");
     } finally {
       setProcessing(false);
     }
@@ -235,9 +235,9 @@ export default function FlightTravelerDetails() {
       <Layout>
         <div className="min-h-[60vh] flex items-center justify-center px-4">
           <div className="bg-card rounded-2xl p-8 shadow-card text-center max-w-lg">
-            <h2 className="text-xl font-bold mb-2">�� ���� ���� �����</h2>
-            <p className="text-muted-foreground mb-4">���� ������ ���� ����� �� ���� �������.</p>
-            <Button variant="hero" onClick={() => navigate("/trips")}>������ �������</Button>
+            <h2 className="text-xl font-bold mb-2">?? ???? ?????? ??? ??????</h2>
+            <p className="text-muted-foreground mb-4">???? ?????? ????? ??????? ??????? ????? ??????? ?????.</p>
+            <Button variant="hero" onClick={() => navigate("/trips")}>?????? ???????</Button>
           </div>
         </div>
       </Layout>
@@ -248,9 +248,9 @@ export default function FlightTravelerDetails() {
     <Layout>
       <section className="hero-gradient py-16">
         <div className="container mx-auto px-4 text-center">
-          <span className="text-primary-foreground/80">������ ���������</span>
-          <h1 className="text-3xl md:text-4xl font-bold text-primary-foreground mt-3">���� ������ �����</h1>
-          <p className="text-primary-foreground/80 mt-3">������� ��� �������� ������ ����� ������� ��� �����.</p>
+          <span className="text-primary-foreground/80">???? ?????? ??????</span>
+          <h1 className="text-3xl md:text-4xl font-bold text-primary-foreground mt-3">??????? ?????????</h1>
+          <p className="text-primary-foreground/80 mt-3">???? ????? ???????? ??? ?? ?? ???? ????? ?????? ?????.</p>
         </div>
       </section>
 
@@ -259,20 +259,20 @@ export default function FlightTravelerDetails() {
           <div className="space-y-6">
             {travelers.map((traveler, index) => (
               <div key={index} className="bg-card rounded-2xl p-6 shadow-card">
-                <h3 className="text-lg font-bold mb-4">����� {index + 1}</h3>
+                <h3 className="text-lg font-bold mb-4">?????? ??????? {index + 1}</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <Label>����� �����</Label>
+                    <Label>????? ?????</Label>
                     <Input value={traveler.firstName} onChange={(e) => updateTraveler(index, { firstName: e.target.value })} placeholder="First Name" />
                     {fieldErrors[index]?.firstName && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.firstName}</p>}
                   </div>
                   <div>
-                    <Label>��� �������</Label>
+                    <Label>??? ???????</Label>
                     <Input value={traveler.lastName} onChange={(e) => updateTraveler(index, { lastName: e.target.value })} placeholder="Last Name" />
                     {fieldErrors[index]?.lastName && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.lastName}</p>}
                   </div>
                   <div>
-                    <Label>����� �������</Label>
+                    <Label>????? ???????</Label>
                     <DatePickerField
                       value={traveler.dateOfBirth}
                       onChange={(nextValue) => updateTraveler(index, { dateOfBirth: nextValue })}
@@ -281,22 +281,22 @@ export default function FlightTravelerDetails() {
                     {fieldErrors[index]?.dateOfBirth && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.dateOfBirth}</p>}
                   </div>
                   <div>
-                    <Label>�����</Label>
+                    <Label>?????</Label>
                     <select className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm" value={traveler.gender} onChange={(e) => updateTraveler(index, { gender: e.target.value as TravelerForm["gender"] })}>
-                      <option value="MALE">���</option>
-                      <option value="FEMALE">����</option>
+                      <option value="MALE">???</option>
+                      <option value="FEMALE">????</option>
                     </select>
                     {fieldErrors[index]?.gender && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.gender}</p>}
                   </div>
 
                   <div>
-                    <Label>��� ������</Label>
+                    <Label>??? ??????</Label>
                     <Input value={traveler.passportNumber} onChange={(e) => updateTraveler(index, { passportNumber: e.target.value })} placeholder="Passport Number" />
                     {fieldErrors[index]?.passportNumber && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.passportNumber}</p>}
                   </div>
 
                   <div>
-                    <Label>����� ������ ������</Label>
+                    <Label>????? ?????? ??????</Label>
                     <DatePickerField
                       value={traveler.passportExpiry}
                       onChange={(nextValue) => updateTraveler(index, { passportExpiry: nextValue })}
@@ -306,25 +306,25 @@ export default function FlightTravelerDetails() {
                   </div>
 
                   <div>
-                    <Label>������� (��� ISO ��� SA)</Label>
+                    <Label>??????? (??? ISO ??? SA)</Label>
                     <Input value={traveler.nationality} onChange={(e) => updateTraveler(index, { nationality: e.target.value.toUpperCase() })} placeholder="SA" />
                     {fieldErrors[index]?.nationality && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.nationality}</p>}
                   </div>
 
                   <div>
-                    <Label>������ ����������</Label>
+                    <Label>?????? ??????????</Label>
                     <Input type="email" value={traveler.email} onChange={(e) => updateTraveler(index, { email: e.target.value })} placeholder="name@email.com" />
                     {fieldErrors[index]?.email && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.email}</p>}
                   </div>
 
                   <div>
-                    <Label>��� ������</Label>
+                    <Label>??? ??????</Label>
                     <Input value={traveler.phoneCountryCode} onChange={(e) => updateTraveler(index, { phoneCountryCode: e.target.value })} placeholder="966" />
                     {fieldErrors[index]?.phoneCountryCode && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.phoneCountryCode}</p>}
                   </div>
 
                   <div>
-                    <Label>��� ������</Label>
+                    <Label>??? ??????</Label>
                     <Input value={traveler.phoneNumber} onChange={(e) => updateTraveler(index, { phoneNumber: e.target.value })} placeholder="5XXXXXXXX" />
                     {fieldErrors[index]?.phoneNumber && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.phoneNumber}</p>}
                   </div>
@@ -334,18 +334,18 @@ export default function FlightTravelerDetails() {
           </div>
 
           <div className="bg-card rounded-2xl p-6 shadow-card h-fit">
-            <h3 className="text-xl font-bold mb-4">���� �����</h3>
+            <h3 className="text-xl font-bold mb-4">???? ?????</h3>
             <div className="space-y-3 text-sm text-muted-foreground">
-              <div>��� ������: {checkout.tripType === "roundtrip" ? "���� �����" : "���� ���"}</div>
-              <div>��� ���������: {checkout.passengers}</div>
-              {checkout.summary?.outbound && <div>������: {checkout.summary.outbound}</div>}
-              {checkout.summary?.inbound && <div>������: {checkout.summary.inbound}</div>}
+              <div>??? ??????: {checkout.tripType === "roundtrip" ? "???? ?????" : "???? ???"}</div>
+              <div>??? ?????????: {checkout.passengers}</div>
+              {checkout.summary?.outbound && <div>???? ??????: {checkout.summary.outbound}</div>}
+              {checkout.summary?.inbound && <div>???? ??????: {checkout.summary.inbound}</div>}
             </div>
             {error && <p className="text-sm text-destructive mt-4">{error}</p>}
             <Button variant="hero" className="w-full mt-6" disabled={!canContinue || processing} onClick={handleSubmit}>
-              {processing ? "���� ����� �����..." : "�������� �����"}
+              {processing ? "???? ????????..." : "?????? ??? ?????"}
             </Button>
-            <Button variant="ghost" className="w-full mt-3" onClick={() => navigate("/trips")}>����� �����</Button>
+            <Button variant="ghost" className="w-full mt-3" onClick={() => navigate("/trips")}>?????? ???????</Button>
           </div>
         </div>
       </section>

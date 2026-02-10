@@ -1,157 +1,104 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { CalendarDays, ArrowLeft, Clock, User, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { defaultArticles, useAdminCollection } from "@/data/adminStore";
 
-// ����� ������ ������ �����
 export const travelTips = [
   {
     id: 1,
-    title: "���� ��� ������ ���",
-    category: "�����",
-    readTime: "5 �����",
+    title: "خطة سهلة لتجهيز حقيبة السفر",
+    category: "نصائح السفر",
+    readTime: "5 دقائق",
     views: 2450,
     date: "2026-02-04",
-    author: "���� �������",
-    image: "https://images.unsplash.com/photo-1512453391709-c5d2f4c5c5e0",
-    excerpt: "���� ��� ���� ������ ������ ��� ���������� ������ �������� ������� �������� �������.",
+    author: "فريق مشروك",
+    image: "https://source.unsplash.com/1200x800/?travel,packing",
+    excerpt: "خطوات عملية لاختيار الملابس والمستلزمات الأساسية بدون زيادة الوزن.",
     content: `
-��� �� ���� ������� �������� �� ����� ������. ��� ��� ���� ����� ��� ���� ����� �� ����� ����� �������.
+نظّم حقيبتك بذكاء لتوفر المساحة وتجنب الرسوم الإضافية.
 
-## ���� ����� �������
+## قبل التعبئة
+- راجع حالة الطقس في وجهتك.
+- حدّد مدة الرحلة وعدد القطع المناسبة.
+- جهّز قائمة مختصرة بالأشياء الأساسية.
 
-### ������ ��� ����
-* ����� ����� ������ (20-30 ���� �����)
-* ��� ����� �������� �������
-* ��� ����� ������� ��������
-* ��� ���������� ������ ������ ����� ������
+## أثناء التعبئة
+- استخدم مكعبات التنظيم.
+- ضع القطع الثقيلة في الأسفل.
+- احتفظ بالمستندات في جيب يسهل الوصول إليه.
 
-### ����� ��� ������
-* �� ���� �� ��� ��� 50 ���� �����
-* ����� ����� ��� �� ������ ������
-* ����� �������� ������
-
-## ����� ����
-
-1. **������**: ������ ������ �� ������ ������
-2. **�������**: ����� ����� ������ �����
-3. **�����**: ���� ������ �� �����
-4. **�������**: ���� ������ �� ����� ������
-    `
+## نصائح إضافية
+1. اترك مساحة لهدايا العودة.
+2. احمل شاحنًا وبطارية احتياطية.
+3. لا تنسَ أدويةك الضرورية.
+    `,
   },
   {
     id: 2,
-    title: "����� ��� ������� ��������",
-    category: "�����",
-    readTime: "8 �����",
+    title: "كيف تختار الفندق المناسب؟",
+    category: "الفنادق",
+    readTime: "8 دقائق",
     views: 1823,
     date: "2026-02-02",
-    author: "����� �������",
-    image: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304",
-    excerpt: "����� ���� ����� ���� ������� ������ ����� ������� ��� ���� ������ ���������.",
+    author: "فريق مشروك",
+    image: "https://source.unsplash.com/1200x800/?hotel,lobby",
+    excerpt: "معايير بسيطة تساعدك على اختيار فندق يلائم ميزانيتك واحتياجاتك.",
     content: `
-��� ����� ���� �� ���� ���� ������� ����� �� �����. ���� ��� ������� �������:
+اختيار الفندق الصحيح يصنع فرقًا كبيرًا في تجربة السفر.
 
-## ����� ��� ���
+## أهم المعايير
+- الموقع وقربه من المعالم.
+- تقييمات النزلاء الموثوقة.
+- مستوى النظافة والخدمات.
 
-### 1. ���� ������
-- ���� ��� 4-6 ������ �� �����
-- ���� ����� �� ��� ����
-
-### 2. ���� �������
-- ������ ����� ��������
-- ���� �� ���������
-- ���� ���������
-
-### 3. ���� �� ���� ����
-- �������� ��� ������� ������� ����
-- ������� �������� ���� �����
-
-### 4. ���� ���� ����� ���������
-- ������ �� ������
-- ������ �� ������� ��������
-    `
+## نصائح سريعة
+- قارن بين أكثر من خيار.
+- اقرأ التعليقات الأخيرة.
+- تأكد من سياسة الإلغاء.
+    `,
   },
   {
     id: 3,
-    title: "����� ����� ��������",
-    category: "�������",
-    readTime: "6 �����",
+    title: "السفر الاقتصادي بدون التنازل عن الجودة",
+    category: "توفير",
+    readTime: "6 دقائق",
     views: 3156,
     date: "2026-02-01",
-    author: "���� �������",
-    image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828",
-    excerpt: "����� ����� ����� ������� �������� ���� ������� ��� ����� ��� ������.",
+    author: "فريق مشروك",
+    image: "https://source.unsplash.com/1200x800/?budget,travel",
+    excerpt: "استفد من الحجز المبكر والعروض الموسمية لتحقيق أفضل قيمة.",
     content: `
-������ �� ���� ���� ������� �������� ��� ����� ��� ���� �������.
+يمكنك تقليل التكاليف مع الحفاظ على جودة الرحلة.
 
-## ������� ��������
+## طرق فعالة للتوفير
+- اختر تواريخ مرنة للسفر.
+- فعّل إشعارات العروض.
+- استخدم الباقات التي تشمل الطيران والإقامة.
 
-### 1. ���� �����
-- ���� �� �������
-- �� ��� �� 6 ���� �� ����� �����
-
-### 2. ��������
-- ���� ������� ��������
-- ���� ������� ������
-
-### 3. �������
-- ����� �������
-- ����� ������� ������
-
-### 4. ������ �������
-- ��� ����� �����
-- ������ ������
-- ����� ��������
-    `
-  },
-  {
-    id: 4,
-    title: "���� ������� �� ������",
-    category: "����",
-    readTime: "7 �����",
-    views: 2789,
-    date: "2026-01-30",
-    author: "���� ������",
-    image: "https://images.unsplash.com/photo-1504674900757-da26b07bfd83",
-    excerpt: "������ ���� ������� ��� ����� ������� �������� �� ������.",
-    content: `
-������ ����� ������ ����� �� ������� ��������.
-
-## ������� ������ ���
-
-### ����� �������
-- **���� �����**: ������ ��������
-- **���� �����**: �������� �������
-- **���� �������**: ������ �������
-
-### ����� �������
-- **���� ������**: ��������� ��������� �������
-- **���� ����**: ������ ������ ������
-
-### �������
-- **���� ������**: ���� ������ �������
-- **���� �������**: ����� ���� ����� �����
-    `
+## تذكير
+أفضل الأسعار غالبًا تكون قبل موعد السفر بوقت كافٍ.
+    `,
   },
 ];
 
+type TipArticle = (typeof travelTips)[number];
+
 export default function Articles() {
-  const [selectedArticle, setSelectedArticle] = useState<typeof travelTips[0] | null>(null);
-  const latestArticles = useAdminCollection("articles", defaultArticles);
+  const [selectedArticle, setSelectedArticle] = useState<TipArticle | null>(null);
+  const latestArticles = useAdminCollection("articles", defaultArticles).slice(0, 6);
 
   return (
     <Layout>
       <section className="hero-gradient py-20">
         <div className="container mx-auto px-4 text-center">
-          <span className="text-primary-foreground/80 text-lg">������� ���������</span>
+          <span className="text-primary-foreground/80 text-lg">محتوى ملهم للسفر</span>
           <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mt-3">
-            ������ ������ �����
+            مقالات ونصائح السفر
           </h1>
           <p className="text-primary-foreground/80 mt-4 max-w-2xl mx-auto text-lg">
-            ���� ������� �������ɡ ������� ��������� ������ ������� ������ ��� ������.
+            اكتشف أدلة عملية ونصائح مختصرة تساعدك على التخطيط لرحلتك بثقة.
           </p>
         </div>
       </section>
@@ -159,17 +106,15 @@ export default function Articles() {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-10">
-            {/* Main Articles */}
             <div className="space-y-8">
               {selectedArticle ? (
-                // Article Detail View
                 <div className="bg-card rounded-2xl p-8 shadow-card">
                   <button
                     onClick={() => setSelectedArticle(null)}
                     className="flex items-center gap-2 text-primary mb-6 hover:gap-3 transition-all"
                   >
                     <ArrowLeft className="w-4 h-4" />
-                    ������ �������
+                    العودة إلى المقالات
                   </button>
 
                   <ImageWithFallback
@@ -194,135 +139,90 @@ export default function Articles() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Eye className="w-4 h-4" />
-                      {selectedArticle.views.toLocaleString()} ���
+                      {selectedArticle.views.toLocaleString()} مشاهدة
                     </div>
                   </div>
 
-                  <h1 className="text-3xl font-bold mb-6">{selectedArticle.title}</h1>
-
-                  <div className="prose prose-invert max-w-none text-foreground/90">
-                    {selectedArticle.content.split("\n##").map((section, idx) => {
-                      if (idx === 0) return <p key={idx} className="mb-6">{section}</p>;
-                      const [title, ...rest] = section.split("\n");
-                      return (
-                        <div key={idx} className="mb-6">
-                          <h2 className="text-2xl font-bold mb-4">{title}</h2>
-                          {rest.map((line, i) => {
-                            if (!line.trim()) return null;
-                            if (line.startsWith("###")) {
-                              return <h3 key={i} className="text-lg font-semibold mt-4 mb-2">{line.replace("###", "").trim()}</h3>;
-                            }
-                            if (line.startsWith("*")) {
-                              return <li key={i} className="ml-6 list-disc">{line.replace("*", "").trim()}</li>;
-                            }
-                            if (line.startsWith("-")) {
-                              return <li key={i} className="ml-6 list-disc">{line.replace("-", "").trim()}</li>;
-                            }
-                            if (line.startsWith("1.") || line.match(/^\d+\./)) {
-                              return <li key={i} className="ml-6 list-decimal">{line.replace(/^\d+\.\s*/, "").trim()}</li>;
-                            }
-                            return <p key={i} className="mb-3">{line}</p>;
-                          })}
-                        </div>
-                      );
-                    })}
+                  <h2 className="text-2xl font-bold mb-4">{selectedArticle.title}</h2>
+                  <div className="space-y-3 text-muted-foreground leading-relaxed">
+                    {selectedArticle.content
+                      .trim()
+                      .split("\n")
+                      .filter(Boolean)
+                      .map((line, idx) => {
+                        if (line.startsWith("## ")) {
+                          return (
+                            <h3 key={idx} className="text-lg font-semibold text-foreground mt-4">
+                              {line.replace("## ", "")}
+                            </h3>
+                          );
+                        }
+                        if (line.startsWith("- ")) {
+                          return (
+                            <li key={idx} className="list-disc mr-5">
+                              {line.replace("- ", "")}
+                            </li>
+                          );
+                        }
+                        return <p key={idx}>{line}</p>;
+                      })}
                   </div>
                 </div>
               ) : (
-                // Articles List View
                 travelTips.map((article) => (
                   <div
                     key={article.id}
-                    className="bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-hover transition-all duration-300 cursor-pointer group"
-                    onClick={() => setSelectedArticle(article)}
+                    className="bg-card rounded-2xl p-6 shadow-card hover:shadow-hover transition-all"
                   >
-                    <div className="grid md:grid-cols-[1fr_300px] gap-4">
-                      <div className="p-6">
-                        <div className="flex items-center gap-2 mb-3">
-                          <span className="px-3 py-1 rounded-full bg-secondary/20 text-secondary text-xs font-semibold">
-                            {article.category}
-                          </span>
-                          <span className="text-xs text-muted-foreground">{article.readTime}</span>
-                        </div>
-                        <h3 className="text-xl font-bold mb-3 group-hover:text-secondary transition-colors">
-                          {article.title}
-                        </h3>
-                        <p className="text-muted-foreground mb-4">{article.excerpt}</p>
-                        <div className="flex items-center justify-between text-sm text-muted-foreground">
-                          <div className="flex items-center gap-2">
-                            <User className="w-4 h-4" />
-                            <span>{article.author}</span>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <span className="flex items-center gap-1">
-                              <CalendarDays className="w-4 h-4" />
-                              {new Date(article.date).toLocaleDateString("ar-SA")}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Eye className="w-4 h-4" />
-                              {article.views}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="overflow-hidden h-48 md:h-auto">
-                        <ImageWithFallback
-                          src={article.image}
-                          alt={article.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          fallbackQuery={`${article.category} ${article.title}`}
-                        />
-                      </div>
+                    <ImageWithFallback
+                      src={article.image}
+                      alt={article.title}
+                      className="w-full h-56 object-cover rounded-xl mb-4"
+                      fallbackQuery={article.title}
+                    />
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3">
+                      <span className="bg-muted px-3 py-1 rounded-full">{article.category}</span>
+                      <span>{article.readTime}</span>
                     </div>
+                    <h3 className="text-xl font-bold mb-2">{article.title}</h3>
+                    <p className="text-muted-foreground mb-4">{article.excerpt}</p>
+                    <Button variant="outline" onClick={() => setSelectedArticle(article)}>
+                      اقرأ المزيد
+                    </Button>
                   </div>
                 ))
               )}
             </div>
 
-            {/* Sidebar */}
             <aside className="space-y-6">
-              {/* ���� �������� ������ */}
               <div className="bg-card rounded-2xl p-6 shadow-card">
-                <h3 className="text-xl font-bold mb-4">���� �������� ������</h3>
+                <h3 className="text-xl font-bold mb-4">آخر المقالات</h3>
                 <div className="space-y-4">
-                  {travelTips
-                    .sort((a, b) => b.views - a.views)
-                    .slice(0, 5)
-                    .map((article, idx) => (
-                      <div
-                        key={article.id}
-                        onClick={() => setSelectedArticle(article)}
-                        className="pb-4 border-b border-border last:border-0 cursor-pointer hover:text-secondary transition-colors group"
-                      >
-                        <div className="flex items-start gap-3">
-                          <span className="text-lg font-bold text-secondary">{idx + 1}</span>
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-sm group-hover:text-secondary transition-colors">
-                              {article.title}
-                            </h4>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {article.views} ���
-                            </p>
-                          </div>
-                        </div>
+                  {latestArticles.map((article) => (
+                    <div key={article.id} className="flex items-center gap-4">
+                      <ImageWithFallback
+                        src={article.image}
+                        alt={article.title}
+                        className="w-20 h-20 rounded-lg object-cover"
+                        fallbackQuery={article.title}
+                      />
+                      <div>
+                        <p className="text-sm text-muted-foreground">{article.category}</p>
+                        <p className="font-semibold">{article.title}</p>
                       </div>
-                    ))}
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* ������ */}
-              <div className="bg-card rounded-2xl p-6 shadow-card">
-                <h3 className="text-lg font-bold mb-4">������</h3>
-                <div className="flex flex-wrap gap-2">
-                  {["�����", "�����", "�������", "����", "�����"].map((cat) => (
-                    <button
-                      key={cat}
-                      className="px-3 py-1 rounded-full bg-muted text-sm text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-all"
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
+              <div className="bg-muted/40 rounded-2xl p-6">
+                <h4 className="text-lg font-bold mb-2">هل لديك سؤال؟</h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  تواصل معنا وسنساعدك في تخطيط رحلتك خطوة بخطوة.
+                </p>
+                <Button variant="hero" className="w-full" onClick={() => (window.location.href = "/support")}>
+                  تواصل مع الدعم
+                </Button>
               </div>
             </aside>
           </div>
