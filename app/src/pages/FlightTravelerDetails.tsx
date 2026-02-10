@@ -235,9 +235,9 @@ export default function FlightTravelerDetails() {
       <Layout>
         <div className="min-h-[60vh] flex items-center justify-center px-4">
           <div className="bg-card rounded-2xl p-8 shadow-card text-center max-w-lg">
-            <h2 className="text-xl font-bold mb-2">�� ���� ���� �����</h2>
-            <p className="text-muted-foreground mb-4">���� ������ ���� ����� �� ���� �������.</p>
-            <Button variant="hero" onClick={() => navigate("/trips")}>������ �������</Button>
+            <h2 className="text-xl font-bold mb-2">لا توجد بيانات للحجز</h2>
+            <p className="text-muted-foreground mb-4">يرجى اختيار رحلة طيران من صفحة الرحلات.</p>
+            <Button variant="hero" onClick={() => navigate("/trips")}>تصفح الرحلات</Button>
           </div>
         </div>
       </Layout>
@@ -248,9 +248,9 @@ export default function FlightTravelerDetails() {
     <Layout>
       <section className="hero-gradient py-16">
         <div className="container mx-auto px-4 text-center">
-          <span className="text-primary-foreground/80">������ ���������</span>
-          <h1 className="text-3xl md:text-4xl font-bold text-primary-foreground mt-3">���� ������ �����</h1>
-          <p className="text-primary-foreground/80 mt-3">������� ��� �������� ������ ����� ������� ��� �����.</p>
+          <span className="text-primary-foreground/80">معلومات المسافرين</span>
+          <h1 className="text-3xl md:text-4xl font-bold text-primary-foreground mt-3">بيانات الركاب للحجز</h1>
+          <p className="text-primary-foreground/80 mt-3">الرجاء ملء المعلومات الكاملة لكافة المسافرين في الحجز.</p>
         </div>
       </section>
 
@@ -259,20 +259,20 @@ export default function FlightTravelerDetails() {
           <div className="space-y-6">
             {travelers.map((traveler, index) => (
               <div key={index} className="bg-card rounded-2xl p-6 shadow-card">
-                <h3 className="text-lg font-bold mb-4">����� {index + 1}</h3>
+                <h3 className="text-lg font-bold mb-4">مسافر {index + 1}</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <Label>����� �����</Label>
+                    <Label>الاسم الأول</Label>
                     <Input value={traveler.firstName} onChange={(e) => updateTraveler(index, { firstName: e.target.value })} placeholder="First Name" />
                     {fieldErrors[index]?.firstName && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.firstName}</p>}
                   </div>
                   <div>
-                    <Label>��� �������</Label>
+                    <Label>اسم العائلة</Label>
                     <Input value={traveler.lastName} onChange={(e) => updateTraveler(index, { lastName: e.target.value })} placeholder="Last Name" />
                     {fieldErrors[index]?.lastName && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.lastName}</p>}
                   </div>
                   <div>
-                    <Label>����� �������</Label>
+                    <Label>تاريخ الميلاد</Label>
                     <DatePickerField
                       value={traveler.dateOfBirth}
                       onChange={(nextValue) => updateTraveler(index, { dateOfBirth: nextValue })}
@@ -281,22 +281,22 @@ export default function FlightTravelerDetails() {
                     {fieldErrors[index]?.dateOfBirth && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.dateOfBirth}</p>}
                   </div>
                   <div>
-                    <Label>�����</Label>
+                    <Label>الجنس</Label>
                     <select className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm" value={traveler.gender} onChange={(e) => updateTraveler(index, { gender: e.target.value as TravelerForm["gender"] })}>
-                      <option value="MALE">���</option>
-                      <option value="FEMALE">����</option>
+                      <option value="MALE">ذكر</option>
+                      <option value="FEMALE">أنثى</option>
                     </select>
                     {fieldErrors[index]?.gender && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.gender}</p>}
                   </div>
 
                   <div>
-                    <Label>��� ������</Label>
+                    <Label>رقم الجواز</Label>
                     <Input value={traveler.passportNumber} onChange={(e) => updateTraveler(index, { passportNumber: e.target.value })} placeholder="Passport Number" />
                     {fieldErrors[index]?.passportNumber && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.passportNumber}</p>}
                   </div>
 
                   <div>
-                    <Label>����� ������ ������</Label>
+                    <Label>تاريخ انتهاء الجواز</Label>
                     <DatePickerField
                       value={traveler.passportExpiry}
                       onChange={(nextValue) => updateTraveler(index, { passportExpiry: nextValue })}
@@ -306,25 +306,25 @@ export default function FlightTravelerDetails() {
                   </div>
 
                   <div>
-                    <Label>������� (��� ISO ��� SA)</Label>
+                    <Label>الجنسية (رمز ISO مثل SA)</Label>
                     <Input value={traveler.nationality} onChange={(e) => updateTraveler(index, { nationality: e.target.value.toUpperCase() })} placeholder="SA" />
                     {fieldErrors[index]?.nationality && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.nationality}</p>}
                   </div>
 
                   <div>
-                    <Label>������ ����������</Label>
+                    <Label>البريد الإلكتروني</Label>
                     <Input type="email" value={traveler.email} onChange={(e) => updateTraveler(index, { email: e.target.value })} placeholder="name@email.com" />
                     {fieldErrors[index]?.email && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.email}</p>}
                   </div>
 
                   <div>
-                    <Label>��� ������</Label>
+                    <Label>رمز الدولة</Label>
                     <Input value={traveler.phoneCountryCode} onChange={(e) => updateTraveler(index, { phoneCountryCode: e.target.value })} placeholder="966" />
                     {fieldErrors[index]?.phoneCountryCode && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.phoneCountryCode}</p>}
                   </div>
 
                   <div>
-                    <Label>��� ������</Label>
+                    <Label>رقم الهاتف</Label>
                     <Input value={traveler.phoneNumber} onChange={(e) => updateTraveler(index, { phoneNumber: e.target.value })} placeholder="5XXXXXXXX" />
                     {fieldErrors[index]?.phoneNumber && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.phoneNumber}</p>}
                   </div>
@@ -334,18 +334,18 @@ export default function FlightTravelerDetails() {
           </div>
 
           <div className="bg-card rounded-2xl p-6 shadow-card h-fit">
-            <h3 className="text-xl font-bold mb-4">���� �����</h3>
+            <h3 className="text-xl font-bold mb-4">ملخص الحجز</h3>
             <div className="space-y-3 text-sm text-muted-foreground">
-              <div>��� ������: {checkout.tripType === "roundtrip" ? "���� �����" : "���� ���"}</div>
-              <div>��� ���������: {checkout.passengers}</div>
-              {checkout.summary?.outbound && <div>������: {checkout.summary.outbound}</div>}
-              {checkout.summary?.inbound && <div>������: {checkout.summary.inbound}</div>}
+              <div>نوع الرحلة: {checkout.tripType === "roundtrip" ? "ذهاب وعودة" : "ذهاب فقط"}</div>
+              <div>عدد المسافرين: {checkout.passengers}</div>
+              {checkout.summary?.outbound && <div>الذهاب: {checkout.summary.outbound}</div>}
+              {checkout.summary?.inbound && <div>العودة: {checkout.summary.inbound}</div>}
             </div>
             {error && <p className="text-sm text-destructive mt-4">{error}</p>}
             <Button variant="hero" className="w-full mt-6" disabled={!canContinue || processing} onClick={handleSubmit}>
-              {processing ? "���� ����� �����..." : "�������� �����"}
+              {processing ? "جاري تأكيد الحجز..." : "المتابعة للدفع"}
             </Button>
-            <Button variant="ghost" className="w-full mt-3" onClick={() => navigate("/trips")}>����� �����</Button>
+            <Button variant="ghost" className="w-full mt-3" onClick={() => navigate("/trips")}>تعديل الرحلة</Button>
           </div>
         </div>
       </section>
