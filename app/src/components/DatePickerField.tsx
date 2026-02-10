@@ -59,7 +59,7 @@ export default function DatePickerField({
             <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <span
               className={cn("block pr-8 text-sm", !selected && "text-muted-foreground")}
-              dir={textDirection}
+            dir={textDirection}
             >
               {display}
             </span>

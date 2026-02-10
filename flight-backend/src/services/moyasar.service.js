@@ -1,8 +1,20 @@
 import axios from 'axios';
 import { moyasarEnv } from '../config/env.config.js';
-import { getApiKeyValue } from './api-keys.service.js';
+import { getApiKeyValue, getApiBaseUrl } from './api-keys.service.js';
 
-const MOYASAR_BASE_URL = process.env.MOYASAR_BASE_URL || 'https://api.moyasar.com/v1';
+const DEFAULT_MOYASAR_BASE = 'https://api.moyasar.com/v1';
+
+async function resolveMoyasarBaseUrl() {
+  const explicit = String(process.env.MOYASAR_BASE_URL || '').trim();
+  if (explicit) return explicit.replace(/\/$/, '');
+  try {
+    const fromAdmin = await getApiBaseUrl('moyasar');
+    if (fromAdmin) return String(fromAdmin).trim().replace(/\/$/, '');
+  } catch {
+    // ignore
+  }
+  return DEFAULT_MOYASAR_BASE;
+}
 
 const normalizeAmount = (amount) => {
   const numeric = Number(String(amount).replace(/[^\d.]/g, '')) || 0;
@@ -53,9 +65,12 @@ export async function createMoyasarInvoice({
     callback_url: callbackUrl,
     metadata,
   };
+  const base = await resolveMoyasarBaseUrl();
+  const url = `${base.replace(/\/$/, '')}/invoices`;
 
-  const response = await axios.post(`${MOYASAR_BASE_URL}/invoices`, payload, {
+  const response = await axios.post(url, payload, {
     auth: { username: secretKey, password: '' },
+    timeout: 15000,
   });
 
   return response.data;

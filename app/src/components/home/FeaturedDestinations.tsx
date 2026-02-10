@@ -8,12 +8,14 @@ import { seasonalOffers } from "@/data/content";
 export function FeaturedDestinations() {
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const handleBook = (offerTitle?: string, price?: string, details?: string) => {
+  const handleBook = (offer: (typeof seasonalOffers)[number]) => {
     addItem({
-      id: `seasonal-${offerTitle ?? Date.now()}`,
-      title: offerTitle ?? "عرض موسمي",
-      price: Number((price ?? "0").replace(/[^\\d.]/g, "")) || 0,
-      details,
+      id: `seasonal-${offer.title}-${Date.now()}`,
+      title: offer.title,
+      price: Number(offer.price.replace(/[^\\d.]/g, "")) || 0,
+      details: `${offer.location} • ${offer.duration}`,
+      image: offer.image,
+      type: "seasonal",
     });
     navigate("/cart");
   };
@@ -92,7 +94,7 @@ export function FeaturedDestinations() {
                 <Button
                   variant="hero"
                   className="w-full mt-5"
-                  onClick={() => handleBook(offer.title, offer.price, `${offer.location} • ${offer.duration}`)}
+                  onClick={() => handleBook(offer)}
                 >
                   احجز الآن
                 </Button>

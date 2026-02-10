@@ -33,20 +33,20 @@ type ApiAirline = {
   country?: string;
 };
 
-// بيانات الخطوط الجوية
+// قائمة شركات الطيران
 export const AIRLINES: AirlineOption[] = [
   { code: "SV", name: "الخطوط السعودية", country: "السعودية" },
   { code: "EK", name: "طيران الإمارات", country: "الإمارات" },
-  { code: "FZ", name: "طيران اقتصادي", country: "الإمارات" },
+  { code: "FZ", name: "فلاي دبي", country: "الإمارات" },
   { code: "MS", name: "مصر للطيران", country: "مصر" },
   { code: "TK", name: "الخطوط التركية", country: "تركيا" },
   { code: "QR", name: "الخطوط القطرية", country: "قطر" },
   { code: "LH", name: "لوفتهانزا", country: "ألمانيا" },
   { code: "BA", name: "الخطوط البريطانية", country: "المملكة المتحدة" },
-  { code: "UA", name: "يونايتد إيرلاينز", country: "أمريكا" },
+  { code: "UA", name: "يونايتد", country: "الولايات المتحدة" },
 ];
 
-// بيانات المطارات الآن في data/airports.ts
+// قائمة المطارات الأساسية موجودة في data/airports.ts
 
 interface FlightSearchFormProps {
   onSearch?: (data: FlightSearchData) => void;
@@ -83,7 +83,7 @@ export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFo
     (import.meta.env.VITE_FLIGHT_API_URL as string | undefined) ||
     "https://jubilant-hope-production-a334.up.railway.app";
 
-  // جلب مفاتيح API من لوحة الإدارة
+  // استخدام مفاتيح API من لوحة الإدارة
   const apiKeys = useAdminCollection("apiKeys", []);
   const amadeusKey = getActiveApiKeyByProvider(apiKeys, "amadeus");
 
@@ -94,11 +94,11 @@ export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFo
       resolveAirportCode(destinationInput, destinationAirports) ||
       resolveAirportCode(destinationInput, AIRPORTS);
     if (!originCode || !destinationCode || !departureDate) {
-      alert("يرجى ملء جميع الحقول المطلوبة");
+      alert("يرجى إدخال مطار المغادرة والوصول وتاريخ السفر.");
       return;
     }
     if (tripType === "roundtrip" && !returnDate) {
-      alert("يرجى تحديد تاريخ العودة لرحلات الذهاب والعودة");
+      alert("يرجى إدخال تاريخ العودة لرحلة الذهاب والعودة.");
       return;
     }
 
@@ -196,14 +196,14 @@ export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFo
       {/* Country & City Selection */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div>
-          <label className="block text-sm font-semibold mb-2 text-foreground">دولة المغادرة</label>
+          <label className="block text-sm font-semibold mb-2 text-foreground">بلد المغادرة</label>
           <Select value={originCountry} onValueChange={setOriginCountry}>
             <SelectTrigger className="bg-muted border-0 h-12">
               <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
               <SelectValue placeholder="اختر الدولة" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">كل الدول</SelectItem>
+              <SelectItem value="all">الكل</SelectItem>
               {countryOptions.map((country) => (
                 <SelectItem key={country} value={country}>
                   {country}
@@ -214,12 +214,12 @@ export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFo
         </div>
 
         <div>
-          <label className="block text-sm font-semibold mb-2 text-foreground">مدينة المغادرة</label>
+          <label className="block text-sm font-semibold mb-2 text-foreground">مدينة أو مطار المغادرة</label>
           <div className="relative">
             <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             <Input
               list="origin-airports"
-              placeholder="اكتب المدينة أو الكود"
+              placeholder="اختر المدينة أو المطار"
               value={originInput}
               onChange={(event) => setOriginInput(event.target.value)}
               className="pr-10 h-12 bg-muted border-0"
@@ -233,14 +233,14 @@ export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFo
         </div>
 
         <div>
-          <label className="block text-sm font-semibold mb-2 text-foreground">دولة الوصول</label>
+          <label className="block text-sm font-semibold mb-2 text-foreground">بلد الوصول</label>
           <Select value={destinationCountry} onValueChange={setDestinationCountry}>
             <SelectTrigger className="bg-muted border-0 h-12">
               <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
               <SelectValue placeholder="اختر الدولة" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">كل الدول</SelectItem>
+              <SelectItem value="all">الكل</SelectItem>
               {countryOptions.map((country) => (
                 <SelectItem key={country} value={country}>
                   {country}
@@ -251,12 +251,12 @@ export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFo
         </div>
 
         <div>
-          <label className="block text-sm font-semibold mb-2 text-foreground">مدينة الوصول</label>
+          <label className="block text-sm font-semibold mb-2 text-foreground">مدينة أو مطار الوصول</label>
           <div className="relative">
             <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             <Input
               list="destination-airports"
-              placeholder="اكتب المدينة أو الكود"
+              placeholder="اختر المدينة أو المطار"
               value={destinationInput}
               onChange={(event) => setDestinationInput(event.target.value)}
               className="pr-10 h-12 bg-muted border-0"
@@ -273,7 +273,7 @@ export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFo
       {/* Dates */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-6">
         <div>
-          <label className="block text-sm font-semibold mb-2 text-foreground">تاريخ الذهاب</label>
+          <label className="block text-sm font-semibold mb-2 text-foreground">تاريخ المغادرة</label>
           <DatePickerField
             value={departureDate}
             onChange={setDepartureDate}
@@ -330,23 +330,23 @@ export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFo
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="economy">درجة اقتصادية</SelectItem>
-              <SelectItem value="business">درجة الأعمال</SelectItem>
-              <SelectItem value="first">الدرجة الأولى</SelectItem>
+              <SelectItem value="economy">اقتصادية</SelectItem>
+              <SelectItem value="business">رجال الأعمال</SelectItem>
+              <SelectItem value="first">الأولى</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {/* Airline (Optional) */}
         <div>
-          <label className="block text-sm font-semibold mb-2 text-foreground">خطوط جوية (اختياري)</label>
+          <label className="block text-sm font-semibold mb-2 text-foreground">شركة الطيران (اختياري)</label>
           <Select value={selectedAirline} onValueChange={setSelectedAirline}>
             <SelectTrigger className="bg-muted border-0 h-12">
               <Plane className="w-4 h-4 mr-2 text-muted-foreground" />
-              <SelectValue placeholder="الكل" />
+              <SelectValue placeholder="أي شركة" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">جميع الخطوط</SelectItem>
+              <SelectItem value="all">كل الشركات</SelectItem>
               {airlines.map((airline) => (
                 <SelectItem key={airline.code} value={airline.code}>
                   {airline.name} ({airline.code})
@@ -364,7 +364,7 @@ export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFo
       <div className="flex justify-between items-center gap-4">
         <Button variant="ghost" className="gap-2">
           <Filter className="w-4 h-4" />
-          تصفية النتائج
+          تصفية متقدمة
         </Button>
         <Button
           variant="hero"
@@ -373,7 +373,7 @@ export function FlightSearchForm({ onSearch, airlineCodes = [] }: FlightSearchFo
           onClick={handleSearch}
         >
           <Plane className="w-5 h-5" />
-          ابحث عن رحلات
+          ابحث عن رحلة
         </Button>
       </div>
     </div>

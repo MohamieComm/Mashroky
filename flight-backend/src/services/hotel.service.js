@@ -1,6 +1,9 @@
 import axios from 'axios';
 import { getAccessToken } from './amadeus.service.js';
 import { getApiBaseUrl } from './api-keys.service.js';
+import { v4 as uuid } from 'uuid';
+import { insertBooking } from './supabase.service.js';
+import { createMockMoyasarPayment } from './moyasar.service.js';
 import { logAmadeusError } from '../utils/amadeus-logger.js';
 
 const DEFAULT_TEST_BASE = 'https://test.api.amadeus.com';
@@ -218,7 +221,29 @@ export async function getHotelDetails(params = {}) {
 }
 
 export async function bookHotel(_params = {}) {
-  const err = new Error('hotel_booking_not_implemented');
-  err.status = 501;
-  throw err;
+  const params = _params || {};
+  const { offerId, hotelId, guests, payment } = params;
+  if (!offerId && !hotelId) {
+    const err = new Error('missing_offer_or_hotel_id');
+    err.status = 400;
+    throw err;
+  }
+
+  const record = {
+    id: uuid(),
+    type: 'hotel',
+    provider: 'hotel_service',
+    provider_offer_id: offerId || null,
+    provider_hotel_id: hotelId || null,
+    status: 'created',
+    raw_request: params,
+  };
+
+  const saved = await insertBooking(record);
+
+  const response = { booking: saved };
+  if (payment && payment.amount) {
+    response.paymentInfo = createMockMoyasarPayment(payment);
+  }
+  return response;
 }

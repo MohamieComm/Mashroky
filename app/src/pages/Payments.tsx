@@ -18,6 +18,24 @@ const ORDER_SNAPSHOT_KEY = "mashrouk-last-order";
 const FLIGHT_BOOKING_KEY = "mashrouk-flight-booking";
 const FLIGHT_BOOKING_STATUS_KEY = "mashrouk-flight-booking-status";
 const FLIGHT_BOOKING_RESULT_KEY = "mashrouk-flight-booking-result";
+const HOTEL_BOOKING_KEY = "mashrouk-hotel-booking";
+const HOTEL_BOOKING_STATUS_KEY = "mashrouk-hotel-booking-status";
+const HOTEL_BOOKING_RESULT_KEY = "mashrouk-hotel-booking-result";
+const CAR_BOOKING_KEY = "mashrouk-car-booking";
+const CAR_BOOKING_STATUS_KEY = "mashrouk-car-booking-status";
+const CAR_BOOKING_RESULT_KEY = "mashrouk-car-booking-result";
+const TOUR_BOOKING_KEY = "mashrouk-tour-booking";
+const TOUR_BOOKING_STATUS_KEY = "mashrouk-tour-booking-status";
+const TOUR_BOOKING_RESULT_KEY = "mashrouk-tour-booking-result";
+const TRANSFER_BOOKING_KEY = "mashrouk-transfer-booking";
+const TRANSFER_BOOKING_STATUS_KEY = "mashrouk-transfer-booking-status";
+const TRANSFER_BOOKING_RESULT_KEY = "mashrouk-transfer-booking-result";
+
+type ServiceBookingState = {
+  status: "idle" | "processing" | "success" | "error";
+  message?: string;
+  result?: any;
+};
 
 type StoredOrder = {
   orderNumber?: string;
@@ -41,6 +59,10 @@ export default function Payments() {
     message?: string;
     results?: any[];
   }>({ status: "idle" });
+  const [hotelBookingState, setHotelBookingState] = useState<ServiceBookingState>({ status: "idle" });
+  const [carBookingState, setCarBookingState] = useState<ServiceBookingState>({ status: "idle" });
+  const [tourBookingState, setTourBookingState] = useState<ServiceBookingState>({ status: "idle" });
+  const [transferBookingState, setTransferBookingState] = useState<ServiceBookingState>({ status: "idle" });
   const flightApiBaseUrl =
     (import.meta.env.VITE_FLIGHT_API_URL as string | undefined) ||
     "https://jubilant-hope-production-a334.up.railway.app";

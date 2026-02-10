@@ -83,6 +83,7 @@ export default function TripDetails() {
       price: trip.price,
       details: `${trip.destination} • ${trip.duration_days} أيام`,
       image: trip.image_url,
+      type: "trip",
     });
     navigate("/cart");
   };

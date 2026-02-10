@@ -26,13 +26,15 @@
         }
         var configUrl = apiBase.replace(/\/$/, "") + "/api/public-config";
 
+        var fallbackCampaignCode = "0c80bdb8b4";
         function injectAdmitadScript(campaignCode) {
-          if (!campaignCode) return;
+          var resolvedCode = campaignCode || fallbackCampaignCode;
+          if (!resolvedCode) return;
           var script = document.createElement("script");
           script.async = true;
           script.src =
             "https://www.artfut.com/static/tagtag.min.js?campaign_code=" +
-            encodeURIComponent(campaignCode);
+            encodeURIComponent(resolvedCode);
           script.onerror = function () {
             var self = this;
             window.ADMITAD = window.ADMITAD || {};
@@ -111,7 +113,9 @@
             .then(function (data) {
               injectAdmitadScript(data && data.admitad_campaign_code);
             })
-            .catch(function () {});
+            .catch(function () {
+              injectAdmitadScript(fallbackCampaignCode);
+            });
         } catch (e) {}
       })();
     </script>

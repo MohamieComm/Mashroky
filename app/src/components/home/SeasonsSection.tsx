@@ -10,13 +10,14 @@ export function SeasonsSection() {
   const navigate = useNavigate();
   const { addItem } = useCart();
 
-  const handleBook = (title: string, price: string, details?: string, image?: string | null) => {
+  const handleBook = (offer: (typeof seasons)[number]) => {
     addItem({
-      id: `season-${title}-${Date.now()}`,
-      title,
-      price: Number(String(price).replace(/[^\d.]/g, "")) || 0,
-      details,
-      image,
+      id: `season-${offer.title}-${Date.now()}`,
+      title: offer.title,
+      price: Number(String(offer.price).replace(/[^\d.]/g, "")) || 0,
+      details: `موسم: ${offer.season}`,
+      image: offer.image,
+      type: "season",
     });
     navigate("/cart");
   };
@@ -87,9 +88,7 @@ export function SeasonsSection() {
                   <Button
                     variant="hero"
                     size="sm"
-                    onClick={() =>
-                      handleBook(offer.title, offer.price, `موسم: ${offer.season}`, offer.image)
-                    }
+                    onClick={() => handleBook(offer)}
                   >
                     احجز الآن
                   </Button>
@@ -102,4 +101,3 @@ export function SeasonsSection() {
     </section>
   );
 }
-

@@ -8,12 +8,14 @@ import { studyOffers } from "@/data/content";
 export function WeeklyOffers() {
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const handleBook = (offerTitle?: string, price?: string, details?: string) => {
+  const handleBook = (offer: (typeof studyOffers)[number]) => {
     addItem({
-      id: `study-${offerTitle ?? Date.now()}`,
-      title: offerTitle ?? "حجز دراسة",
-      price: Number((price ?? "0").replace(/[^\\d.]/g, "")) || 0,
-      details,
+      id: `study-${offer.title}-${Date.now()}`,
+      title: offer.title,
+      price: Number(offer.price.replace(/[^\\d.]/g, "")) || 0,
+      details: offer.location,
+      image: offer.image,
+      type: "study",
     });
     navigate("/cart");
   };
@@ -73,7 +75,7 @@ export function WeeklyOffers() {
                   <Button
                     variant="hero"
                     size="sm"
-                    onClick={() => handleBook(offer.title, offer.price, offer.location)}
+                    onClick={() => handleBook(offer)}
                   >
                     احجز
                   </Button>

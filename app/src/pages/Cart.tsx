@@ -3,8 +3,24 @@ import { Button } from "@/components/ui/button";
 import { Trash2, CreditCard } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { useState } from "react";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 const ORDER_SNAPSHOT_KEY = "mashrouk-last-order";
+const typeLabels: Record<string, string> = {
+  flight: "طيران",
+  hotel: "فندق",
+  car: "سيارة",
+  tour: "جولة",
+  transfer: "توصيل",
+  offer: "عرض",
+  seasonal: "عرض موسمي",
+  study: "دراسة",
+  destination: "وجهة",
+  transport: "نقل",
+  trip: "رحلة",
+  service: "خدمة",
+  activity: "نشاط",
+};
 
 export default function Cart() {
   const { items, removeItem, clear, total } = useCart();
@@ -99,10 +115,25 @@ export default function Cart() {
           <div className="space-y-4">
             {hasItems ? (
               items.map((item) => (
-                <div key={item.id} className="bg-card rounded-2xl p-6 shadow-card flex items-center justify-between gap-4">
-                  <div>
-                    <h3 className="font-bold">{item.title}</h3>
-                    {item.details && <p className="text-sm text-muted-foreground">{item.details}</p>}
+                <div key={item.id} className="bg-card rounded-2xl p-6 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <ImageWithFallback
+                      src={item.image}
+                      alt={item.title}
+                      className="w-20 h-20 rounded-xl object-cover shrink-0"
+                      fallbackQuery={item.details || item.title}
+                    />
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-bold">{item.title}</h3>
+                        {item.type && (
+                          <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
+                            {typeLabels[item.type] || "حجز"}
+                          </span>
+                        )}
+                      </div>
+                      {item.details && <p className="text-sm text-muted-foreground">{item.details}</p>}
+                    </div>
                   </div>
                   <div className="flex items-center gap-4">
                     <p className="text-xl font-bold text-primary">{item.price.toLocaleString()} ر.س</p>

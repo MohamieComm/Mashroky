@@ -10,19 +10,21 @@ export default function Activities() {
   const activities = useAdminCollection("activities", defaultActivities);
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const handleBook = (activityTitle: string, price: string, location?: string) => {
+  const handleBook = (activity: (typeof activities)[number]) => {
     addItem({
-      id: `activity-${activityTitle}-${Date.now()}`,
-      title: activityTitle,
-      price: Number(price.replace(/[^\\d.]/g, "")) || 0,
-      details: location,
+      id: `activity-${activity.title}-${Date.now()}`,
+      title: activity.title,
+      price: Number(activity.price.replace(/[^\\d.]/g, "")) || 0,
+      details: activity.location,
+      image: activity.image,
+      type: "activity",
     });
     navigate("/cart");
   };
   const handleQuickAdd = () => {
     const sample = activities[0];
     if (!sample) return;
-    handleBook(sample.title, sample.price, sample.location);
+    handleBook(sample);
   };
 
   return (
@@ -78,7 +80,7 @@ export default function Activities() {
                     <Button
                       variant="hero"
                       size="sm"
-                      onClick={() => handleBook(activity.title, activity.price, activity.location)}
+                      onClick={() => handleBook(activity)}
                     >
                       احجز
                     </Button>

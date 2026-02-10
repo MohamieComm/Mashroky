@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Plane,
-  Hotel,
+   Hotel,
+  Car,
   Tag,
   Menu,
   X,
@@ -21,25 +22,27 @@ import {
   LogIn,
   LogOut,
 } from "lucide-react";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 const navItems = [
   { name: "الرئيسية", path: "/", icon: Home },
-  { name: "الرحلات", path: "/trips", icon: Plane },
+  { name: "الطيران", path: "/trips", icon: Plane },
   { name: "الفنادق", path: "/hotels", icon: Hotel },
+  { name: "السيارات", path: "/cars", icon: Car },
   { name: "العروض", path: "/offers", icon: Tag },
-  { name: "مواسم", path: "/seasons", icon: CalendarCheck },
-  { name: "النشاطات", path: "/activities", icon: CalendarCheck },
-  { name: "الوجهات السياحية", path: "/destinations", icon: MapPinned },
-  { name: "الدراسة بالخارج", path: "/study", icon: GraduationCap },
+  { name: "المواسم", path: "/seasons", icon: CalendarCheck },
+  { name: "الجولات", path: "/tours", icon: CalendarCheck },
+  { name: "الوجهات", path: "/destinations", icon: MapPinned },
+  { name: "الدراسة", path: "/study", icon: GraduationCap },
 ];
 
 const secondaryItems = [
-  { name: "عن المنصة", path: "/about", icon: Shield },
-  { name: "السياحة في السعودية", path: "/saudi", icon: MapPinned },
-  { name: "المواصلات", path: "/transport", icon: Plane },
+  { name: "عن مشروك", path: "/about", icon: Shield },
+  { name: "السعودية", path: "/saudi", icon: MapPinned },
+  { name: "النقل الخاص", path: "/transfers", icon: Plane },
   { name: "المدفوعات", path: "/payments", icon: CreditCard },
   { name: "المقالات", path: "/articles", icon: Newspaper },
-  { name: "تواصل معنا", path: "/support", icon: MessageCircle },
+  { name: "الدعم", path: "/support", icon: MessageCircle },
 ];
 
 export function Navbar() {
@@ -67,11 +70,7 @@ export function Navbar() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center">
-              <img
-                src="/logo.png"
-                alt="مشروك"
-                className="w-12 h-12 object-contain shrink-0"
-              />
+              <ImageWithFallback src="/logo.png" alt="مشروك" className="w-12 h-12 object-contain shrink-0" fallbackSrc="/logo.png" fallbackQuery="Mashrouk logo" />
             </Link>
 
             <div className="hidden md:flex items-center gap-1">

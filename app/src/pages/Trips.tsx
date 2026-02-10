@@ -146,6 +146,7 @@ export default function Trips() {
         price: Number(String(flight.price).replace(/[^\d.]/g, "")) || 0,
         details: flight.duration,
         image: flight.image,
+        type: "flight",
       });
     }
     navigate("/cart");
@@ -176,6 +177,7 @@ export default function Trips() {
       title: service.name,
       price: Number(String(service.price).replace(/[^\d.]/g, "")) || 0,
       details: serviceDetails.length ? `${service.description} • ${serviceDetails.join("، ")}` : service.description,
+      type: "service",
     });
     navigate("/cart");
   };
@@ -206,6 +208,8 @@ export default function Trips() {
   const [searchParams] = useSearchParams();
   const flightErrorMessages: Record<string, string> = {
     amadeus_not_configured: "خدمة الرحلات غير مهيأة بعد على الخادم.",
+    amadeus_token_failed: "???? ??????? ????? Amadeus. ???? ?? ?????? ???????? ?? ??? ????????.",
+    amadeus_search_failed: "???? ??? ??????? ?? ?????? ??????. ???? ??????.",
     invalid_airport_code: "رمز المطار غير صحيح.",
     invalid_departure_date: "تاريخ المغادرة غير صحيح.",
     invalid_passenger_count: "عدد المسافرين غير صالح.",
@@ -894,3 +898,4 @@ export default function Trips() {
     </Layout>
   );
 }
+

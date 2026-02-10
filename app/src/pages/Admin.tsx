@@ -37,6 +37,7 @@ import {
   Mail,
   MapPin,
 } from "lucide-react";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 type FieldType = "text" | "number" | "textarea" | "list" | "pairlist" | "select";
 
@@ -678,8 +679,8 @@ export default function Admin() {
           }`}
         >
           <div className="p-4 border-b border-border flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="مشروك" className="w-10 h-10 object-contain" />
+              <div className="flex items-center gap-3">
+              <ImageWithFallback src="/logo.png" alt="مشروك" className="w-10 h-10 object-contain" fallbackSrc="/logo.png" fallbackQuery="Mashrouk logo" />
               <span className="text-xl font-bold text-gradient">مشروك</span>
             </div>
             <button onClick={() => setMobileSidebarOpen(false)} className="p-2 hover:bg-muted rounded-lg">
@@ -725,7 +726,7 @@ export default function Admin() {
       <aside className={`hidden lg:flex ${sidebarOpen ? "w-64" : "w-20"} bg-card border-l border-border transition-all duration-300 flex-col`}>
         <div className="p-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="مشروك" className="w-10 h-10 object-contain" />
+            <ImageWithFallback src="/logo.png" alt="مشروك" className="w-10 h-10 object-contain" fallbackSrc="/logo.png" fallbackQuery="Mashrouk logo" />
             {sidebarOpen && <span className="text-xl font-bold text-gradient">مشروك</span>}
           </div>
           <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1 hover:bg-muted rounded">
@@ -872,7 +873,12 @@ export default function Admin() {
                 </div>
                 <div className="mt-6 flex gap-6">
                   {promoDraft && isPromoImage && (
-                    <img src={promoDraft} alt="صورة إعلان" className="rounded-xl shadow-card w-64 h-40 object-cover" />
+                    <ImageWithFallback
+                      src={promoDraft}
+                      alt="صورة إعلان"
+                      className="rounded-xl shadow-card w-64 h-40 object-cover"
+                      fallbackQuery="promo image"
+                    />
                   )}
                   {promoDraft && isPromoVideo && (
                     <video src={promoDraft} controls className="rounded-xl shadow-card w-64 h-40 object-cover" />
@@ -927,10 +933,11 @@ export default function Admin() {
                   </Button>
                 </div>
                 {appDownloadImageDraft && (
-                  <img
+                  <ImageWithFallback
                     src={appDownloadImageDraft}
                     alt="صورة التطبيق"
                     className="rounded-xl shadow-card w-72 h-44 object-cover"
+                    fallbackQuery="app download image"
                   />
                 )}
               </div>
@@ -1180,7 +1187,12 @@ export default function Admin() {
                             }}
                           />
                           {draft[field.key] && (
-                            <img src={draft[field.key]} alt="صورة" className="rounded-xl shadow-card w-40 h-24 object-cover mt-2" />
+                            <ImageWithFallback
+                              src={draft[field.key]}
+                              alt="صورة"
+                              className="rounded-xl shadow-card w-40 h-24 object-cover mt-2"
+                              fallbackQuery={String(field.label || field.key)}
+                            />
                           )}
                         </div>
                       ) : field.type === "textarea" ? (

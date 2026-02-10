@@ -20,10 +20,14 @@ export function ImageWithFallback({
   fallbackClassName,
   fallbackQuery,
 }: ImageWithFallbackProps) {
-  const safeQuery = (fallbackQuery || "").trim();
+  const altQuery = (alt || "").trim();
+  const safeQuery =
+    (fallbackQuery || "").trim() ||
+    (altQuery && !/(logo|icon|شعار|أيقونة|لوجو)/i.test(altQuery) ? altQuery : "");
   const autoFallbackSrc = safeQuery
     ? `https://source.unsplash.com/1200x800/?${encodeURIComponent(safeQuery)}`
     : "";
+  const defaultFallback = "/fallback-city.jpg";
   const localFallback = useMemo(() => {
     const label = encodeURIComponent(alt || "صورة");
     return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='420'%3E%3Crect width='100%25' height='100%25' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='50%25' font-size='24' fill='%236b7280' text-anchor='middle' dominant-baseline='middle'%3E${label}%3C/text%3E%3C/svg%3E`;
@@ -34,6 +38,7 @@ export function ImageWithFallback({
       ...(fallbackSources || []),
       fallbackSrc,
       autoFallbackSrc,
+      defaultFallback,
       "/placeholder.svg",
       localFallback,
     ]
@@ -51,6 +56,7 @@ export function ImageWithFallback({
       alt={alt}
       loading="lazy"
       decoding="async"
+      referrerPolicy="no-referrer"
       className={cn(className, showFallback && (fallbackClassName ?? "object-cover bg-muted"))}
       onError={() => {
         setFailedCount((count) => Math.min(count + 1, sources.length - 1));

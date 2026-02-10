@@ -17,28 +17,34 @@ import {
 
 const faqs = [
   {
-    question: "كيف يمكنني إلغاء حجزي؟",
-    answer: "يمكنك إلغاء حجزك من خلال صفحة 'حجوزاتي' في حسابك الشخصي. يرجى مراعاة سياسة الإلغاء الخاصة بكل حجز والتي تختلف حسب نوع الخدمة والمدة المتبقية قبل موعد الرحلة أو الإقامة.",
+    question: "كيف أحجز رحلة أو فندق؟",
+    answer:
+      "اختر الخدمة من القائمة الرئيسية، ثم حدّد الوجهة والتواريخ وعدد المسافرين، وبعدها اضغط على “إضافة للسلة” لإكمال الدفع.",
   },
   {
-    question: "ما هي طرق الدفع المتاحة؟",
-    answer: "نوفر عدة طرق للدفع تشمل: Apple Pay، Samsung Pay، بطاقات الائتمان (Visa، Mastercard)، وبطاقة مدى. جميع المعاملات مؤمنة بأعلى معايير الأمان.",
+    question: "ما وسائل الدفع المتاحة؟",
+    answer:
+      "ندعم Apple Pay وSamsung Pay وبطاقات Visa وMastercard، كما يمكن إضافة مزودات أخرى من لوحة الإدارة عند الحاجة.",
   },
   {
-    question: "هل يمكنني تعديل حجزي بعد التأكيد؟",
-    answer: "نعم، يمكنك تعديل معظم الحجوزات قبل 48 ساعة من الموعد المحدد. قد تطبق رسوم تعديل إضافية حسب نوع الحجز وسياسة الشركة المقدمة للخدمة.",
+    question: "هل يمكن تعديل الحجز؟",
+    answer:
+      "يمكن تعديل بعض الحجوزات حسب شروط المزوّد. تواصل معنا وسنراجع الخيارات المتاحة لك بأسرع وقت.",
   },
   {
-    question: "كيف أحصل على فاتورة ضريبية؟",
-    answer: "يتم إرسال الفاتورة الضريبية تلقائياً إلى بريدك الإلكتروني بعد إتمام عملية الدفع. يمكنك أيضاً تحميلها من صفحة تفاصيل الحجز في حسابك.",
+    question: "كيف يتم استرجاع المبلغ؟",
+    answer:
+      "يتم الاسترجاع وفق سياسة المزود وخلال 7-14 يوم عمل في المتوسط بعد تأكيد الإلغاء.",
   },
   {
-    question: "ما هي سياسة الاسترداد؟",
-    answer: "تختلف سياسة الاسترداد حسب نوع الحجز. بشكل عام، الحجوزات القابلة للاسترداد تسمح بإلغاء كامل قبل 24-72 ساعة من الموعد. يرجى مراجعة شروط الحجز المحددة.",
+    question: "هل الأسعار تشمل الضرائب والرسوم؟",
+    answer:
+      "الأسعار المعروضة شاملة للضرائب الأساسية ما لم يُذكر غير ذلك في تفاصيل العرض.",
   },
   {
-    question: "هل تقدمون خدمات للشركات؟",
-    answer: "نعم، نوفر باقات خاصة للشركات تشمل إدارة سفر الموظفين، أسعار تفضيلية، وتقارير مفصلة. تواصل معنا عبر البريد الإلكتروني للشركات للمزيد.",
+    question: "كيف أتواصل في الحالات العاجلة؟",
+    answer:
+      "يمكنك التواصل عبر واتساب أو الاتصال المباشر، وسيتولى الفريق متابعة الحالة فورًا.",
   },
 ];
 
@@ -49,22 +55,20 @@ export default function Support() {
 
   return (
     <Layout>
-      {/* Hero */}
       <section className="hero-gradient py-20">
         <div className="container mx-auto px-4 text-center">
           <div className="w-20 h-20 bg-primary-foreground/20 rounded-full flex items-center justify-center mx-auto mb-6">
             <HelpCircle className="w-10 h-10 text-primary-foreground" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4">
-            كيف يمكننا مساعدتك؟
+            كيف نساعدك؟
           </h1>
           <p className="text-primary-foreground/80 text-lg max-w-2xl mx-auto">
-            فريق الدعم متاح على مدار الساعة لمساعدتك في أي استفسار
+            فريق مشروك جاهز للإجابة عن استفساراتك حول الحجوزات والدفع والعروض الموسمية.
           </p>
         </div>
       </section>
 
-      {/* Contact Options */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8 mb-16">
@@ -73,7 +77,7 @@ export default function Support() {
                 <Phone className="w-8 h-8 text-primary-foreground" />
               </div>
               <h3 className="text-xl font-bold mb-2">اتصل بنا</h3>
-              <p className="text-muted-foreground mb-4">متاحون على مدار الساعة</p>
+              <p className="text-muted-foreground mb-4">دعم مباشر خلال ساعات العمل</p>
               <p className="text-xl font-bold text-primary phone-field" dir="ltr">
                 {contactPhone || "+966 54 245 4094"}
               </p>
@@ -83,7 +87,7 @@ export default function Support() {
               <div className="w-16 h-16 gold-gradient rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Mail className="w-8 h-8 text-secondary-foreground" />
               </div>
-              <h3 className="text-xl font-bold mb-2">راسلنا</h3>
+              <h3 className="text-xl font-bold mb-2">البريد الإلكتروني</h3>
               <p className="text-muted-foreground mb-4">نرد خلال 24 ساعة</p>
               <p className="text-xl font-bold text-primary phone-field" dir="ltr">
                 {contactEmail || "ibrahemest@outlook.sa"}
@@ -94,29 +98,25 @@ export default function Support() {
               <div className="w-16 h-16 bg-accent rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <MessageCircle className="w-8 h-8 text-accent-foreground" />
               </div>
-              <h3 className="text-xl font-bold mb-2">محادثة مباشرة</h3>
-              <p className="text-muted-foreground mb-4">ردود فورية</p>
+              <h3 className="text-xl font-bold mb-2">واتساب</h3>
+              <p className="text-muted-foreground mb-4">رسالة سريعة</p>
               <Button variant="hero">ابدأ المحادثة</Button>
               <a
                 className="block text-sm text-primary mt-3"
                 href={`https://wa.me/${whatsappNumber.replace("+", "")}`}
                 rel="noreferrer"
               >
-                تحويل واتساب للدعم الفني
+                فتح واتساب في نافذة جديدة
               </a>
             </div>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-12">
-            {/* FAQ */}
             <div>
               <h2 className="text-2xl font-bold mb-6">الأسئلة الشائعة</h2>
               <div className="space-y-4">
                 {faqs.map((faq, index) => (
-                  <div
-                    key={index}
-                    className="bg-card rounded-xl shadow-card overflow-hidden"
-                  >
+                  <div key={index} className="bg-card rounded-xl shadow-card overflow-hidden">
                     <button
                       onClick={() => setOpenFaq(openFaq === index ? null : index)}
                       className="w-full flex items-center justify-between p-5 text-right hover:bg-muted/50 transition-colors"
@@ -138,15 +138,14 @@ export default function Support() {
               </div>
             </div>
 
-            {/* Contact Form */}
             <div>
-              <h2 className="text-2xl font-bold mb-6">أرسل استفسارك</h2>
+              <h2 className="text-2xl font-bold mb-6">تواصل معنا</h2>
               <div className="bg-card rounded-2xl p-8 shadow-card">
                 <div className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium mb-2 block">الاسم</label>
-                      <Input placeholder="اسمك الكامل" />
+                      <Input placeholder="الاسم الكامل" />
                     </div>
                     <div>
                       <label className="text-sm font-medium mb-2 block">البريد الإلكتروني</label>
@@ -160,11 +159,11 @@ export default function Support() {
                   <div>
                     <label className="text-sm font-medium mb-2 block">نوع الاستفسار</label>
                     <select className="w-full h-11 rounded-lg border border-input bg-background px-3 text-sm">
-                      <option>استفسار عام</option>
-                      <option>مشكلة في الحجز</option>
-                      <option>طلب استرداد</option>
-                      <option>شكوى</option>
-                      <option>اقتراح</option>
+                      <option>حجز جديد</option>
+                      <option>تعديل الحجز</option>
+                      <option>إلغاء الحجز</option>
+                      <option>الدفع</option>
+                      <option>الدعم الفني</option>
                     </select>
                   </div>
                   <div>
@@ -173,7 +172,7 @@ export default function Support() {
                   </div>
                   <Button variant="hero" className="w-full gap-2">
                     <Send className="w-5 h-5" />
-                    إرسال
+                    إرسال الطلب
                   </Button>
                 </div>
 

@@ -6,23 +6,23 @@ import { useCart } from "@/hooks/useCart";
 
 const transportOptions = [
   {
-    title: "سيارة خاصة مع سائق",
-    description: "تنقلات مرنة داخل المدينة مع خيارات استقبال مطار.",
+    title: "تأجير سيارات خاصة",
+    description: "خيارات مرنة للمدن والرحلات اليومية مع سائق أو بدون.",
     icon: Car,
   },
   {
-    title: "خدمة النقل المشتركة",
-    description: "خيارات اقتصادية للمطارات والفنادق والمهرجانات.",
+    title: "حافلات سياحية",
+    description: "جولات مريحة مع مرشدين وتنقلات جماعية منظمة.",
     icon: Bus,
   },
   {
-    title: "قطارات داخلية",
-    description: "احجز خطوط القطارات بين المدن الكبرى بسهولة.",
+    title: "قطارات إقليمية",
+    description: "تنقل سريع بين المدن الرئيسية مع مواعيد دقيقة.",
     icon: Train,
   },
   {
     title: "رحلات داخلية",
-    description: "تنسيق رحلات داخل السعودية ضمن باقات السفر.",
+    description: "أفضل المسارات للطيران المحلي وربط المدن البعيدة.",
     icon: Plane,
   },
 ];
@@ -31,7 +31,7 @@ export default function Transport() {
   const navigate = useNavigate();
   const { addItem } = useCart();
   const handleBook = (title: string) => {
-    addItem({ id: `transport-${title}-${Date.now()}`, title, price: 0 });
+    addItem({ id: `transport-${title}-${Date.now()}`, title, price: 0, type: "transport" });
     navigate("/cart");
   };
 
@@ -39,12 +39,12 @@ export default function Transport() {
     <Layout>
       <section className="hero-gradient py-20">
         <div className="container mx-auto px-4 text-center">
-          <span className="text-primary-foreground/80">المواصلات</span>
+          <span className="text-primary-foreground/80">خدمات النقل</span>
           <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mt-3">
-            تنقل بمرونة في كل مدينة
+            اختر وسيلة التنقل الأنسب
           </h1>
           <p className="text-primary-foreground/80 mt-4 max-w-2xl mx-auto">
-            اختر وسيلة النقل المناسبة وأضفها تلقائيًا إلى رحلتك أو عرضك.
+            ننسّق لك النقل من وإلى المطار والتنقلات الداخلية بسهولة ومرونة.
           </p>
         </div>
       </section>
@@ -67,18 +67,20 @@ export default function Transport() {
           </div>
 
           <div className="bg-card rounded-3xl p-8 shadow-card mt-12">
-            <h2 className="text-2xl font-bold mb-6">نموذج حجز المواصلات</h2>
+            <h2 className="text-2xl font-bold mb-6">نموذج طلب النقل</h2>
             <div className="grid md:grid-cols-3 gap-4">
               <input className="h-12 rounded-xl border border-input px-4" placeholder="مدينة الانطلاق" />
               <input className="h-12 rounded-xl border border-input px-4" placeholder="الوجهة" />
-              <input className="h-12 rounded-xl border border-input px-4" placeholder="نوع المواصلات" />
-              <input className="h-12 rounded-xl border border-input px-4" placeholder="تاريخ الرحلة" />
               <input className="h-12 rounded-xl border border-input px-4" placeholder="عدد الركاب" />
+              <input className="h-12 rounded-xl border border-input px-4" placeholder="تاريخ الرحلة" />
+              <input className="h-12 rounded-xl border border-input px-4" placeholder="وقت الانطلاق" />
               <input className="h-12 rounded-xl border border-input px-4" placeholder="ملاحظات إضافية" />
             </div>
-            <Button variant="hero" className="mt-6" onClick={() => handleBook("خدمة نقل")}>إضافة للمسار</Button>
+            <Button variant="hero" className="mt-6" onClick={() => handleBook("طلب نقل")}>
+              إضافة للسلة
+            </Button>
             <p className="text-xs text-muted-foreground mt-3">
-              سيتم إرسال تفاصيل الوصول ونقطة الالتقاء بعد إتمام الدفع مباشرة.
+              سيتم التواصل لتأكيد الموعد والسعر النهائي حسب الوجهة ونوع المركبة.
             </p>
           </div>
 
@@ -87,9 +89,9 @@ export default function Transport() {
               <MapPin className="w-7 h-7" />
             </div>
             <div>
-              <h3 className="text-xl font-bold">تنبيهات الوصول</h3>
+              <h3 className="text-xl font-bold">مناطق التغطية</h3>
               <p className="text-muted-foreground">
-                بعد الدفع سنرسل تفاصيل الوصول، موقع التجمع، ووقت التحرك عبر البريد أو واتساب.
+                نوفر الخدمة في المدن الرئيسية ومناطق الجذب السياحي، ويمكن طلب تنقلات خاصة حسب الحاجة.
               </p>
             </div>
           </div>

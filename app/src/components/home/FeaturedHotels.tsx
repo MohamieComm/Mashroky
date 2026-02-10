@@ -8,12 +8,14 @@ import { honeymoonOffers } from "@/data/content";
 export function FeaturedHotels() {
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const handleBook = (title: string, price: string, details?: string) => {
+  const handleBook = (offer: (typeof honeymoonOffers)[number]) => {
     addItem({
-      id: `honeymoon-${title}-${Date.now()}`,
-      title,
-      price: Number(price.replace(/[^\\d.]/g, "")) || 0,
-      details,
+      id: `honeymoon-${offer.title}-${Date.now()}`,
+      title: offer.title,
+      price: Number(offer.price.replace(/[^\\d.]/g, "")) || 0,
+      details: `${offer.location} • ${offer.duration}`,
+      image: offer.image,
+      type: "honeymoon",
     });
     navigate("/cart");
   };
@@ -82,7 +84,7 @@ export function FeaturedHotels() {
                   <Button
                     variant="hero"
                     size="sm"
-                    onClick={() => handleBook(offer.title, offer.price, `${offer.location} • ${offer.duration}`)}
+                    onClick={() => handleBook(offer)}
                   >
                     احجز
                   </Button>

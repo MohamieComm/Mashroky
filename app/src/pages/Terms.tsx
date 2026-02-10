@@ -22,40 +22,42 @@ export default function Terms() {
             <div>
               <div className="flex items-center gap-3 mb-3 text-foreground">
                 <CheckCircle className="w-5 h-5 text-primary" />
-                <h2 className="text-xl font-bold">القبول بالشروط</h2>
+                <h2 className="text-xl font-bold">قبول الشروط</h2>
               </div>
               <p>
-                باستخدامك لخدمات مشروك، فإنك توافق على الالتزام بهذه الشروط وعلى سياسات الخصوصية.
+                باستخدامك لمنصة مشروك، فأنت تقر بموافقتك على هذه الشروط. إذا لم تكن موافقًا،
+                يرجى عدم استخدام الموقع أو الخدمات.
               </p>
             </div>
 
             <div>
               <div className="flex items-center gap-3 mb-3 text-foreground">
                 <Scale className="w-5 h-5 text-primary" />
-                <h2 className="text-xl font-bold">شروط الحجز</h2>
+                <h2 className="text-xl font-bold">مسؤوليات المستخدم</h2>
               </div>
               <ul className="space-y-2">
-                <li>• يجب تقديم بيانات صحيحة عند الحجز.</li>
-                <li>• الأسعار قابلة للتغيير حتى إتمام الدفع.</li>
-                <li>• تأكيد الحجز يعتمد على توفر الخدمة لدى المزود.</li>
+                <li>• إدخال بيانات صحيحة عند إنشاء الحساب أو الحجز.</li>
+                <li>• الحفاظ على سرية بيانات الدخول وعدم مشاركتها.</li>
+                <li>• الالتزام بسياسات المزودين والشركاء الخارجيين.</li>
               </ul>
             </div>
 
             <div>
               <div className="flex items-center gap-3 mb-3 text-foreground">
                 <AlertTriangle className="w-5 h-5 text-primary" />
-                <h2 className="text-xl font-bold">المسؤولية</h2>
+                <h2 className="text-xl font-bold">المدفوعات والإلغاء</h2>
               </div>
               <ul className="space-y-2">
-                <li>• مشروك وسيط بين المستخدم ومزودي الخدمات.</li>
-                <li>• يتأكد المستخدم من التأشيرات والشروط الصحية قبل السفر.</li>
-                <li>• تخضع جميع الخدمات لشروط مقدميها.</li>
+                <li>• تتم معالجة المدفوعات عبر بوابات دفع آمنة.</li>
+                <li>• تختلف سياسات الإلغاء والاسترجاع حسب كل مزود.</li>
+                <li>• قد تُطبق رسوم إدارية أو فروقات سعرية عند التعديل.</li>
               </ul>
             </div>
 
             <div className="bg-accent rounded-2xl p-6 text-foreground">
               <p>
-                يحتفظ مشروك بالحق في تحديث الشروط عند الحاجة. سيتم إشعار المستخدمين بالتغييرات الجوهرية.
+                لأي استفسار حول الشروط والأحكام يمكنك التواصل مع فريق الدعم. سيتم تحديث هذه
+                الصفحة عند الحاجة.
               </p>
             </div>
           </div>

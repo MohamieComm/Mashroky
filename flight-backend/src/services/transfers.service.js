@@ -1,6 +1,9 @@
 import axios from 'axios';
 import { getApiBaseUrl, getApiKeyValue } from './api-keys.service.js';
 import { logAmadeusError } from '../utils/amadeus-logger.js';
+import { v4 as uuid } from 'uuid';
+import { insertBooking } from './supabase.service.js';
+import { createMockMoyasarPayment } from './moyasar.service.js';
 
 const tokenCache = {
   accessToken: null,
@@ -155,22 +158,31 @@ export async function getAccessToken() {
   params.set('client_id', config.clientId);
   params.set('client_secret', config.clientSecret);
 
-  const res = await axios.post(config.tokenUrl, params.toString(), {
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    timeout: 15000,
-  });
-  const data = res?.data || {};
-  const accessToken = data.access_token || '';
-  const tokenType = data.token_type || 'Bearer';
-  const expiresIn = Number(data.expires_in || 0);
-  const expiresAt = Date.now() + (expiresIn > 0 ? expiresIn * 1000 : 60 * 1000);
+  try {
+    const res = await axios.post(config.tokenUrl, params.toString(), {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      timeout: 15000,
+    });
+    const data = res?.data || {};
+    const accessToken = data.access_token || '';
+    const tokenType = data.token_type || 'Bearer';
+    const expiresIn = Number(data.expires_in || 0);
+    const expiresAt = Date.now() + (expiresIn > 0 ? expiresIn * 1000 : 60 * 1000);
 
-  tokenCache.accessToken = accessToken;
-  tokenCache.tokenType = tokenType;
-  tokenCache.expiresAt = expiresAt;
-  tokenCache.raw = data;
+    tokenCache.accessToken = accessToken;
+    tokenCache.tokenType = tokenType;
+    tokenCache.expiresAt = expiresAt;
+    tokenCache.raw = data;
 
-  return { accessToken, tokenType, expiresIn, raw: data };
+    return { accessToken, tokenType, expiresIn, raw: data };
+  } catch (error) {
+    const payload = error?.response?.data || error?.message || error;
+    await logAmadeusError('transfers_token_error', { error: payload });
+    const err = new Error('transfers_token_failed');
+    err.cause = payload;
+    err.status = error?.response?.status || 502;
+    throw err;
+  }
 }
 
 const buildAuthHeaders = async (config) => {
@@ -237,7 +249,26 @@ export async function getTransferDetails(_params = {}) {
 }
 
 export async function bookTransfer(_params = {}) {
-  const err = new Error('transfers_booking_not_implemented');
-  err.status = 501;
-  throw err;
+  const params = _params || {};
+  const { offerId, transferId, passenger, payment } = params;
+  if (!offerId && !transferId) {
+    const err = new Error('missing_offer_or_transfer_id');
+    err.status = 400;
+    throw err;
+  }
+
+  const record = {
+    id: uuid(),
+    type: 'transfer',
+    provider: 'transfers_service',
+    provider_offer_id: offerId || null,
+    provider_transfer_id: transferId || null,
+    status: 'created',
+    raw_request: params,
+  };
+
+  const saved = await insertBooking(record);
+  const response = { booking: saved };
+  if (payment && payment.amount) response.paymentInfo = createMockMoyasarPayment(payment);
+  return response;
 }

@@ -4,6 +4,7 @@ export function errorMiddleware(err, req, res, next) {
   if (!isProd) {
     console.error(err);
   }
-  const message = status >= 500 && isProd ? 'server_error' : err.message || 'server_error';
+  const shouldExpose = err.expose === true || status < 500 || !isProd;
+  const message = shouldExpose ? err.message || 'server_error' : 'server_error';
   res.status(status).json({ error: message });
 }

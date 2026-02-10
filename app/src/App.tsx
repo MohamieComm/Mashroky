@@ -9,6 +9,9 @@ import Index from "./pages/Index";
 import Trips from "./pages/Trips";
 import TripDetails from "./pages/TripDetails";
 import Hotels from "./pages/Hotels";
+import HotelDetails from "./pages/HotelDetails";
+import HotelBooking from "./pages/HotelBooking";
+import HotelConfirmation from "./pages/HotelConfirmation";
 import Offers from "./pages/Offers";
 import Seasons from "./pages/Seasons";
 import Profile from "./pages/Profile";
@@ -19,8 +22,18 @@ import Terms from "./pages/Terms";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import About from "./pages/About";
-import Activities from "./pages/Activities";
-import Transport from "./pages/Transport";
+import CarResults from "./pages/CarResults";
+import CarDetails from "./pages/CarDetails";
+import CarBooking from "./pages/CarBooking";
+import CarConfirmation from "./pages/CarConfirmation";
+import ToursResults from "./pages/ToursResults";
+import TourDetails from "./pages/TourDetails";
+import TourBooking from "./pages/TourBooking";
+import TourConfirmation from "./pages/TourConfirmation";
+import TransfersResults from "./pages/TransfersResults";
+import TransferDetails from "./pages/TransferDetails";
+import TransferBooking from "./pages/TransferBooking";
+import TransferConfirmation from "./pages/TransferConfirmation";
 import Payments from "./pages/Payments";
 import Saudi from "./pages/Saudi";
 import Study from "./pages/Study";
@@ -67,10 +80,25 @@ const App = () => (
               <Route path="/trips" element={<Trips />} />
               <Route path="/trip/:id" element={<TripDetails />} />
               <Route path="/hotels" element={<Hotels />} />
+              <Route path="/hotels/:hotelId" element={<HotelDetails />} />
+              <Route path="/hotels/:hotelId/booking" element={<HotelBooking />} />
+              <Route path="/hotels/confirmation" element={<HotelConfirmation />} />
+              <Route path="/cars" element={<CarResults />} />
+              <Route path="/cars/:carId" element={<CarDetails />} />
+              <Route path="/cars/:carId/booking" element={<CarBooking />} />
+              <Route path="/cars/confirmation" element={<CarConfirmation />} />
+              <Route path="/tours" element={<ToursResults />} />
+              <Route path="/tours/:tourId" element={<TourDetails />} />
+              <Route path="/tours/:tourId/booking" element={<TourBooking />} />
+              <Route path="/tours/confirmation" element={<TourConfirmation />} />
+              <Route path="/transfers" element={<TransfersResults />} />
+              <Route path="/transfers/:transferId" element={<TransferDetails />} />
+              <Route path="/transfers/:transferId/booking" element={<TransferBooking />} />
+              <Route path="/transfers/confirmation" element={<TransferConfirmation />} />
               <Route path="/offers" element={<Offers />} />
               <Route path="/seasons" element={<Seasons />} />
-              <Route path="/activities" element={<Activities />} />
-              <Route path="/transport" element={<Transport />} />
+              <Route path="/activities" element={<Navigate to="/tours" replace />} />
+              <Route path="/transport" element={<Navigate to="/transfers" replace />} />
               <Route path="/payments" element={<Payments />} />
               <Route path="/saudi" element={<Saudi />} />
               <Route path="/study" element={<Study />} />

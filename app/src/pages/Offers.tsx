@@ -19,13 +19,14 @@ export default function Offers() {
   const offers = useAdminCollection("offers", defaultOffers);
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const handleBook = (title: string, price: string, details?: string, image?: string | null) => {
+  const handleBook = (offer: (typeof offers)[number]) => {
     addItem({
-      id: `offer-${title}-${Date.now()}`,
-      title,
-      price: Number(String(price).replace(/[^\d.]/g, "")) || 0,
-      details,
-      image,
+      id: `offer-${offer.title}-${Date.now()}`,
+      title: offer.title,
+      price: Number(String(offer.price).replace(/[^\d.]/g, "")) || 0,
+      details: offer.description,
+      image: offer.image,
+      type: "offer",
     });
     navigate("/cart");
   };
@@ -152,14 +153,7 @@ export default function Offers() {
                       <Button
                         variant="hero"
                         size="lg"
-                        onClick={() =>
-                          handleBook(
-                            offer.title,
-                            offer.newPrice,
-                            `موسم: ${offer.season}`,
-                            offer.image
-                          )
-                        }
+                        onClick={() => handleBook(offer)}
                       >
                         احجز الآن
                       </Button>

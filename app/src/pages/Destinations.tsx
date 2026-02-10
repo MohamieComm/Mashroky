@@ -32,12 +32,14 @@ export default function Destinations() {
   const { appDownloadLink } = useAdminSettings();
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const handleBook = (title?: string, price?: string, details?: string) => {
+  const handleBook = (dest: (typeof destinations)[number]) => {
     addItem({
-      id: `destination-${title ?? Date.now()}`,
-      title: title ?? "وجهة سياحية",
-      price: Number(String(price ?? "0").replace(/[^\d.]/g, "")) || 0,
-      details,
+      id: `destination-${dest.title}-${Date.now()}`,
+      title: dest.title || "وجهة سياحية",
+      price: Number(String(dest.priceFrom ?? "0").replace(/[^\d.]/g, "")) || 0,
+      details: `${dest.country} • ${dest.duration}`,
+      image: dest.image,
+      type: "destination",
     });
     navigate("/cart");
   };
@@ -212,7 +214,7 @@ export default function Destinations() {
                   <Button
                     variant="hero"
                     size="sm"
-                    onClick={() => handleBook(dest.title, dest.priceFrom, `${dest.country} • ${dest.duration}`)}
+                    onClick={() => handleBook(dest)}
                   >
                     احجز الآن
                   </Button>

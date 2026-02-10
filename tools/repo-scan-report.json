@@ -1,0 +1,169 @@
+{
+  "generatedAt": "2026-02-10T17:48:17.738Z",
+  "results": [
+    {
+      "file": "app\\src\\components\\layout\\Footer.tsx",
+      "mojibake": [],
+      "imgIssues": [],
+      "logoRefs": [
+        {
+          "line": 50,
+          "text": "src=\"/logo.png\""
+        },
+        {
+          "line": 53,
+          "text": "fallbackSrc=\"/logo.png\""
+        }
+      ],
+      "usesImageWithFallback": true,
+      "usesRawImg": false,
+      "missingFallback": false
+    },
+    {
+      "file": "app\\src\\components\\layout\\Navbar.tsx",
+      "mojibake": [],
+      "imgIssues": [],
+      "logoRefs": [
+        {
+          "line": 73,
+          "text": "src=\"/logo.png\""
+        }
+      ],
+      "usesImageWithFallback": false,
+      "usesRawImg": true,
+      "missingFallback": true
+    },
+    {
+      "file": "app\\src\\lib\\utils.ts",
+      "mojibake": [
+        {
+          "line": 13,
+          "text": "const replacementCount = (s.match(/�/g) || []).length;"
+        },
+        {
+          "line": 16,
+          "text": "const cleaned = s.replace(/�+/g, \"\").replace(/[\\x00-\\x1F\\x7F]/g, \"\").trim();"
+        }
+      ],
+      "imgIssues": [],
+      "logoRefs": [],
+      "usesImageWithFallback": false,
+      "usesRawImg": false,
+      "missingFallback": false
+    },
+    {
+      "file": "app\\src\\pages\\Admin.tsx",
+      "mojibake": [],
+      "imgIssues": [],
+      "logoRefs": [
+        {
+          "line": 683,
+          "text": "<ImageWithFallback src=\"/logo.png\" alt=\"مشروك\" className=\"w-10 h-10 object-contain\" fallbackSrc=\"/logo.png\" fallbackQuery=\"Mashrouk logo\" />"
+        },
+        {
+          "line": 729,
+          "text": "<ImageWithFallback src=\"/logo.png\" alt=\"مشروك\" className=\"w-10 h-10 object-contain\" fallbackSrc=\"/logo.png\" fallbackQuery=\"Mashrouk logo\" />"
+        }
+      ],
+      "usesImageWithFallback": true,
+      "usesRawImg": true,
+      "missingFallback": false
+    },
+    {
+      "file": "Mashrok\\app\\(tabs)\\explore.tsx",
+      "mojibake": [],
+      "imgIssues": [],
+      "logoRefs": [
+        {
+          "line": 61,
+          "text": "source={require('@/assets/images/react-logo.png')}"
+        }
+      ],
+      "usesImageWithFallback": false,
+      "usesRawImg": false,
+      "missingFallback": false
+    },
+    {
+      "file": "Mashrok\\app\\(tabs)\\index.tsx",
+      "mojibake": [],
+      "imgIssues": [],
+      "logoRefs": [
+        {
+          "line": 16,
+          "text": "source={require('@/assets/images/partial-react-logo.png')}"
+        }
+      ],
+      "usesImageWithFallback": false,
+      "usesRawImg": false,
+      "missingFallback": false
+    },
+    {
+      "file": "public\\Reboet\\Rebort.txt",
+      "mojibake": [],
+      "imgIssues": [],
+      "logoRefs": [
+        {
+          "line": 180,
+          "text": "<img src=\"/logo.png\" alt=\"مشروك\" class=\"w-12 h-12 object-contain shrink-0\">"
+        },
+        {
+          "line": 181,
+          "text": "/logo.png(www.mashrok.online)"
+        }
+      ],
+      "usesImageWithFallback": false,
+      "usesRawImg": true,
+      "missingFallback": true
+    },
+    {
+      "file": "README.md",
+      "mojibake": [],
+      "imgIssues": [],
+      "logoRefs": [
+        {
+          "line": 19,
+          "text": "- ملف الشعار المستخدم في الواجهة: `app/public/logo.png`."
+        }
+      ],
+      "usesImageWithFallback": false,
+      "usesRawImg": false,
+      "missingFallback": false
+    },
+    {
+      "file": "tools\\apply-mojibake-fix.js",
+      "mojibake": [
+        {
+          "line": 16,
+          "text": "if (content.includes('�')) {"
+        },
+        {
+          "line": 18,
+          "text": "const newContent = content.split('�').join('');"
+        }
+      ],
+      "imgIssues": [],
+      "logoRefs": [],
+      "usesImageWithFallback": false,
+      "usesRawImg": false,
+      "missingFallback": false
+    },
+    {
+      "file": "tools\\repo-check.js",
+      "mojibake": [
+        {
+          "line": 36,
+          "text": "if (ln.includes('\\uFFFD') || ln.includes('�')) mojibake.push({ line: i + 1, text: ln.trim().slice(0, 300) });"
+        }
+      ],
+      "imgIssues": [],
+      "logoRefs": [],
+      "usesImageWithFallback": true,
+      "usesRawImg": false,
+      "missingFallback": false
+    }
+  ],
+  "summary": {
+    "filesChecked": 484,
+    "filesWithFindings": 10
+  }
+}

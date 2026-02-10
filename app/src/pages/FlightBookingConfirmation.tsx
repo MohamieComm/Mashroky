@@ -1,33 +1,3 @@
-// Admitad SALE tracking injection
-function AdmitadSaleScript({ orderNumber, discountCode, items, currency }) {
-  return (
-    <script
-      dangerouslySetInnerHTML={{
-        __html: `
-ADMITAD = window.ADMITAD || {};
-ADMITAD.Invoice = ADMITAD.Invoice || {};
-if (!getSourceCookie(cookie_name)) {
-  ADMITAD.Invoice.broker = 'na';
-} else if (getSourceCookie(cookie_name) != 'admitad') {
-  ADMITAD.Invoice.broker = getSourceCookie(cookie_name);
-} else {
-  ADMITAD.Invoice.broker = 'adm';
-}
-ADMITAD.Invoice.category = '1';
-var orderedItem = [];
-${items
-  .map(
-    (item) => `orderedItem.push({Product:{productID:'${item.id}',category:'1',price:'${item.price}',priceCurrency:'${currency}'},orderQuantity:'${item.quantity}',additionalType:'sale'});`
-  )
-  .join('\n')}
-ADMITAD.Invoice.referencesOrder = ADMITAD.Invoice.referencesOrder || [];
-ADMITAD.Invoice.referencesOrder.push({orderNumber:'${orderNumber}',discountCode:'${discountCode}',orderedItem:orderedItem});
-// ADMITAD.Tracking.processPositions();
-        `,
-      }}
-    />
-  );
-}
 import { useMemo } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -35,6 +5,30 @@ import { useNavigate } from "react-router-dom";
 
 const BOOKING_RESULT_KEY = "mashrouk-flight-booking-result";
 const BOOKING_KEY = "mashrouk-flight-booking";
+
+// Admitad SALE tracking injection
+function AdmitadSaleScript({ orderNumber, discountCode, items, currency }: any) {
+  return (
+    <script
+      dangerouslySetInnerHTML={{
+        __html: `
+ADMITAD = window.ADMITAD || {};
+ADMITAD.Invoice = ADMITAD.Invoice || {};
+ADMITAD.Invoice.broker = 'na';
+ADMITAD.Invoice.category = '1';
+var orderedItem = [];
+${items
+  .map(
+    (item: any) => `orderedItem.push({Product:{productID:'${item.id}',category:'1',price:'${item.price}',priceCurrency:'${currency}'},orderQuantity:'${item.quantity}',additionalType:'sale'});`
+  )
+  .join('\n')}
+ADMITAD.Invoice.referencesOrder = ADMITAD.Invoice.referencesOrder || [];
+ADMITAD.Invoice.referencesOrder.push({orderNumber:'${orderNumber}',discountCode:'${discountCode}',orderedItem:orderedItem});
+        `,
+      }}
+    />
+  );
+}
 
 export default function FlightBookingConfirmation() {
   const navigate = useNavigate();

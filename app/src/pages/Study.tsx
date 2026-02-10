@@ -10,12 +10,16 @@ import { useCart } from "@/hooks/useCart";
 export default function Study() {
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const handleBook = (title?: string, price?: string, details?: string) => {
+  const handleBook = (payload?: { title?: string; price?: string; details?: string; image?: string | null }) => {
+    const title = payload?.title ?? "برنامج دراسة";
+    const price = payload?.price ?? "0";
     addItem({
-      id: `study-${title ?? Date.now()}`,
-      title: title ?? "برنامج دراسة",
-      price: Number((price ?? "0").replace(/[^\\d.]/g, "")) || 0,
-      details,
+      id: `study-${title}-${Date.now()}`,
+      title,
+      price: Number(price.replace(/[^\\d.]/g, "")) || 0,
+      details: payload?.details,
+      image: payload?.image,
+      type: "study",
     });
     navigate("/cart");
   };
@@ -74,6 +78,7 @@ export default function Study() {
                     src={offer.image}
                     alt={offer.title}
                     className="w-full h-full object-cover"
+                    fallbackQuery={`${offer.location} ${offer.title}`}
                   />
                   </div>
                 <div className="p-5">
@@ -89,7 +94,14 @@ export default function Study() {
                     <Button
                       variant="hero"
                       size="sm"
-                      onClick={() => handleBook(offer.title, offer.price, `${offer.location} • ${offer.duration}`)}
+                      onClick={() =>
+                        handleBook({
+                          title: offer.title,
+                          price: offer.price,
+                          details: `${offer.location} • ${offer.duration}`,
+                          image: offer.image,
+                        })
+                      }
                     >
                       احجز
                     </Button>

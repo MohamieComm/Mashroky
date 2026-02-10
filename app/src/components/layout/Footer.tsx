@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { useAdminSettings } from "@/data/adminStore";
 
 export function Footer() {
@@ -45,7 +46,13 @@ export function Footer() {
             {/* Brand */}
             <div>
               <div className="flex items-center gap-3 mb-6">
-                <img src="/logo.png" alt="مشروك" className="w-12 h-12 object-contain" />
+                <ImageWithFallback
+                  src="/logo.png"
+                  alt="مشروك"
+                  className="w-12 h-12 object-contain"
+                  fallbackSrc="/logo.png"
+                  fallbackQuery="Mashrouk logo"
+                />
                 <div>
                   <span className="text-2xl font-bold block">مشروك</span>
                   <span className="text-sm text-background/60">للسفر والسياحة</span>

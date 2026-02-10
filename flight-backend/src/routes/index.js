@@ -15,11 +15,13 @@ import carsRoutes from './cars.routes.js';
 import toursRoutes from './tours.routes.js';
 import transfersRoutes from './transfers.routes.js';
 import { getPublicConfig } from '../controllers/public-config.controller.js';
+import { pingAmadeus } from '../controllers/amadeus.controller.js';
 
 const router = express.Router();
 
 router.get('/health', (_req, res) => res.json({ ok: true }));
 router.get('/public-config', getPublicConfig);
+router.get('/amadeus/ping', pingAmadeus);
 router.use('/flights', flightsRoutes);
 router.use('/hotels', hotelsRoutes);
 router.use('/cars', carsRoutes);
