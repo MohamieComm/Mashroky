@@ -1,6 +1,9 @@
 import axios from 'axios';
 import { getApiBaseUrl, getApiKeyValue } from './api-keys.service.js';
 import { logAmadeusError } from '../utils/amadeus-logger.js';
+import { v4 as uuid } from 'uuid';
+import { insertBooking } from './supabase.service.js';
+import { createMockMoyasarPayment } from './moyasar.service.js';
 
 const tokenCache = {
   accessToken: null,
@@ -97,7 +100,9 @@ const buildUrl = (baseUrl, path) => {
   try {
     return new URL(path, baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`).toString();
   } catch {
-    return `${baseUrl.replace(/\/$/, '')}/${String(path || '').replace(/^\\//, '')}`;
+    const rawPath = String(path || '');
+    const cleanedPath = rawPath.startsWith('/') ? rawPath.slice(1) : rawPath;
+    return `${baseUrl.replace(/\/$/, '')}/${cleanedPath}`;
   }
 };
 
@@ -150,22 +155,31 @@ export async function getAccessToken() {
   params.set('client_id', config.clientId);
   params.set('client_secret', config.clientSecret);
 
-  const res = await axios.post(config.tokenUrl, params.toString(), {
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    timeout: 15000,
-  });
-  const data = res?.data || {};
-  const accessToken = data.access_token || '';
-  const tokenType = data.token_type || 'Bearer';
-  const expiresIn = Number(data.expires_in || 0);
-  const expiresAt = Date.now() + (expiresIn > 0 ? expiresIn * 1000 : 60 * 1000);
+  try {
+    const res = await axios.post(config.tokenUrl, params.toString(), {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      timeout: 15000,
+    });
+    const data = res?.data || {};
+    const accessToken = data.access_token || '';
+    const tokenType = data.token_type || 'Bearer';
+    const expiresIn = Number(data.expires_in || 0);
+    const expiresAt = Date.now() + (expiresIn > 0 ? expiresIn * 1000 : 60 * 1000);
 
-  tokenCache.accessToken = accessToken;
-  tokenCache.tokenType = tokenType;
-  tokenCache.expiresAt = expiresAt;
-  tokenCache.raw = data;
+    tokenCache.accessToken = accessToken;
+    tokenCache.tokenType = tokenType;
+    tokenCache.expiresAt = expiresAt;
+    tokenCache.raw = data;
 
-  return { accessToken, tokenType, expiresIn, raw: data };
+    return { accessToken, tokenType, expiresIn, raw: data };
+  } catch (error) {
+    const payload = error?.response?.data || error?.message || error;
+    await logAmadeusError('tours_token_error', { error: payload });
+    const err = new Error('tours_token_failed');
+    err.cause = payload;
+    err.status = error?.response?.status || 502;
+    throw err;
+  }
 }
 
 const buildAuthHeaders = async (config) => {
@@ -232,7 +246,26 @@ export async function getTourDetails(_params = {}) {
 }
 
 export async function bookTour(_params = {}) {
-  const err = new Error('tours_booking_not_implemented');
-  err.status = 501;
-  throw err;
+  const params = _params || {};
+  const { tourId, offerId, travelers, payment } = params;
+  if (!offerId && !tourId) {
+    const err = new Error('missing_offer_or_tour_id');
+    err.status = 400;
+    throw err;
+  }
+
+  const record = {
+    id: uuid(),
+    type: 'tour',
+    provider: 'tours_service',
+    provider_offer_id: offerId || null,
+    provider_tour_id: tourId || null,
+    status: 'created',
+    raw_request: params,
+  };
+
+  const saved = await insertBooking(record);
+  const response = { booking: saved };
+  if (payment && payment.amount) response.paymentInfo = createMockMoyasarPayment(payment);
+  return response;
 }
