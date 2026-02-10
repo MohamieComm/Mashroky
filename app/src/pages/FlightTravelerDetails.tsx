@@ -110,26 +110,26 @@ export default function FlightTravelerDetails() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (!traveler.firstName) errors.firstName = "����� ����� �����";
-    if (!traveler.lastName) errors.lastName = "��� ������� �����";
-    if (!traveler.dateOfBirth) errors.dateOfBirth = "����� ������� �����";
-    if (!traveler.gender) errors.gender = "����� �����";
-    if (!traveler.nationality) errors.nationality = "������� ������";
+    if (!traveler.firstName) errors.firstName = "الاسم الأول مطلوب";
+    if (!traveler.lastName) errors.lastName = "اسم العائلة مطلوب";
+    if (!traveler.dateOfBirth) errors.dateOfBirth = "تاريخ الميلاد مطلوب";
+    if (!traveler.gender) errors.gender = "الجنس مطلوب";
+    if (!traveler.nationality) errors.nationality = "الجنسية مطلوبة";
     else if (!nationalityRegex.test(traveler.nationality))
-      errors.nationality = "��� ������� ��� �� ���� 2-3 ����";
-    if (!traveler.passportNumber) errors.passportNumber = "��� ������ �����";
-    else if (!passportRegex.test(traveler.passportNumber)) errors.passportNumber = "��� ������ ��� ����";
-    if (!traveler.passportExpiry) errors.passportExpiry = "����� ������ ������ �����";
+      errors.nationality = "رمز الجنسية يجب أن يكون 2-3 أحرف";
+    if (!traveler.passportNumber) errors.passportNumber = "رقم الجواز مطلوب";
+    else if (!passportRegex.test(traveler.passportNumber)) errors.passportNumber = "رقم الجواز غير صالح";
+    if (!traveler.passportExpiry) errors.passportExpiry = "تاريخ انتهاء الجواز مطلوب";
     else {
       const expiry = new Date(traveler.passportExpiry);
-      if (Number.isNaN(expiry.getTime())) errors.passportExpiry = "����� ������ ������ ��� ����";
-      else if (expiry < today) errors.passportExpiry = "����� ������ ������ ��� �� ���� ���������";
+      if (Number.isNaN(expiry.getTime())) errors.passportExpiry = "تاريخ انتهاء الجواز غير صالح";
+      else if (expiry < today) errors.passportExpiry = "تاريخ انتهاء الجواز يجب أن يكون في المستقبل";
     }
-    if (!traveler.email) errors.email = "������ ���������� �����";
-    else if (!emailRegex.test(traveler.email)) errors.email = "���� ������ ��� �����";
-    if (!traveler.phoneCountryCode) errors.phoneCountryCode = "��� ������ �����";
-    if (!traveler.phoneNumber) errors.phoneNumber = "��� ������ �����";
-    else if (!/^[0-9]{5,15}$/.test(traveler.phoneNumber)) errors.phoneNumber = "��� ������ ��� ����";
+    if (!traveler.email) errors.email = "البريد الإلكتروني مطلوب";
+    else if (!emailRegex.test(traveler.email)) errors.email = "صيغة البريد غير صالحة";
+    if (!traveler.phoneCountryCode) errors.phoneCountryCode = "رمز الدولة مطلوب";
+    if (!traveler.phoneNumber) errors.phoneNumber = "رقم الهاتف مطلوب";
+    else if (!/^[0-9]{5,15}$/.test(traveler.phoneNumber)) errors.phoneNumber = "رقم الهاتف غير صالح";
 
     return errors;
   };
@@ -173,7 +173,7 @@ export default function FlightTravelerDetails() {
   const handleSubmit = async () => {
     if (!checkout) return;
     if (!validateAll()) {
-      setError("���� ����� ������ ��������� ��� ��������.");
+      setError("يرجى تصحيح الأخطاء المدخلة قبل المتابعة.");
       return;
     }
     setProcessing(true);
@@ -207,13 +207,13 @@ export default function FlightTravelerDetails() {
       localStorage.setItem(BOOKING_STATUS_KEY, "pending");
 
       const orderNumber = `ORD-${Date.now()}`;
-      const orderSnapshot = { orderNumber, currency, total, items: [{ id: orderNumber, title: checkout.summary?.outbound || "��� �����", price: total, quantity: 1 }] };
+      const orderSnapshot = { orderNumber, currency, total, items: [{ id: orderNumber, title: checkout.summary?.outbound || "حجز طيران", price: total, quantity: 1 }] };
       localStorage.setItem(ORDER_SNAPSHOT_KEY, JSON.stringify(orderSnapshot));
 
       const paymentRes = await fetch(`${flightApiBaseUrl.replace(/\/$/, "")}/api/payments/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: total, currency, description: "��� �����", returnUrl: window.location.origin }),
+        body: JSON.stringify({ amount: total, currency, description: "حجز طيران", returnUrl: window.location.origin }),
       });
       if (!paymentRes.ok) throw new Error("payment_failed");
       const paymentData = await paymentRes.json();
@@ -224,7 +224,7 @@ export default function FlightTravelerDetails() {
       throw new Error("missing_payment_url");
     } catch (err) {
       const code = err instanceof Error ? err.message : "unknown_error";
-      setError(code === "flight_price_failed" ? "���� ����� ������. ���� ��� ����." : "���� ��� �����. ���� �� �������� �� ��� ��������.");
+      setError(code === "flight_price_failed" ? "فشل تسعير الرحلة. يرجى حاول لاحقاً." : "حدث خطأ غير متوقع. يرجى إعادة المحاولة أو تواصل مع الدعم.");
     } finally {
       setProcessing(false);
     }
