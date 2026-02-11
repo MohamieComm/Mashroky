@@ -1,4 +1,4 @@
-﻿export const stats = [
+export const stats = [
   { label: "رحلات تم حجزها", value: "10K+" },
   { label: "وجهات عالمية", value: "500+" },
   { label: "دعم على مدار الساعة", value: "24/7" },

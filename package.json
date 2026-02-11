@@ -1,0 +1,7 @@
+{
+  "name": "mashrok-workspace",
+  "private": true,
+  "scripts": {
+    "watchdog": "node tools/mashrok-encoding-watchdog.js"
+  }
+}
