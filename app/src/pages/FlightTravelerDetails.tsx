@@ -110,26 +110,25 @@ export default function FlightTravelerDetails() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (!traveler.firstName) errors.firstName = "????? ????? ?????";
-    if (!traveler.lastName) errors.lastName = "??? ??????? ?????";
-    if (!traveler.dateOfBirth) errors.dateOfBirth = "????? ??????? ?????";
-    if (!traveler.gender) errors.gender = "????? ?????";
-    if (!traveler.nationality) errors.nationality = "??????? ??????";
-    else if (!nationalityRegex.test(traveler.nationality))
-    if (!traveler.nationality) errors.nationality = "??????? ??????";
-    if (!traveler.passportNumber) errors.passportNumber = "??? ?????? ?????";
-    else if (!passportRegex.test(traveler.passportNumber)) errors.passportNumber = "??? ?????? ??? ????";
-    if (!traveler.passportExpiry) errors.passportExpiry = "????? ?????? ?????? ?????";
+    if (!traveler.firstName) errors.firstName = "الاسم الأول مطلوب";
+    if (!traveler.lastName) errors.lastName = "اسم العائلة مطلوب";
+    if (!traveler.dateOfBirth) errors.dateOfBirth = "تاريخ الميلاد مطلوب";
+    if (!traveler.gender) errors.gender = "الجنس مطلوب";
+    if (!traveler.nationality) errors.nationality = "الجنسية مطلوبة";
+    else if (!nationalityRegex.test(traveler.nationality)) errors.nationality = "الجنسية غير صحيحة";
+    if (!traveler.passportNumber) errors.passportNumber = "رقم الجواز مطلوب";
+    else if (!passportRegex.test(traveler.passportNumber)) errors.passportNumber = "رقم الجواز غير صحيح";
+    if (!traveler.passportExpiry) errors.passportExpiry = "تاريخ انتهاء الجواز مطلوب";
     else {
       const expiry = new Date(traveler.passportExpiry);
-      if (Number.isNaN(expiry.getTime())) errors.passportExpiry = "????? ?????? ?????? ??? ????";
-      else if (expiry < today) errors.passportExpiry = "??? ?? ???? ????? ???????? ????????";
+      if (Number.isNaN(expiry.getTime())) errors.passportExpiry = "تاريخ انتهاء الجواز غير صحيح";
+      else if (expiry < today) errors.passportExpiry = "انتهاء الجواز يجب أن يكون بعد تاريخ اليوم";
     }
-    if (!traveler.email) errors.email = "?????? ?????????? ?????";
-    else if (!emailRegex.test(traveler.email)) errors.email = "?????? ?????????? ??? ????";
-    if (!traveler.phoneCountryCode) errors.phoneCountryCode = "??? ?????? ?????";
-    if (!traveler.phoneNumber) errors.phoneNumber = "??? ?????? ?????";
-    else if (!/^[0-9]{5,15}$/.test(traveler.phoneNumber)) errors.phoneNumber = "??? ?????? ??? ????";
+    if (!traveler.email) errors.email = "البريد الإلكتروني مطلوب";
+    else if (!emailRegex.test(traveler.email)) errors.email = "البريد الإلكتروني غير صحيح";
+    if (!traveler.phoneCountryCode) errors.phoneCountryCode = "رمز الدولة مطلوب";
+    if (!traveler.phoneNumber) errors.phoneNumber = "رقم الهاتف مطلوب";
+    else if (!/^[0-9]{5,15}$/.test(traveler.phoneNumber)) errors.phoneNumber = "رقم الهاتف غير صحيح";
 
     return errors;
   };
@@ -173,7 +172,7 @@ export default function FlightTravelerDetails() {
   const handleSubmit = async () => {
     if (!checkout) return;
     if (!validateAll()) {
-      setError("???? ????? ???? ???????? ???????? ???? ????.");
+      setError("يرجى تعبئة جميع الحقول المطلوبة بشكل صحيح.");
       return;
     }
     setProcessing(true);
@@ -207,13 +206,26 @@ export default function FlightTravelerDetails() {
       localStorage.setItem(BOOKING_STATUS_KEY, "pending");
 
       const orderNumber = `ORD-${Date.now()}`;
-              {checkout.summary?.outbound && <div>???? ??????: {checkout.summary.outbound}</div>}
+      const orderSnapshot = {
+        orderNumber,
+        currency,
+        total,
+        items: [
+          {
+            id: `flight-${orderNumber}`,
+            title: checkout.summary?.outbound ? `رحلة ${checkout.summary.outbound}` : "حجز رحلة طيران",
+            price: total,
+            quantity: 1,
+          },
+        ],
+        createdAt: new Date().toISOString(),
+      };
       localStorage.setItem(ORDER_SNAPSHOT_KEY, JSON.stringify(orderSnapshot));
 
       const paymentRes = await fetch(`${flightApiBaseUrl.replace(/\/$/, "")}/api/payments/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: total, currency, description: "??? ???? ?????", returnUrl: window.location.origin }),
+        body: JSON.stringify({ amount: total, currency, description: "حجز رحلة طيران", returnUrl: window.location.origin }),
       });
       if (!paymentRes.ok) throw new Error("payment_failed");
       const paymentData = await paymentRes.json();
@@ -224,7 +236,11 @@ export default function FlightTravelerDetails() {
       throw new Error("missing_payment_url");
     } catch (err) {
       const code = err instanceof Error ? err.message : "unknown_error";
-      setError(code === "flight_price_failed" ? "???? ????? ??????. ???? ???????? ??????." : "???? ????? ?????. ???? ???????? ??? ???? ?? ??????? ?? ?????.");
+      setError(
+        code === "flight_price_failed"
+          ? "تعذر تسعير الرحلات. يرجى المحاولة لاحقًا."
+          : "تعذر بدء عملية الدفع. يرجى المحاولة مرة أخرى أو التواصل مع الدعم."
+      );
     } finally {
       setProcessing(false);
     }
@@ -235,9 +251,9 @@ export default function FlightTravelerDetails() {
       <Layout>
         <div className="min-h-[60vh] flex items-center justify-center px-4">
           <div className="bg-card rounded-2xl p-8 shadow-card text-center max-w-lg">
-            <h2 className="text-xl font-bold mb-2">?? ???? ?????? ??? ??????</h2>
-            <p className="text-muted-foreground mb-4">???? ?????? ????? ??????? ??????? ????? ??????? ?????.</p>
-            <Button variant="hero" onClick={() => navigate("/trips")}>?????? ???????</Button>
+            <h2 className="text-xl font-bold mb-2">لا توجد بيانات للحجز</h2>
+            <p className="text-muted-foreground mb-4">يرجى اختيار رحلة أولًا ثم المتابعة للحجز.</p>
+            <Button variant="hero" onClick={() => navigate("/trips")}>عودة للرحلات</Button>
           </div>
         </div>
       </Layout>
@@ -248,9 +264,9 @@ export default function FlightTravelerDetails() {
     <Layout>
       <section className="hero-gradient py-16">
         <div className="container mx-auto px-4 text-center">
-          <span className="text-primary-foreground/80">???? ?????? ??????</span>
-          <h1 className="text-3xl md:text-4xl font-bold text-primary-foreground mt-3">??????? ?????????</h1>
-          <p className="text-primary-foreground/80 mt-3">???? ????? ???????? ??? ?? ?? ???? ????? ?????? ?????.</p>
+          <span className="text-primary-foreground/80">بيانات المسافرين</span>
+          <h1 className="text-3xl md:text-4xl font-bold text-primary-foreground mt-3">أكمل بيانات المسافرين</h1>
+          <p className="text-primary-foreground/80 mt-3">يرجى إدخال بيانات المسافرين كما هي في جواز السفر.</p>
         </div>
       </section>
 
@@ -259,20 +275,20 @@ export default function FlightTravelerDetails() {
           <div className="space-y-6">
             {travelers.map((traveler, index) => (
               <div key={index} className="bg-card rounded-2xl p-6 shadow-card">
-                <h3 className="text-lg font-bold mb-4">?????? ??????? {index + 1}</h3>
+                <h3 className="text-lg font-bold mb-4">بيانات المسافر {index + 1}</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <Label>????? ?????</Label>
-                    <Input value={traveler.firstName} onChange={(e) => updateTraveler(index, { firstName: e.target.value })} placeholder="First Name" />
+                    <Label>الاسم الأول</Label>
+                    <Input value={traveler.firstName} onChange={(e) => updateTraveler(index, { firstName: e.target.value })} placeholder="محمد" />
                     {fieldErrors[index]?.firstName && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.firstName}</p>}
                   </div>
                   <div>
-                    <Label>??? ???????</Label>
-                    <Input value={traveler.lastName} onChange={(e) => updateTraveler(index, { lastName: e.target.value })} placeholder="Last Name" />
+                    <Label>اسم العائلة</Label>
+                    <Input value={traveler.lastName} onChange={(e) => updateTraveler(index, { lastName: e.target.value })} placeholder="العتيبي" />
                     {fieldErrors[index]?.lastName && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.lastName}</p>}
                   </div>
                   <div>
-                    <Label>????? ???????</Label>
+                    <Label>تاريخ الميلاد</Label>
                     <DatePickerField
                       value={traveler.dateOfBirth}
                       onChange={(nextValue) => updateTraveler(index, { dateOfBirth: nextValue })}
@@ -281,22 +297,22 @@ export default function FlightTravelerDetails() {
                     {fieldErrors[index]?.dateOfBirth && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.dateOfBirth}</p>}
                   </div>
                   <div>
-                    <Label>?????</Label>
+                    <Label>الجنس</Label>
                     <select className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm" value={traveler.gender} onChange={(e) => updateTraveler(index, { gender: e.target.value as TravelerForm["gender"] })}>
-                      <option value="MALE">???</option>
-                      <option value="FEMALE">????</option>
+                      <option value="MALE">ذكر</option>
+                      <option value="FEMALE">أنثى</option>
                     </select>
                     {fieldErrors[index]?.gender && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.gender}</p>}
                   </div>
 
                   <div>
-                    <Label>??? ??????</Label>
-                    <Input value={traveler.passportNumber} onChange={(e) => updateTraveler(index, { passportNumber: e.target.value })} placeholder="Passport Number" />
+                    <Label>رقم الجواز</Label>
+                    <Input value={traveler.passportNumber} onChange={(e) => updateTraveler(index, { passportNumber: e.target.value })} placeholder="رقم الجواز" />
                     {fieldErrors[index]?.passportNumber && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.passportNumber}</p>}
                   </div>
 
                   <div>
-                    <Label>????? ?????? ??????</Label>
+                    <Label>تاريخ انتهاء الجواز</Label>
                     <DatePickerField
                       value={traveler.passportExpiry}
                       onChange={(nextValue) => updateTraveler(index, { passportExpiry: nextValue })}
@@ -306,25 +322,25 @@ export default function FlightTravelerDetails() {
                   </div>
 
                   <div>
-                    <Label>??????? (??? ISO ??? SA)</Label>
+                    <Label>الجنسية (كود ISO مثل SA)</Label>
                     <Input value={traveler.nationality} onChange={(e) => updateTraveler(index, { nationality: e.target.value.toUpperCase() })} placeholder="SA" />
                     {fieldErrors[index]?.nationality && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.nationality}</p>}
                   </div>
 
                   <div>
-                    <Label>?????? ??????????</Label>
+                    <Label>البريد الإلكتروني</Label>
                     <Input type="email" value={traveler.email} onChange={(e) => updateTraveler(index, { email: e.target.value })} placeholder="name@email.com" />
                     {fieldErrors[index]?.email && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.email}</p>}
                   </div>
 
                   <div>
-                    <Label>??? ??????</Label>
+                    <Label>رمز الدولة</Label>
                     <Input value={traveler.phoneCountryCode} onChange={(e) => updateTraveler(index, { phoneCountryCode: e.target.value })} placeholder="966" />
                     {fieldErrors[index]?.phoneCountryCode && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.phoneCountryCode}</p>}
                   </div>
 
                   <div>
-                    <Label>??? ??????</Label>
+                    <Label>رقم الهاتف</Label>
                     <Input value={traveler.phoneNumber} onChange={(e) => updateTraveler(index, { phoneNumber: e.target.value })} placeholder="5XXXXXXXX" />
                     {fieldErrors[index]?.phoneNumber && <p className="text-xs text-destructive mt-1">{fieldErrors[index]?.phoneNumber}</p>}
                   </div>
@@ -334,18 +350,18 @@ export default function FlightTravelerDetails() {
           </div>
 
           <div className="bg-card rounded-2xl p-6 shadow-card h-fit">
-            <h3 className="text-xl font-bold mb-4">???? ?????</h3>
+            <h3 className="text-xl font-bold mb-4">ملخص الحجز</h3>
             <div className="space-y-3 text-sm text-muted-foreground">
-              <div>??? ??????: {checkout.tripType === "roundtrip" ? "???? ?????" : "???? ???"}</div>
-              <div>??? ?????????: {checkout.passengers}</div>
-              {checkout.summary?.outbound && <div>???? ??????: {checkout.summary.outbound}</div>}
-              {checkout.summary?.inbound && <div>???? ??????: {checkout.summary.inbound}</div>}
+              <div>نوع الرحلة: {checkout.tripType === "roundtrip" ? "ذهاب وعودة" : "ذهاب فقط"}</div>
+              <div>عدد المسافرين: {checkout.passengers}</div>
+              {checkout.summary?.outbound && <div>رحلة الذهاب: {checkout.summary.outbound}</div>}
+              {checkout.summary?.inbound && <div>رحلة العودة: {checkout.summary.inbound}</div>}
             </div>
             {error && <p className="text-sm text-destructive mt-4">{error}</p>}
             <Button variant="hero" className="w-full mt-6" disabled={!canContinue || processing} onClick={handleSubmit}>
-              {processing ? "???? ????????..." : "?????? ??? ?????"}
+              {processing ? "جارٍ المتابعة..." : "المتابعة للدفع"}
             </Button>
-            <Button variant="ghost" className="w-full mt-3" onClick={() => navigate("/trips")}>?????? ???????</Button>
+            <Button variant="ghost" className="w-full mt-3" onClick={() => navigate("/trips")}>عودة للرحلات</Button>
           </div>
         </div>
       </section>
