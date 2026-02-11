@@ -926,16 +926,34 @@ const fixMojibake = (value: string) => {
   return best;
 };
 
+const stripInvalidChars = (value: string) =>
+  value.replace(/\uFFFD+/g, "").replace(/[\x00-\x1F\x7F]/g, "").trim();
+
+const sanitizeText = (value: string, fallback = "") => {
+  const fixed = fixMojibake(value);
+  const cleaned = stripInvalidChars(fixed);
+  return cleaned || fallback;
+};
+
+const containsReplacement = (value: unknown): boolean => {
+  if (typeof value === "string") return value.includes("\uFFFD");
+  if (Array.isArray(value)) return value.some(containsReplacement);
+  if (value && typeof value === "object") {
+    return Object.values(value as Record<string, unknown>).some(containsReplacement);
+  }
+  return false;
+};
+
 const asString = (value: unknown, fallback = "") => {
   if (value === null || value === undefined) return fallback;
-  return fixMojibake(String(value));
+  return sanitizeText(String(value), fallback);
 };
 const asNumber = (value: unknown, fallback = 0) => {
   const num = Number(value);
   return Number.isFinite(num) ? num : fallback;
 };
 const asStringArray = (value: unknown) =>
-  Array.isArray(value) ? value.map((item) => fixMojibake(String(item))) : [];
+  Array.isArray(value) ? value.map((item) => sanitizeText(String(item))) : [];
 const asArray = <T,>(value: unknown) => (Array.isArray(value) ? (value as T[]) : []);
 
 type CollectionConfig<T> = {
@@ -1279,6 +1297,7 @@ const fetchAdminCollection = async <K extends CollectionKey>(
     );
     if (error) return fallback;
     const rows = (data || []) as DbRow[];
+    if (rows.length && rows.some(containsReplacement)) return fallback;
     const mapped = rows.map(config.fromDb);
     return emptyOrFallback(mapped, fallback);
   } catch {

@@ -11,6 +11,7 @@ export function safeText(value?: unknown, fallback = "غير متوفر") {
   const s = String(value);
   // If contains many replacement chars, return fallback
   const replacementCount = (s.match(/\uFFFD/g) || []).length;
+  if (replacementCount > 2) return fallback;
   // Remove any lone replacement chars and control characters
   const cleaned = s.replace(/\uFFFD+/g, "").replace(/[\x00-\x1F\x7F]/g, "").trim();
   return cleaned || fallback;
