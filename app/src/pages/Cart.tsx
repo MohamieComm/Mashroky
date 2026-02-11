@@ -75,7 +75,7 @@ export default function Cart() {
           amount: finalTotal,
           currency: "SAR",
           description: "حجز عبر السلة",
-          returnUrl: window.location.origin,
+          returnUrl: `${window.location.origin}/payments`,
         }),
       });
       if (!res.ok) {

@@ -230,7 +230,7 @@ export default function Payments() {
           }),
         });
         setTimeout(() => {
-          navigate("/flight/confirmation");
+          navigate("/booking/confirmation");
         }, 1500);
       } catch (err) {
         const code = err instanceof Error ? err.message : "flight_booking_failed";
@@ -240,6 +240,254 @@ export default function Payments() {
             code === "flight_booking_failed"
               ? "تعذر إصدار التذاكر بعد الدفع. يرجى التواصل مع الدعم."
               : "حدث خطأ غير متوقع أثناء إصدار التذاكر.",
+        });
+      }
+    };
+
+    runBooking();
+  }, [paymentStatus, flightApiBaseUrl]);
+
+  useEffect(() => {
+    if (paymentStatus !== "success" || typeof window === "undefined") return;
+    const raw = localStorage.getItem(HOTEL_BOOKING_KEY);
+    if (!raw) return;
+    const status = localStorage.getItem(HOTEL_BOOKING_STATUS_KEY);
+    if (status === "booked") {
+      const cached = localStorage.getItem(HOTEL_BOOKING_RESULT_KEY);
+      setHotelBookingState({
+        status: "success",
+        result: cached ? JSON.parse(cached) : null,
+      });
+      return;
+    }
+
+    const payload = JSON.parse(raw);
+    const offerId = payload?.offer?.id || null;
+    const hotelId = payload?.hotel?.id || null;
+    if (!offerId && !hotelId) return;
+
+    const runBooking = async () => {
+      setHotelBookingState({ status: "processing" });
+      try {
+        const res = await fetch(`${flightApiBaseUrl.replace(/\/$/, "")}/api/hotels/book`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            offerId,
+            hotelId,
+            guests: payload?.guest || null,
+            payment: {
+              amount: Number(payload?.offer?.price?.total || payload?.price || 0),
+              currency: payload?.offer?.price?.currency || payload?.currency || "SAR",
+            },
+          }),
+        });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body?.error || "hotel_booking_failed");
+        }
+        const result = await res.json();
+        localStorage.setItem(HOTEL_BOOKING_STATUS_KEY, "booked");
+        localStorage.setItem(HOTEL_BOOKING_RESULT_KEY, JSON.stringify(result));
+        setHotelBookingState({ status: "success", result });
+        setTimeout(() => {
+          navigate("/hotels/confirmation");
+        }, 1200);
+      } catch (err) {
+        const code = err instanceof Error ? err.message : "hotel_booking_failed";
+        setHotelBookingState({
+          status: "error",
+          message:
+            code === "hotel_booking_failed"
+              ? "تعذر تأكيد حجز الفندق بعد الدفع. يرجى التواصل مع الدعم."
+              : "حدث خطأ غير متوقع أثناء تأكيد حجز الفندق.",
+        });
+      }
+    };
+
+    runBooking();
+  }, [paymentStatus, flightApiBaseUrl]);
+
+  useEffect(() => {
+    if (paymentStatus !== "success" || typeof window === "undefined") return;
+    const raw = localStorage.getItem(CAR_BOOKING_KEY);
+    if (!raw) return;
+    const status = localStorage.getItem(CAR_BOOKING_STATUS_KEY);
+    if (status === "booked") {
+      const cached = localStorage.getItem(CAR_BOOKING_RESULT_KEY);
+      setCarBookingState({
+        status: "success",
+        result: cached ? JSON.parse(cached) : null,
+      });
+      return;
+    }
+
+    const payload = JSON.parse(raw);
+    const carId = payload?.car?.id || null;
+    if (!carId) return;
+
+    const runBooking = async () => {
+      setCarBookingState({ status: "processing" });
+      try {
+        const res = await fetch(`${flightApiBaseUrl.replace(/\/$/, "")}/api/cars/book`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            carId,
+            renter: payload?.traveler || null,
+            payment: {
+              amount: Number(payload?.car?.priceTotal || payload?.price || 0),
+              currency: payload?.car?.currency || payload?.currency || "SAR",
+            },
+            pickupDate: payload?.pickupDate || null,
+            dropoffDate: payload?.dropoffDate || null,
+            notes: payload?.notes || null,
+          }),
+        });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body?.error || "car_booking_failed");
+        }
+        const result = await res.json();
+        localStorage.setItem(CAR_BOOKING_STATUS_KEY, "booked");
+        localStorage.setItem(CAR_BOOKING_RESULT_KEY, JSON.stringify(result));
+        setCarBookingState({ status: "success", result });
+        setTimeout(() => {
+          navigate("/cars/confirmation");
+        }, 1200);
+      } catch (err) {
+        const code = err instanceof Error ? err.message : "car_booking_failed";
+        setCarBookingState({
+          status: "error",
+          message:
+            code === "car_booking_failed"
+              ? "تعذر تأكيد حجز السيارة بعد الدفع. يرجى التواصل مع الدعم."
+              : "حدث خطأ غير متوقع أثناء تأكيد حجز السيارة.",
+        });
+      }
+    };
+
+    runBooking();
+  }, [paymentStatus, flightApiBaseUrl]);
+
+  useEffect(() => {
+    if (paymentStatus !== "success" || typeof window === "undefined") return;
+    const raw = localStorage.getItem(TOUR_BOOKING_KEY);
+    if (!raw) return;
+    const status = localStorage.getItem(TOUR_BOOKING_STATUS_KEY);
+    if (status === "booked") {
+      const cached = localStorage.getItem(TOUR_BOOKING_RESULT_KEY);
+      setTourBookingState({
+        status: "success",
+        result: cached ? JSON.parse(cached) : null,
+      });
+      return;
+    }
+
+    const payload = JSON.parse(raw);
+    const tourId = payload?.tour?.id || null;
+    if (!tourId) return;
+
+    const runBooking = async () => {
+      setTourBookingState({ status: "processing" });
+      try {
+        const res = await fetch(`${flightApiBaseUrl.replace(/\/$/, "")}/api/tours/book`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tourId,
+            travelers: payload?.traveler || null,
+            payment: {
+              amount: Number(payload?.tour?.priceTotal || payload?.price || 0),
+              currency: payload?.tour?.currency || payload?.currency || "SAR",
+            },
+            date: payload?.date || null,
+            people: payload?.people || null,
+            notes: payload?.notes || null,
+          }),
+        });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body?.error || "tour_booking_failed");
+        }
+        const result = await res.json();
+        localStorage.setItem(TOUR_BOOKING_STATUS_KEY, "booked");
+        localStorage.setItem(TOUR_BOOKING_RESULT_KEY, JSON.stringify(result));
+        setTourBookingState({ status: "success", result });
+        setTimeout(() => {
+          navigate("/tours/confirmation");
+        }, 1200);
+      } catch (err) {
+        const code = err instanceof Error ? err.message : "tour_booking_failed";
+        setTourBookingState({
+          status: "error",
+          message:
+            code === "tour_booking_failed"
+              ? "تعذر تأكيد حجز الجولة بعد الدفع. يرجى التواصل مع الدعم."
+              : "حدث خطأ غير متوقع أثناء تأكيد حجز الجولة.",
+        });
+      }
+    };
+
+    runBooking();
+  }, [paymentStatus, flightApiBaseUrl]);
+
+  useEffect(() => {
+    if (paymentStatus !== "success" || typeof window === "undefined") return;
+    const raw = localStorage.getItem(TRANSFER_BOOKING_KEY);
+    if (!raw) return;
+    const status = localStorage.getItem(TRANSFER_BOOKING_STATUS_KEY);
+    if (status === "booked") {
+      const cached = localStorage.getItem(TRANSFER_BOOKING_RESULT_KEY);
+      setTransferBookingState({
+        status: "success",
+        result: cached ? JSON.parse(cached) : null,
+      });
+      return;
+    }
+
+    const payload = JSON.parse(raw);
+    const transferId = payload?.transfer?.id || null;
+    if (!transferId) return;
+
+    const runBooking = async () => {
+      setTransferBookingState({ status: "processing" });
+      try {
+        const res = await fetch(`${flightApiBaseUrl.replace(/\/$/, "")}/api/transfers/book`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            transferId,
+            passenger: payload?.traveler || null,
+            payment: {
+              amount: Number(payload?.transfer?.priceTotal || payload?.price || 0),
+              currency: payload?.transfer?.currency || payload?.currency || "SAR",
+            },
+            pickupAddress: payload?.pickupAddress || null,
+            dropoffAddress: payload?.dropoffAddress || null,
+            date: payload?.date || null,
+            notes: payload?.notes || null,
+          }),
+        });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body?.error || "transfer_booking_failed");
+        }
+        const result = await res.json();
+        localStorage.setItem(TRANSFER_BOOKING_STATUS_KEY, "booked");
+        localStorage.setItem(TRANSFER_BOOKING_RESULT_KEY, JSON.stringify(result));
+        setTransferBookingState({ status: "success", result });
+        setTimeout(() => {
+          navigate("/transfers/confirmation");
+        }, 1200);
+      } catch (err) {
+        const code = err instanceof Error ? err.message : "transfer_booking_failed";
+        setTransferBookingState({
+          status: "error",
+          message:
+            code === "transfer_booking_failed"
+              ? "تعذر تأكيد حجز النقل بعد الدفع. يرجى التواصل مع الدعم."
+              : "حدث خطأ غير متوقع أثناء تأكيد حجز النقل.",
         });
       }
     };
@@ -354,7 +602,83 @@ export default function Payments() {
                       <div>رقم الطلب: {result?.providerOrderId || "غير متوفر"}</div>
                     </div>
                   ))}
-                  <Button variant="hero" className="mt-4" onClick={() => navigate("/flight/confirmation")}>
+                  <Button variant="hero" className="mt-4" onClick={() => navigate("/booking/confirmation")}>
+                    عرض صفحة التأكيد
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+          {hotelBookingState.status !== "idle" && (
+            <div className="mt-6 bg-card rounded-3xl p-8 shadow-card">
+              <h3 className="text-xl font-bold mb-3">حالة حجز الفندق</h3>
+              {hotelBookingState.status === "processing" && (
+                <p className="text-muted-foreground">جاري تأكيد الحجز مع مزود الفنادق...</p>
+              )}
+              {hotelBookingState.status === "error" && (
+                <p className="text-destructive">{hotelBookingState.message}</p>
+              )}
+              {hotelBookingState.status === "success" && (
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>تم تأكيد حجز الفندق بنجاح.</p>
+                  <Button variant="hero" className="mt-4" onClick={() => navigate("/hotels/confirmation")}>
+                    عرض صفحة التأكيد
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+          {carBookingState.status !== "idle" && (
+            <div className="mt-6 bg-card rounded-3xl p-8 shadow-card">
+              <h3 className="text-xl font-bold mb-3">حالة حجز السيارة</h3>
+              {carBookingState.status === "processing" && (
+                <p className="text-muted-foreground">جاري تأكيد حجز السيارة...</p>
+              )}
+              {carBookingState.status === "error" && (
+                <p className="text-destructive">{carBookingState.message}</p>
+              )}
+              {carBookingState.status === "success" && (
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>تم تأكيد حجز السيارة بنجاح.</p>
+                  <Button variant="hero" className="mt-4" onClick={() => navigate("/cars/confirmation")}>
+                    عرض صفحة التأكيد
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+          {tourBookingState.status !== "idle" && (
+            <div className="mt-6 bg-card rounded-3xl p-8 shadow-card">
+              <h3 className="text-xl font-bold mb-3">حالة حجز الجولة</h3>
+              {tourBookingState.status === "processing" && (
+                <p className="text-muted-foreground">جاري تأكيد حجز الجولة...</p>
+              )}
+              {tourBookingState.status === "error" && (
+                <p className="text-destructive">{tourBookingState.message}</p>
+              )}
+              {tourBookingState.status === "success" && (
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>تم تأكيد حجز الجولة بنجاح.</p>
+                  <Button variant="hero" className="mt-4" onClick={() => navigate("/tours/confirmation")}>
+                    عرض صفحة التأكيد
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+          {transferBookingState.status !== "idle" && (
+            <div className="mt-6 bg-card rounded-3xl p-8 shadow-card">
+              <h3 className="text-xl font-bold mb-3">حالة حجز النقل</h3>
+              {transferBookingState.status === "processing" && (
+                <p className="text-muted-foreground">جاري تأكيد حجز النقل...</p>
+              )}
+              {transferBookingState.status === "error" && (
+                <p className="text-destructive">{transferBookingState.message}</p>
+              )}
+              {transferBookingState.status === "success" && (
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>تم تأكيد حجز النقل بنجاح.</p>
+                  <Button variant="hero" className="mt-4" onClick={() => navigate("/transfers/confirmation")}>
                     عرض صفحة التأكيد
                   </Button>
                 </div>

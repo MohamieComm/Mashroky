@@ -1,10 +1,12 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { safeText } from "@/lib/utils";
 
 const CAR_BOOKING_KEY = "mashrouk-car-booking";
+const CAR_BOOKING_STATUS_KEY = "mashrouk-car-booking-status";
+const CAR_BOOKING_RESULT_KEY = "mashrouk-car-booking-result";
 
 export default function CarConfirmation() {
   const navigate = useNavigate();
@@ -15,6 +17,13 @@ export default function CarConfirmation() {
     } catch {
       return null;
     }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.removeItem(CAR_BOOKING_KEY);
+    localStorage.removeItem(CAR_BOOKING_STATUS_KEY);
+    localStorage.removeItem(CAR_BOOKING_RESULT_KEY);
   }, []);
 
   return (

@@ -1,9 +1,11 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 const TRANSFER_BOOKING_KEY = "mashrouk-transfer-booking";
+const TRANSFER_BOOKING_STATUS_KEY = "mashrouk-transfer-booking-status";
+const TRANSFER_BOOKING_RESULT_KEY = "mashrouk-transfer-booking-result";
 
 export default function TransferConfirmation() {
   const navigate = useNavigate();
@@ -14,6 +16,13 @@ export default function TransferConfirmation() {
     } catch {
       return null;
     }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.removeItem(TRANSFER_BOOKING_KEY);
+    localStorage.removeItem(TRANSFER_BOOKING_STATUS_KEY);
+    localStorage.removeItem(TRANSFER_BOOKING_RESULT_KEY);
   }, []);
 
   return (

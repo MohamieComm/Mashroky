@@ -72,12 +72,12 @@ const resolveConfig = async () => {
 
   const authType =
     String(process.env.CAR_RENTAL_AUTH_TYPE || '').trim().toLowerCase() ||
-    (await getApiKeyValue('car_rental', 'auth_type')).toLowerCase() ||
+    String(await getApiKeyValue('car_rental', 'auth_type') || '').trim().toLowerCase() ||
     (clientId && clientSecret ? 'oauth2' : apiKey ? 'apikey' : 'none');
 
   const searchMethod =
     String(process.env.CAR_RENTAL_SEARCH_METHOD || '').trim().toUpperCase() ||
-    (await getApiKeyValue('car_rental', 'search_method')).toUpperCase() ||
+    String(await getApiKeyValue('car_rental', 'search_method') || '').trim().toUpperCase() ||
     'GET';
 
   return {
@@ -181,23 +181,6 @@ export async function getAccessToken() {
     err.status = error?.response?.status || 502;
     throw err;
   }
-
-  const res = await axios.post(config.tokenUrl, params.toString(), {
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    timeout: 15000,
-  });
-  const data = res?.data || {};
-  const accessToken = data.access_token || '';
-  const tokenType = data.token_type || 'Bearer';
-  const expiresIn = Number(data.expires_in || 0);
-  const expiresAt = Date.now() + (expiresIn > 0 ? expiresIn * 1000 : 60 * 1000);
-
-  tokenCache.accessToken = accessToken;
-  tokenCache.tokenType = tokenType;
-  tokenCache.expiresAt = expiresAt;
-  tokenCache.raw = data;
-
-  return { accessToken, tokenType, expiresIn, raw: data };
 }
 
 const buildAuthHeaders = async (config) => {

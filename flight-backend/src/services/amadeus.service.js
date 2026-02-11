@@ -131,8 +131,21 @@ export async function searchFlights(params = {}) {
   try {
     const token = await getAccessToken();
     const base = await resolveBaseUrl();
+    const apiParams = { ...params };
+    if (apiParams.origin && !apiParams.originLocationCode) {
+      apiParams.originLocationCode = apiParams.origin;
+      delete apiParams.origin;
+    }
+    if (apiParams.destination && !apiParams.destinationLocationCode) {
+      apiParams.destinationLocationCode = apiParams.destination;
+      delete apiParams.destination;
+    }
+    if (apiParams.airline && !apiParams.includedAirlineCodes) {
+      apiParams.includedAirlineCodes = apiParams.airline;
+      delete apiParams.airline;
+    }
     const res = await axios.get(`${base}/v2/shopping/flight-offers`, {
-      params,
+      params: apiParams,
       headers: {
         Authorization: buildAuthHeader(token),
         'Content-Type': 'application/json',

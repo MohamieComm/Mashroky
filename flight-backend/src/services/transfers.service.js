@@ -72,12 +72,12 @@ const resolveConfig = async () => {
 
   const authType =
     String(process.env.TRANSFERS_AUTH_TYPE || '').trim().toLowerCase() ||
-    (await getApiKeyValue('transfers', 'auth_type')).toLowerCase() ||
+    String(await getApiKeyValue('transfers', 'auth_type') || '').trim().toLowerCase() ||
     (clientId && clientSecret ? 'oauth2' : apiKey ? 'apikey' : 'none');
 
   const searchMethod =
     String(process.env.TRANSFERS_SEARCH_METHOD || '').trim().toUpperCase() ||
-    (await getApiKeyValue('transfers', 'search_method')).toUpperCase() ||
+    String(await getApiKeyValue('transfers', 'search_method') || '').trim().toUpperCase() ||
     'GET';
 
   return {

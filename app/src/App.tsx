@@ -46,6 +46,7 @@ import Cookies from "./pages/Cookies";
 import Refund from "./pages/Refund";
 import FlightTravelerDetails from "./pages/FlightTravelerDetails";
 import FlightBookingConfirmation from "./pages/FlightBookingConfirmation";
+import BookingConfirmation from "./pages/BookingConfirmation";
 
 const queryClient = new QueryClient();
 
@@ -116,6 +117,7 @@ const App = () => (
               <Route path="/refund" element={<Refund />} />
               <Route path="/flight/traveler-details" element={<FlightTravelerDetails />} />
               <Route path="/flight/confirmation" element={<FlightBookingConfirmation />} />
+              <Route path="/booking/confirmation" element={<BookingConfirmation />} />
               <Route
                 path="/admin"
                 element={

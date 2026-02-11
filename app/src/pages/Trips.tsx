@@ -1,42 +1,3 @@
-// --- Amadeus API integration helpers ---
-const FLIGHT_PRICED_OFFER_KEY = "mashrouk-flight-priced-offer";
-// use the same checkout key used by FlightTravelerDetails
-const FLIGHT_BOOKING_PAYLOAD_KEY = "mashrouk-flight-checkout";
-const FLIGHT_BOOKING_RESULT_KEY = "mashrouk-flight-booking-result";
-
-async function priceSelectedOffers(offers: any[], apiBaseUrl: string) {
-  const apiUrl = `${apiBaseUrl.replace(/\/$/, "")}/api/flights/price`;
-  const res = await fetch(apiUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ flightOffers: offers }),
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body?.error || "flight_price_failed");
-  }
-  const data = await res.json();
-  // توقع أن data.results أو data.flightOffers
-  const priced = Array.isArray(data.results) ? data.results : data.flightOffers || [];
-  localStorage.setItem(FLIGHT_PRICED_OFFER_KEY, JSON.stringify(priced));
-  return priced;
-}
-
-async function bookSelectedOffers(pricedOffers: any[], travelers: any[], apiBaseUrl: string) {
-  const apiUrl = `${apiBaseUrl.replace(/\/$/, "")}/api/flights/book`;
-  const res = await fetch(apiUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ flightOffers: pricedOffers, travelers }),
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body?.error || "flight_book_failed");
-  }
-  const data = await res.json();
-  localStorage.setItem(FLIGHT_BOOKING_RESULT_KEY, JSON.stringify(data));
-  return data;
-}
 import { useEffect, useMemo, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -66,6 +27,50 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { adminBenefitCards, popularDestinationsByRegion } from "@/data/content";
 import { useCart } from "@/hooks/useCart";
 import FlightSearchForm, { type FlightSearchData } from "@/components/FlightSearchForm";
+
+// --- Amadeus API integration helpers ---
+const FLIGHT_PRICED_OFFER_KEY = "mashrouk-flight-priced-offer";
+// use the same checkout key used by FlightTravelerDetails
+const FLIGHT_BOOKING_PAYLOAD_KEY = "mashrouk-flight-checkout";
+const FLIGHT_BOOKING_RESULT_KEY = "mashrouk-flight-booking-result";
+
+async function priceSelectedOffers(offers: any[], apiBaseUrl: string) {
+  const apiUrl = `${apiBaseUrl.replace(/\/$/, "")}/api/flights/price`;
+  const res = await fetch(apiUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ flightOffers: offers }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body?.error || "flight_price_failed");
+  }
+  const data = await res.json();
+  // توقع أن data.results أو data.flightOffers
+  const priced = Array.isArray(data.results)
+    ? data.results
+    : Array.isArray(data?.data?.flightOffers)
+      ? data.data.flightOffers
+      : data.flightOffers || [];
+  localStorage.setItem(FLIGHT_PRICED_OFFER_KEY, JSON.stringify(priced));
+  return priced;
+}
+
+async function bookSelectedOffers(pricedOffers: any[], travelers: any[], apiBaseUrl: string) {
+  const apiUrl = `${apiBaseUrl.replace(/\/$/, "")}/api/flights/book`;
+  const res = await fetch(apiUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ flightOffers: pricedOffers, travelers }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body?.error || "flight_book_failed");
+  }
+  const data = await res.json();
+  localStorage.setItem(FLIGHT_BOOKING_RESULT_KEY, JSON.stringify(data));
+  return data;
+}
 
 const bookingNotes = [
   "يرجى الحضور إلى المطار قبل 3 ساعات من الإقلاع.",

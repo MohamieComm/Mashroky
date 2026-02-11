@@ -225,7 +225,12 @@ export default function FlightTravelerDetails() {
       const paymentRes = await fetch(`${flightApiBaseUrl.replace(/\/$/, "")}/api/payments/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: total, currency, description: "حجز رحلة طيران", returnUrl: window.location.origin }),
+        body: JSON.stringify({
+          amount: total,
+          currency,
+          description: "حجز رحلة طيران",
+          returnUrl: `${window.location.origin}/payments`,
+        }),
       });
       if (!paymentRes.ok) throw new Error("payment_failed");
       const paymentData = await paymentRes.json();

@@ -1055,10 +1055,11 @@ export default function Admin() {
                   </div>
                 </div>
                 {featuredImageDraft && (
-                  <img
+                  <ImageWithFallback
                     src={featuredImageDraft}
                     alt="العرض المميز"
                     className="rounded-xl shadow-card w-full max-w-xl h-56 object-cover"
+                    fallbackQuery="عرض سياحي"
                   />
                 )}
               </div>

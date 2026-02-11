@@ -27,6 +27,7 @@ const TRAVEL_CLASS_OPTIONS = new Set([
   'FIRST',
 ]);
 
+const isNonEmptyArray = (value) => Array.isArray(value) && value.length > 0;
 const normalizeCode = (value) => String(value || '').trim().toUpperCase();
 const isValidDate = (value) => Number.isFinite(Date.parse(value));
 
@@ -110,6 +111,9 @@ export async function listAirlines(req, res, next) {
 export async function priceAmadeus(req, res, next) {
   try {
     const { flightOffers } = req.body || {};
+    if (!isNonEmptyArray(flightOffers)) {
+      return res.status(400).json({ error: 'missing_flight_offers' });
+    }
     const result = await amadeusService.priceFlights({ flightOffers });
     res.json(result);
   } catch (err) {
@@ -120,20 +124,52 @@ export async function priceAmadeus(req, res, next) {
 export async function bookAmadeus(req, res, next) {
   try {
     const { flightOffers, travelers, payment, sendEmail, customerEmail } = req.body || {};
-    const result = await amadeusService.bookFlights({ flightOffers, travelers });
+    if (!isNonEmptyArray(flightOffers)) {
+      return res.status(400).json({ error: 'missing_flight_offers' });
+    }
+    if (!isNonEmptyArray(travelers)) {
+      return res.status(400).json({ error: 'missing_travelers' });
+    }
+    const result = await amadeusService.createOrder({ flightOffers, travelers });
+    const flightOrder = result?.data || result || {};
+    const offers = Array.isArray(flightOrder?.flightOffers) ? flightOrder.flightOffers : [];
+    const associatedRecords = Array.isArray(flightOrder?.associatedRecords)
+      ? flightOrder.associatedRecords
+      : [];
+    const bookingReference =
+      associatedRecords.find((record) => record?.reference)?.reference ||
+      flightOrder?.id ||
+      '';
+    const providerOrderId = flightOrder?.id || '';
+    const response = {
+      provider: 'amadeus',
+      bookingReference,
+      providerOrderId,
+      offers,
+      raw: result,
+    };
     if (payment?.amount) {
-      result.paymentInfo = createMockMoyasarPayment(payment);
+      response.paymentInfo = createMockMoyasarPayment(payment);
     }
     if (sendEmail) {
       const passengerEmail =
         customerEmail ||
-        result?.passengers?.find((p) => p.email)?.email ||
+        flightOrder?.travelers?.find((p) => p?.contact?.emailAddress)?.contact?.emailAddress ||
         travelers?.find((t) => t?.contact?.emailAddress)?.contact?.emailAddress ||
         null;
       if (passengerEmail) {
-        const bookingRef = result?.bookingReference || result?.providerOrderId || '';
-        const total = result?.offers?.reduce((sum, offer) => sum + Number(offer?.pricing?.total || 0), 0) || 0;
-        const currency = result?.offers?.[0]?.pricing?.currency || 'SAR';
+        const bookingRef = bookingReference || providerOrderId || '';
+        const total =
+          offers.reduce(
+            (sum, offer) =>
+              sum + Number(offer?.price?.total || offer?.pricing?.total || 0),
+            0
+          ) || 0;
+        const currency =
+          offers?.[0]?.price?.currency ||
+          offers?.[0]?.pricing?.currency ||
+          flightOrder?.price?.currency ||
+          'SAR';
         await sendBookingEmail({
           to: passengerEmail,
           subject: 'تأكيد حجز مشروك',
@@ -150,7 +186,7 @@ export async function bookAmadeus(req, res, next) {
         });
       }
     }
-    res.json(result);
+    res.json(response);
   } catch (err) {
     next(err);
   }

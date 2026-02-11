@@ -5,14 +5,29 @@ import { appBaseUrl, backendBaseUrl, moyasarEnv, allowedOrigins } from '../confi
 const isValidCurrency = (value) => /^[A-Z]{3}$/.test(String(value || '').trim());
 
 const normalizeBaseUrl = (value, fallback) => {
+  const rawValue = String(value || '').trim();
+  const rawFallback = String(fallback || '').trim();
+  const toOrigin = (url) => `${url.protocol}//${url.host}`;
+
+  if (rawValue) {
+    try {
+      const direct = new URL(rawValue);
+      if (['http:', 'https:'].includes(direct.protocol)) return toOrigin(direct);
+    } catch {
+      // not an absolute URL; fall back to base handling
+    }
+  }
+
+  if (!rawFallback) return '';
+
   try {
-    const base = new URL(fallback);
-    const target = value ? new URL(value, base) : base;
-    if (!['http:', 'https:'].includes(target.protocol)) return `${base.protocol}//${base.host}`;
-    if (target.host !== base.host) return `${base.protocol}//${base.host}`;
-    return `${target.protocol}//${target.host}`;
+    const base = new URL(rawFallback);
+    const target = rawValue ? new URL(rawValue, base) : base;
+    if (!['http:', 'https:'].includes(target.protocol)) return toOrigin(base);
+    if (target.host !== base.host) return toOrigin(base);
+    return toOrigin(target);
   } catch {
-    return fallback;
+    return rawFallback;
   }
 };
 

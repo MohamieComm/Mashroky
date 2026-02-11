@@ -1,10 +1,11 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 const BOOKING_RESULT_KEY = "mashrouk-flight-booking-result";
 const BOOKING_KEY = "mashrouk-flight-booking";
+const BOOKING_STATUS_KEY = "mashrouk-flight-booking-status";
 
 // Admitad SALE tracking injection
 function AdmitadSaleScript({ orderNumber, discountCode, items, currency }: any) {
@@ -39,6 +40,13 @@ export default function FlightBookingConfirmation() {
       bookingResult: resultRaw ? JSON.parse(resultRaw) : [],
       bookingPayload: payloadRaw ? JSON.parse(payloadRaw) : null,
     };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.removeItem(BOOKING_KEY);
+    localStorage.removeItem(BOOKING_RESULT_KEY);
+    localStorage.removeItem(BOOKING_STATUS_KEY);
   }, []);
 
   const mainResult = Array.isArray(bookingResult) ? bookingResult[0] : bookingResult;

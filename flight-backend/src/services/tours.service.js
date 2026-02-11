@@ -72,12 +72,12 @@ const resolveConfig = async () => {
 
   const authType =
     String(process.env.TOURS_AUTH_TYPE || '').trim().toLowerCase() ||
-    (await getApiKeyValue('tours', 'auth_type')).toLowerCase() ||
+    String(await getApiKeyValue('tours', 'auth_type') || '').trim().toLowerCase() ||
     (clientId && clientSecret ? 'oauth2' : apiKey ? 'apikey' : 'none');
 
   const searchMethod =
     String(process.env.TOURS_SEARCH_METHOD || '').trim().toUpperCase() ||
-    (await getApiKeyValue('tours', 'search_method')).toUpperCase() ||
+    String(await getApiKeyValue('tours', 'search_method') || '').trim().toUpperCase() ||
     'GET';
 
   return {

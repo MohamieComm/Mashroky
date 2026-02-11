@@ -38,7 +38,7 @@ export default function DatePickerField({
   const display = selected
     ? format(selected, "dd/MM/yyyy", { locale: localeObj })
     : resolvedPlaceholder;
-  const textDirection = selected ? "ltr" : locale === "en" ? "ltr" : "rtl";
+  const textDirection = "ltr";
 
   return (
     <div className={containerClassName}>

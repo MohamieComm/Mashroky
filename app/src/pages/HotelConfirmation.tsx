@@ -1,10 +1,12 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { safeText } from "@/lib/utils";
 
 const HOTEL_BOOKING_KEY = "mashrouk-hotel-booking";
+const HOTEL_BOOKING_STATUS_KEY = "mashrouk-hotel-booking-status";
+const HOTEL_BOOKING_RESULT_KEY = "mashrouk-hotel-booking-result";
 
 export default function HotelConfirmation() {
   const navigate = useNavigate();
@@ -15,6 +17,13 @@ export default function HotelConfirmation() {
     } catch {
       return null;
     }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.removeItem(HOTEL_BOOKING_KEY);
+    localStorage.removeItem(HOTEL_BOOKING_STATUS_KEY);
+    localStorage.removeItem(HOTEL_BOOKING_RESULT_KEY);
   }, []);
 
   return (

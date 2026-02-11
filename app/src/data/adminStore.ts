@@ -870,26 +870,60 @@ const getMojibakeMap = () => {
 const countArabic = (value: string) => (value.match(/[\u0600-\u06FF]/g) || []).length;
 const countMojibakeLetters = (value: string) => (value.match(/[طظ]/g) || []).length;
 
-const shouldFixMojibake = (value: string) => {
+const latin1Pattern = /[\u00C0-\u00FF]/;
+
+const isLikelyMojibake = (value: string) => {
   const arabicCount = countArabic(value);
-  if (!arabicCount) return false;
-  return countMojibakeLetters(value) / arabicCount > 0.2;
+  if (!arabicCount && !latin1Pattern.test(value)) return false;
+  const ratio = countMojibakeLetters(value) / arabicCount;
+  if (ratio > 0.45) return true;
+  if (latin1Pattern.test(value)) return true;
+  return value.includes("ط§ظ") || value.includes("ظ…ط") || value.includes("ط¯ظ");
 };
 
-const fixMojibake = (value: string) => {
-  if (!value) return value;
-  if (!shouldFixMojibake(value)) return value;
+const scoreArabic = (value: string) => {
+  const arabicCount = countArabic(value);
+  const mojibakeCount = countMojibakeLetters(value);
+  return arabicCount * 2 - mojibakeCount * 3;
+};
+
+const decodeWindows1256 = (value: string) => {
   const map = getMojibakeMap();
-  if (!map || !utf8Decoder) return value;
+  if (!map || !utf8Decoder) return null;
   const bytes = new Uint8Array(value.length);
   let index = 0;
   for (const ch of value) {
     const b = map.get(ch);
-    if (b === undefined) return value;
+    if (b === undefined) return null;
     bytes[index++] = b;
   }
-  const fixed = utf8Decoder.decode(bytes);
-  return shouldFixMojibake(fixed) ? value : fixed;
+  return utf8Decoder.decode(bytes);
+};
+
+const decodeLatin1 = (value: string) => {
+  if (!utf8Decoder) return null;
+  const bytes = new Uint8Array([...value].map((ch) => ch.charCodeAt(0)));
+  return utf8Decoder.decode(bytes);
+};
+
+const fixMojibake = (value: string) => {
+  if (!value) return value;
+  if (!isLikelyMojibake(value)) return value;
+  const candidates = [value];
+  const win = decodeWindows1256(value);
+  if (win) candidates.push(win);
+  const latin = decodeLatin1(value);
+  if (latin) candidates.push(latin);
+  let best = value;
+  let bestScore = scoreArabic(value);
+  for (const candidate of candidates) {
+    const score = scoreArabic(candidate);
+    if (score > bestScore) {
+      best = candidate;
+      bestScore = score;
+    }
+  }
+  return best;
 };
 
 const asString = (value: unknown, fallback = "") => {
@@ -1454,4 +1488,3 @@ export const usePromoVideoUrl = () => {
 };
 
 export const getPromoVideoUrl = () => "";
-
