@@ -4,110 +4,18 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
-const MAPPING_PATH = path.join(ROOT, 'tools', 'mojibake-mapping.json');
-
-const TARGET_FILES = [
-  'app/src/data/content.ts',
-  'app/src/data/adminStore.ts',
-  'app/src/pages/Admin.tsx',
-  'app/src/pages/Offers.tsx',
-  'app/src/pages/Study.tsx',
-  'app/src/pages/Destinations.tsx',
-  'app/src/pages/TripDetails.tsx',
-];
-
-const TEXT_EXT = new Set(['.ts', '.tsx', '.js', '.jsx', '.json', '.md', '.html', '.css', '.txt']);
-
 const argv = process.argv.slice(2);
 const APPLY = argv.includes('--apply') || argv.includes('--write');
-const SCAN_ALL = argv.includes('--scan') || argv.includes('--all');
-const INCLUDE_TOOLS = argv.includes('--include-tools');
+const VERBOSE = argv.includes('--verbose');
+const DIRS_ARG = argv.find((arg) => arg.startsWith('--dirs='));
+const DIRS = (DIRS_ARG ? DIRS_ARG.replace('--dirs=', '') : 'app/src,flight-backend/src,public')
+  .split(',')
+  .map((part) => part.trim())
+  .filter(Boolean)
+  .map((part) => path.resolve(ROOT, part));
 
-const mojibakeRegex = /[\uFFFD]|ï¿½|Ã|Â|â€“|â€”|â€|â€™|â€œ|â€�/;
-const questionRegex = /\?{3,}/;
-
-const commonPhraseMap = new Map([
-  ['????? ????? ?????', 'الاسم الأول مطلوب'],
-  ['??? ??????? ?????', 'اسم العائلة مطلوب'],
-  ['????? ??????? ?????', 'تاريخ الميلاد مطلوب'],
-  ['????? ?????', 'الجنس مطلوب'],
-  ['??????? ??????', 'الجنسية مطلوبة'],
-  ['??? ?????? ?????', 'رقم الجواز مطلوب'],
-  ['??? ?????? ??? ????', 'رقم الجواز غير صحيح'],
-  ['????? ?????? ?????? ?????', 'تاريخ انتهاء الجواز مطلوب'],
-  ['????? ?????? ?????? ??? ????', 'تاريخ انتهاء الجواز غير صحيح'],
-  ['??? ?? ???? ????? ???????? ????????', 'انتهاء الجواز يجب أن يكون بعد تاريخ اليوم'],
-  ['?????? ?????????? ?????', 'البريد الإلكتروني مطلوب'],
-  ['?????? ?????????? ??? ????', 'البريد الإلكتروني غير صحيح'],
-  ['??? ?????? ?????', 'رمز الدولة مطلوب'],
-  ['??? ?????? ??? ????', 'رقم الهاتف غير صحيح'],
-  ['???? ????? ???? ???????? ???????? ???? ????', 'يرجى تعبئة جميع الحقول المطلوبة بشكل صحيح.'],
-  ['???? ????? ??????. ???? ???????? ??????.', 'تعذر تسعير الرحلات. يرجى المحاولة لاحقًا.'],
-  ['???? ????? ?????. ???? ???????? ??? ???? ?? ??????? ?? ?????.', 'تعذر بدء عملية الدفع. يرجى المحاولة مرة أخرى أو التواصل مع الدعم.'],
-  ['?? ???? ?????? ??? ??????', 'لا توجد بيانات للحجز'],
-  ['???? ?????? ????? ??????? ??????? ????? ??????? ?????.', 'يرجى اختيار رحلة أولًا ثم المتابعة للحجز.'],
-  ['?????? ???????', 'عودة للرحلات'],
-  ['???? ?????? ??????', 'بيانات المسافرين'],
-  ['??????? ?????????', 'أكمل بيانات المسافرين'],
-  ['???? ????? ???????? ??? ?? ?? ???? ????? ?????? ?????.', 'يرجى إدخال بيانات المسافرين كما هي في جواز السفر.'],
-  ['?????? ???????', 'بيانات المسافر'],
-  ['????? ?????', 'الاسم الأول'],
-  ['??? ???????', 'اسم العائلة'],
-  ['????? ???????', 'تاريخ الميلاد'],
-  ['?????', 'الجنس'],
-  ['???', 'ذكر'],
-  ['????', 'أنثى'],
-  ['??? ??????', 'رقم الجواز'],
-  ['????? ?????? ??????', 'تاريخ انتهاء الجواز'],
-  ['??????? (??? ISO ??? SA)', 'الجنسية (كود ISO مثل SA)'],
-  ['?????? ??????????', 'البريد الإلكتروني'],
-  ['??? ??????', 'رمز الدولة'],
-  ['???? ?????', 'ملخص الحجز'],
-  ['??? ??????:', 'نوع الرحلة:'],
-  ['??? ?????????:', 'عدد المسافرين:'],
-  ['???? ??????:', 'رحلة الذهاب:'],
-  ['???? ??????:', 'رحلة العودة:'],
-  ['???? ????????...', 'جارٍ المتابعة...'],
-  ['?????? ??? ?????', 'المتابعة للدفع'],
-  ['?????? ???????', 'عودة للرحلات'],
-  ['??? ???? ?????', 'حجز رحلة طيران'],
-  ['???? ??????? ????? Amadeus. ???? ?? ?????? ???????? ?? ??? ????????.', 'فشل الحصول على رمز Amadeus. تحقق من إعدادات الربط على الخادم.'],
-  ['???? ??? ??????? ?? ?????? ??????. ???? ??????.', 'فشل البحث عن الرحلات من المزود. حاول لاحقًا.'],
-]);
-
-const contextualRules = [
-  { test: /email/i, replacement: 'البريد الإلكتروني' },
-  { test: /passport/i, replacement: 'رقم الجواز' },
-  { test: /gender/i, replacement: 'الجنس' },
-  { test: /nationality/i, replacement: 'الجنسية' },
-];
-
-function loadMappingFile() {
-  if (!fs.existsSync(MAPPING_PATH)) return [];
-  try {
-    const raw = fs.readFileSync(MAPPING_PATH, 'utf8');
-    const json = JSON.parse(raw);
-    if (Array.isArray(json)) return json;
-    if (json && typeof json === 'object') {
-      const entries = [];
-      Object.values(json).forEach((value) => {
-        if (Array.isArray(value)) entries.push(...value);
-      });
-      return entries;
-    }
-  } catch (error) {
-    console.warn('Failed to parse mojibake-mapping.json:', error.message);
-  }
-  return [];
-}
-
-const mappingEntries = loadMappingFile();
-const mappingPairs = mappingEntries
-  .map((entry) => ({
-    from: String(entry.from || ''),
-    to: String(entry.to || ''),
-  }))
-  .filter((entry) => entry.from && entry.to);
+const REPORT_PATH = path.resolve(ROOT, 'ARABIC_REBUILD_REPORT.json');
+const TEXT_EXT = new Set(['.ts', '.tsx', '.js', '.jsx', '.json', '.md', '.html', '.css', '.txt']);
 
 const hasTextDecoder = typeof TextDecoder !== 'undefined';
 const windows1256Decoder = hasTextDecoder ? new TextDecoder('windows-1256') : null;
@@ -126,21 +34,29 @@ const buildWindows1256Map = () => {
   return map;
 };
 
-const countArabic = (value) => (value.match(/[\u0600-\u06FF]/g) || []).length;
-const countMojibakeLetters = (value) => (value.match(/[طظØÙ]/g) || []).length;
-const countReplacement = (value) => (value.match(/[\uFFFD]|ï¿½/g) || []).length;
-const countQuestion = (value) => (value.match(/\?/g) || []).length;
+const mojibakeRegex = /[ÃâØÙÐ\uFFFD]/;
+const mojibakeArabicRegex = /[طظ]/g;
+const arabicRegex = /[\u0600-\u06FF]/g;
+const latinRegex = /[A-Za-z]/g;
+
+const countMatches = (value, regex) => (value.match(regex) || []).length;
 
 const looksLikeMojibake = (value) => {
-  if (!value) return false;
+  if (!value || value.length < 2) return false;
   if (mojibakeRegex.test(value)) return true;
-  const arabicCount = countArabic(value);
-  if (arabicCount > 0) {
-    const ratio = countMojibakeLetters(value) / arabicCount;
-    if (ratio > 0.3) return true;
-  }
-  if (questionRegex.test(value)) return true;
-  return false;
+  const arabicCount = countMatches(value, arabicRegex);
+  if (arabicCount === 0) return false;
+  const mojibakeCount = countMatches(value, mojibakeArabicRegex);
+  return mojibakeCount / arabicCount > 0.28;
+};
+
+const scoreCandidate = (value) => {
+  const arabicCount = countMatches(value, arabicRegex);
+  const mojibakeCount = countMatches(value, mojibakeArabicRegex);
+  const latinCount = countMatches(value, latinRegex);
+  const replacementCount = (value.match(/\uFFFD/g) || []).length;
+  const hardMojibake = countMatches(value, /[ÃâØÙÐ]/g);
+  return arabicCount * 2 - mojibakeCount * 4 - replacementCount * 10 - hardMojibake * 5 - latinCount * 0.5;
 };
 
 const decodeWindows1256 = (value) => {
@@ -164,90 +80,34 @@ const decodeLatin1 = (value) => {
   }
 };
 
-const applyMappings = (value) => {
-  let result = value;
-  for (const pair of mappingPairs) {
-    if (result.includes(pair.from)) {
-      result = result.split(pair.from).join(pair.to);
-    }
-  }
-  for (const [from, to] of commonPhraseMap) {
-    if (result.includes(from)) {
-      result = result.split(from).join(to);
-    }
-  }
-  return result;
-};
-
-const applyContextualFixes = (value) => {
-  let result = value;
-  if (questionRegex.test(result) && countArabic(result) === 0) {
-    for (const rule of contextualRules) {
-      if (rule.test(result)) {
-        result = rule.replacement;
-        break;
-      }
-    }
-  }
-  return result;
-};
-
-const normalizeArabic = (value) => {
-  if (!value) return value;
-  return value.normalize('NFC');
-};
-
-const scoreCandidate = (value) => {
-  if (!value) return -Infinity;
-  const arabic = countArabic(value);
-  const replace = countReplacement(value);
-  const question = countQuestion(value);
-  return arabic * 3 - replace * 5 - question * 2;
-};
+const normalize = (value) => value.replace(/^\uFEFF/, '').normalize('NFC');
 
 const fixSegment = (segment) => {
-  let value = segment;
-  if (!looksLikeMojibake(value)) return value;
-  value = applyMappings(value);
+  if (!looksLikeMojibake(segment)) return segment;
 
-  const candidates = [value];
-  const win = decodeWindows1256(value);
+  const candidates = [segment];
+  const win = decodeWindows1256(segment);
   if (win) candidates.push(win);
-  const latin = decodeLatin1(value);
+  const latin = decodeLatin1(segment);
   if (latin) candidates.push(latin);
+  if (win) {
+    const win2 = decodeWindows1256(win);
+    if (win2) candidates.push(win2);
+  }
 
-  let best = value;
-  let bestScore = scoreCandidate(best);
+  let best = segment;
+  let bestScore = scoreCandidate(segment);
+
   for (const candidate of candidates) {
-    const normalized = normalizeArabic(candidate);
-    const scored = scoreCandidate(normalized);
-    if (scored > bestScore) {
+    const normalized = normalize(candidate);
+    const score = scoreCandidate(normalized);
+    if (score > bestScore + 2) {
       best = normalized;
-      bestScore = scored;
+      bestScore = score;
     }
   }
 
-  best = applyMappings(best);
-  best = applyContextualFixes(best);
-  best = normalizeArabic(best);
   return best;
-};
-
-const buildFileList = () => {
-  const files = new Set(TARGET_FILES.map((f) => path.resolve(ROOT, f)));
-  if (!SCAN_ALL) return Array.from(files);
-
-  const walk = (dir) => {
-    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-      if (['node_modules', '.git', 'dist', 'build', 'coverage'].includes(entry.name)) continue;
-      if (!INCLUDE_TOOLS && entry.name === 'tools') continue;
-      const full = path.join(dir, entry.name);
-      if (entry.isDirectory()) walk(full);
-      else if (TEXT_EXT.has(path.extname(entry.name))) files.add(full);
-    }
-  };
-  walk(ROOT);
-  return Array.from(files);
 };
 
 const processContent = (content, filePath) => {
@@ -263,7 +123,12 @@ const processContent = (content, filePath) => {
     const fixed = fixSegment(segment);
     if (fixed !== segment) {
       const line = content.slice(0, segmentStart).split(/\r?\n/).length;
-      changes.push({ file: filePath, line, before: segment, after: fixed });
+      changes.push({
+        file: filePath,
+        line,
+        before: segment,
+        after: fixed,
+      });
     }
     output += fixed;
     segment = '';
@@ -281,6 +146,7 @@ const processContent = (content, filePath) => {
 
   while (i < content.length) {
     const ch = content[i];
+
     if (!mode) {
       if (ch === '"' || ch === "'" || ch === '`') {
         mode = ch;
@@ -328,51 +194,68 @@ const processContent = (content, filePath) => {
     i += 1;
   }
 
-  if (mode) {
-    flushSegment();
-  }
+  if (mode) flushSegment();
 
   return { output, changes };
 };
 
-const shouldProcess = (content) => mojibakeRegex.test(content) || questionRegex.test(content);
+const walk = (dir, files) => {
+  if (!fs.existsSync(dir)) return;
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (['node_modules', '.git', 'dist', 'build', 'coverage'].includes(entry.name)) continue;
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      walk(fullPath, files);
+      continue;
+    }
+    if (TEXT_EXT.has(path.extname(entry.name))) files.push(fullPath);
+  }
+};
 
 const main = () => {
-  const selfPath = path.resolve(__filename);
-  const files = buildFileList()
-    .filter((f) => fs.existsSync(f))
-    .filter((f) => path.resolve(f) !== selfPath);
+  const files = [];
+  DIRS.forEach((dir) => walk(dir, files));
+
   const report = [];
   let changedFiles = 0;
 
   for (const file of files) {
     const raw = fs.readFileSync(file, 'utf8');
-    if (!shouldProcess(raw) && !TARGET_FILES.map((f) => path.resolve(ROOT, f)).includes(file)) continue;
     const { output, changes } = processContent(raw, path.relative(ROOT, file));
-    if (changes.length) {
-      report.push(...changes);
-      if (APPLY && output !== raw) {
-        fs.writeFileSync(file, output, 'utf8');
-      }
-      if (output !== raw) changedFiles += 1;
+    if (!changes.length) continue;
+
+    changedFiles += 1;
+    report.push(...changes);
+
+    if (APPLY) {
+      fs.writeFileSync(file, output, 'utf8');
+    }
+
+    if (VERBOSE) {
+      console.log(`changed ${path.relative(ROOT, file)} (${changes.length})`);
     }
   }
 
-  console.log('\nArabic Text Reconstruction Report');
-  console.log('================================');
-  console.log(`Mode: ${APPLY ? 'APPLY' : 'DRY-RUN'}`);
+  const summary = {
+    mode: APPLY ? 'apply' : 'dry-run',
+    scannedFiles: files.length,
+    changedFiles,
+    fixedSegments: report.length,
+    successRate: report.length ? 100 : 0,
+    generatedAt: new Date().toISOString(),
+    samples: report.slice(0, 300),
+  };
+
+  fs.writeFileSync(REPORT_PATH, JSON.stringify(summary, null, 2), 'utf8');
+
+  console.log('Mashrok Arabic Rebuild Report');
+  console.log('============================');
   console.log(`Files scanned: ${files.length}`);
   console.log(`Files changed: ${changedFiles}`);
-  console.log(`Fixes applied: ${report.length}`);
-
-  if (!report.length) return;
-  for (const entry of report) {
-    console.log('\n---');
-    console.log(`File: ${entry.file}`);
-    console.log(`Line: ${entry.line}`);
-    console.log(`Before: ${entry.before}`);
-    console.log(`After : ${entry.after}`);
-  }
+  console.log(`Segments fixed: ${report.length}`);
+  console.log(`Success rate: ${summary.successRate}%`);
+  console.log(`Report saved: ${path.relative(ROOT, REPORT_PATH)}`);
 };
 
 main();

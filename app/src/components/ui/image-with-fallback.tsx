@@ -21,9 +21,11 @@ export function ImageWithFallback({
   fallbackQuery,
 }: ImageWithFallbackProps) {
   const altQuery = (alt || "").trim();
+  const logoPattern = /(logo|icon|\u0634\u0639\u0627\u0631|\u0623\u064a\u0642\u0648\u0646\u0629|\u0644\u0648\u062c\u0648)/i;
+  const isLogo = logoPattern.test(altQuery);
   const safeQuery =
     (fallbackQuery || "").trim() ||
-    (altQuery && !/(logo|icon|شعار|أيقونة|لوجو)/i.test(altQuery) ? altQuery : "");
+    (altQuery && !isLogo ? altQuery : "");
   const autoFallbackSrc = safeQuery
     ? `https://source.unsplash.com/1200x800/?${encodeURIComponent(safeQuery)}`
     : "";
@@ -38,6 +40,7 @@ export function ImageWithFallback({
       ...(fallbackSources || []),
       fallbackSrc,
       autoFallbackSrc,
+      isLogo ? "/logo.png" : "",
       defaultFallback,
       "/placeholder.svg",
       localFallback,
@@ -45,7 +48,7 @@ export function ImageWithFallback({
       .filter(Boolean)
       .map((value) => String(value));
     return Array.from(new Set(list));
-  }, [src, fallbackSources, fallbackSrc, autoFallbackSrc, localFallback]);
+  }, [src, fallbackSources, fallbackSrc, autoFallbackSrc, isLogo, localFallback]);
   const [failedCount, setFailedCount] = useState(0);
   const resolvedSrc = sources[Math.min(failedCount, sources.length - 1)];
   const showFallback = !src || failedCount > 0;

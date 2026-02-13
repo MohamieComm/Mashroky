@@ -868,23 +868,32 @@ const getMojibakeMap = () => {
 };
 
 const countArabic = (value: string) => (value.match(/[\u0600-\u06FF]/g) || []).length;
-const countMojibakeLetters = (value: string) => (value.match(/[طظ]/g) || []).length;
+const countMojibakeLetters = (value: string) => (value.match(/[\u0637\u0638]/g) || []).length;
+const countMojibakePairs = (value: string) => (value.match(/[\u0637\u0638][\u0600-\u06FF]/g) || []).length;
+const countReplacement = (value: string) => (value.match(/\uFFFD/g) || []).length;
 
 const latin1Pattern = /[\u00C0-\u00FF]/;
 
 const isLikelyMojibake = (value: string) => {
   const arabicCount = countArabic(value);
-  if (!arabicCount && !latin1Pattern.test(value)) return false;
-  const ratio = countMojibakeLetters(value) / arabicCount;
-  if (ratio > 0.45) return true;
+  if (!arabicCount && !latin1Pattern.test(value) && !countReplacement(value)) return false;
+  const mojibakeCount = countMojibakeLetters(value);
+  const pairCount = countMojibakePairs(value);
+  const ratio = mojibakeCount / Math.max(arabicCount, 1);
+  if (ratio > 0.16) return true;
+  if (pairCount >= 3) return true;
   if (latin1Pattern.test(value)) return true;
-  return value.includes("ط§ظ") || value.includes("ظ…ط") || value.includes("ط¯ظ");
+  if (countReplacement(value) > 0) return true;
+  return value.includes('8&7');
 };
 
 const scoreArabic = (value: string) => {
   const arabicCount = countArabic(value);
   const mojibakeCount = countMojibakeLetters(value);
-  return arabicCount * 2 - mojibakeCount * 3;
+  const pairCount = countMojibakePairs(value);
+  const latin1Count = (value.match(latin1Pattern) || []).length;
+  const replacementCount = countReplacement(value);
+  return arabicCount * 3 - mojibakeCount * 5 - pairCount * 4 - latin1Count * 3 - replacementCount * 12;
 };
 
 const decodeWindows1256 = (value: string) => {
@@ -918,7 +927,7 @@ const fixMojibake = (value: string) => {
   let bestScore = scoreArabic(value);
   for (const candidate of candidates) {
     const score = scoreArabic(candidate);
-    if (score > bestScore) {
+    if (score > bestScore + 1) {
       best = candidate;
       bestScore = score;
     }

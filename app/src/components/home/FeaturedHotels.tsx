@@ -4,11 +4,37 @@ import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 import { defaultHotels, type HotelItem, useAdminCollection } from "@/data/adminStore";
+import { resolveRelevantImage, safeArabicText } from "@/lib/contentQuality";
 
 export function FeaturedHotels() {
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const hotels = useAdminCollection("hotels", defaultHotels).slice(0, 4);
+  const hotels = useAdminCollection("hotels", defaultHotels)
+    .slice(0, 4)
+    .map((hotel, index) => {
+      const fallback = defaultHotels[index] || defaultHotels[0];
+      const name = safeArabicText(hotel.name, fallback?.name || "فندق مميز");
+      const location = safeArabicText(hotel.location, fallback?.location || "وجهة سياحية");
+      const image = resolveRelevantImage(hotel.image, name, location, fallback?.image || "");
+
+      return {
+        ...hotel,
+        name,
+        location,
+        image,
+        description: safeArabicText(
+          hotel.description,
+          fallback?.description || "إقامة مريحة وخدمات متكاملة."
+        ),
+        tag: safeArabicText(hotel.tag, fallback?.tag || "الأكثر طلبًا"),
+        priceNote: safeArabicText(hotel.priceNote, fallback?.priceNote || "يبدأ من"),
+        amenities: Array.isArray(hotel.amenities) && hotel.amenities.length
+          ? hotel.amenities.map((item, itemIndex) =>
+              safeArabicText(item, fallback?.amenities?.[itemIndex] || "خدمة")
+            )
+          : fallback?.amenities || [],
+      };
+    });
 
   const handleBook = (hotel: HotelItem) => {
     const priceValue =
@@ -51,7 +77,7 @@ export function FeaturedHotels() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {hotels.map((hotel, index) => (
             <div
-              key={hotel.id}
+              key={hotel.id || `hotel-home-${index}`}
               className="group bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-hover transition-all duration-500 animate-fade-up"
               style={{ animationDelay: `${index * 0.1}s` }}
             >

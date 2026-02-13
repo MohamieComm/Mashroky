@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+﻿import nodemailer from 'nodemailer';
 
 const smtpConfig = {
   host: process.env.SMTP_HOST || '',

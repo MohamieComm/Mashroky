@@ -4,11 +4,33 @@ import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 import { defaultOffers, type OfferItem, useAdminCollection } from "@/data/adminStore";
+import { resolveRelevantImage, safeArabicText } from "@/lib/contentQuality";
 
 export function FeaturedDestinations() {
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const offers = useAdminCollection("offers", defaultOffers).slice(0, 6);
+  const offers = useAdminCollection("offers", defaultOffers)
+    .slice(0, 6)
+    .map((offer, index) => {
+      const fallback = defaultOffers[index] || defaultOffers[0];
+      const title = safeArabicText(offer.title, fallback?.title || "عرض سياحي مميز");
+      const description = safeArabicText(
+        offer.description,
+        fallback?.description || "باقة سفر متكاملة تشمل السكن والتنقل والأنشطة."
+      );
+      const image = resolveRelevantImage(offer.image, title, description, fallback?.image || "");
+      return {
+        ...offer,
+        title,
+        description,
+        image,
+        includes: Array.isArray(offer.includes) && offer.includes.length
+          ? offer.includes.map((item, itemIndex) =>
+              safeArabicText(item, fallback?.includes?.[itemIndex] || "خدمة سياحية")
+            )
+          : fallback?.includes || [],
+      };
+    });
 
   const formatSeasonLabel = (season?: string) => {
     switch ((season || "").toLowerCase()) {
@@ -67,7 +89,7 @@ export function FeaturedDestinations() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {offers.map((offer, index) => (
             <div
-              key={offer.id}
+              key={offer.id || `offer-home-${index}`}
               className="group relative bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-hover transition-all duration-500 animate-fade-up"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
@@ -98,7 +120,7 @@ export function FeaturedDestinations() {
                       <span className="text-sm">{formatSeasonLabel(offer.season)}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-2">
-                      ساري حتى: {offer.validUntil}
+                      ساري حتى: {safeArabicText(offer.validUntil, "لفترة محدودة")}
                     </p>
                   </div>
                   <div className="text-left">

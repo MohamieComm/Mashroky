@@ -4,11 +4,25 @@ import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 import { defaultActivities, type ActivityItem, useAdminCollection } from "@/data/adminStore";
+import { resolveRelevantImage, safeArabicText } from "@/lib/contentQuality";
 
 export function WeeklyOffers() {
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const activities = useAdminCollection("activities", defaultActivities).slice(0, 4);
+  const activities = useAdminCollection("activities", defaultActivities)
+    .slice(0, 4)
+    .map((activity, index) => {
+      const fallback = defaultActivities[index] || defaultActivities[0];
+      const title = safeArabicText(activity.title, fallback?.title || "نشاط سياحي");
+      const location = safeArabicText(activity.location, fallback?.location || "مدينة سياحية");
+      return {
+        ...activity,
+        title,
+        location,
+        category: safeArabicText(activity.category, fallback?.category || "ترفيه"),
+        image: resolveRelevantImage(activity.image, title, location, fallback?.image || ""),
+      };
+    });
 
   const handleBook = (activity: ActivityItem) => {
     const priceValue =
@@ -39,7 +53,7 @@ export function WeeklyOffers() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {activities.map((activity, index) => (
             <div
-              key={activity.id}
+              key={activity.id || `activity-home-${index}`}
               className="group relative bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-hover transition-all duration-500 animate-fade-up"
               style={{ animationDelay: `${index * 0.1}s` }}
             >

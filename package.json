@@ -3,5 +3,8 @@
   "private": true,
   "scripts": {
     "watchdog": "node tools/mashrok-encoding-watchdog.js"
+  },
+  "dependencies": {
+    "iconv-lite": "^0.7.2"
   }
 }
