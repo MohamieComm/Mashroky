@@ -1,0 +1,1439 @@
+import { useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useAdminData, type AdminData } from "@/data/adminStore";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { getMediaTypeFromUrl } from "@/lib/media";
+import { useNavigate } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Plane,
+  Hotel,
+  Tag,
+  Users,
+  Settings,
+  Link2,
+  Key,
+  FileText,
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  ChevronLeft,
+  LogOut,
+  Bell,
+  Menu,
+  CalendarCheck,
+  MapPinned,
+  Newspaper,
+  PlayCircle,
+  CreditCard,
+  ShieldCheck,
+  Smartphone,
+  Sparkles,
+  Phone,
+  Mail,
+  MapPin,
+} from "lucide-react";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+
+type FieldType = "text" | "number" | "textarea" | "list" | "pairlist" | "select";
+
+type FieldConfig = {
+  key: string;
+  label: string;
+  type?: FieldType;
+  placeholder?: string;
+  options?: { label: string; value: string }[];
+};
+
+type SectionConfig = {
+  id: string;
+  title: string;
+  description: string;
+  listKey:
+    | "flights"
+    | "hotels"
+    | "offers"
+    | "activities"
+    | "articles"
+    | "destinations"
+    | "partners"
+    | "airlines"
+    | "apiKeys"
+    | "users"
+    | "pages"
+    | "seasons";
+  fields: FieldConfig[];
+  primaryField?: string;
+};
+
+type SectionKey = SectionConfig["listKey"];
+
+const sidebarItems = [
+  { name: "لوحة التحكم", icon: LayoutDashboard, id: "dashboard" },
+  { name: "الرحلات", icon: Plane, id: "trips" },
+  { name: "الفنادق", icon: Hotel, id: "hotels" },
+  { name: "العروض", icon: Tag, id: "offers" },
+  { name: "مواسم", icon: CalendarCheck, id: "seasons" },
+  { name: "النشاطات", icon: CalendarCheck, id: "activities" },
+  { name: "الوجهات", icon: MapPinned, id: "destinations" },
+  { name: "المقالات", icon: Newspaper, id: "articles" },
+  { name: "المشتركين", icon: Users, id: "users" },
+  { name: "الحجوزات", icon: CalendarCheck, id: "bookings" },
+  { name: "الشركاء (Affiliate)", icon: Link2, id: "affiliate" },
+  { name: "خطوط الطيران", icon: Plane, id: "airlines" },
+  { name: "API Keys", icon: Key, id: "api" },
+  { name: "الصفحات", icon: FileText, id: "pages" },
+  { name: "المدفوعات", icon: CreditCard, id: "payments" },
+  { name: "الإعدادات", icon: Settings, id: "settings" },
+];
+
+const sectionConfigs: Record<string, SectionConfig> = {
+    seasons: {
+      id: "seasons",
+      title: "عروض مواسم",
+      description: "إضافة عروض موسمية مثل رمضان، الحج، والصيف (دراسة بالخارج).",
+      listKey: "seasons",
+      primaryField: "title",
+      fields: [
+        { key: "title", label: "اسم العرض" },
+        { key: "season", label: "الموسم", type: "select", options: [
+          { label: "رمضان", value: "ramadan" },
+          { label: "الحج", value: "hajj" },
+          { label: "الصيف", value: "summer" },
+        ] },
+        { key: "description", label: "وصف العرض", type: "textarea" },
+        { key: "image", label: "صورة العرض" },
+        { key: "price", label: "السعر" },
+        { key: "options", label: "خيارات (سكن، مواصلات، دراسة)", type: "list" },
+      ],
+    },
+  trips: {
+    id: "trips",
+    title: "إدارة الرحلات",
+    description: "إضافة وتعديل بيانات الرحلات المعروضة في صفحة الطيران.",
+    listKey: "flights",
+    primaryField: "from",
+    fields: [
+      { key: "from", label: "من" },
+      { key: "to", label: "إلى" },
+      { key: "airline", label: "شركة الطيران" },
+      { key: "departTime", label: "وقت المغادرة" },
+      { key: "arriveTime", label: "وقت الوصول" },
+      { key: "duration", label: "مدة الرحلة" },
+      { key: "price", label: "السعر" },
+      { key: "stops", label: "التوقفات" },
+      { key: "rating", label: "التقييم", type: "number" },
+      { key: "image", label: "صورة" },
+    ],
+  },
+  hotels: {
+    id: "hotels",
+    title: "إدارة الفنادق",
+    description: "تعديل بطاقات الفنادق ومزاياها وأسعارها.",
+    listKey: "hotels",
+    primaryField: "name",
+    fields: [
+      { key: "name", label: "اسم الفندق" },
+      { key: "location", label: "الموقع" },
+      { key: "image", label: "الصورة" },
+      { key: "rating", label: "التقييم", type: "number" },
+      { key: "reviews", label: "عدد التقييمات", type: "number" },
+      { key: "price", label: "السعر" },
+      { key: "priceNote", label: "ملاحظة السعر" },
+      { key: "description", label: "وصف الفندق", type: "textarea" },
+      { key: "amenities", label: "المزايا (افصل بفواصل)", type: "list" },
+      { key: "distances", label: "المسافات (سطر لكل عنصر: الاسم | المسافة)", type: "pairlist" },
+      { key: "cuisine", label: "المطاعم" },
+      { key: "tag", label: "وسم" },
+    ],
+  },
+  offers: {
+    id: "offers",
+    title: "إدارة العروض",
+    description: "تحديث الباقات الموسمية والخصومات.",
+    listKey: "offers",
+    primaryField: "title",
+    fields: [
+      { key: "title", label: "اسم العرض" },
+      { key: "description", label: "وصف العرض", type: "textarea" },
+      { key: "image", label: "الصورة" },
+      { key: "discount", label: "نسبة الخصم", type: "number" },
+      { key: "validUntil", label: "صالح حتى" },
+      { key: "originalPrice", label: "السعر قبل الخصم" },
+      { key: "newPrice", label: "السعر بعد الخصم" },
+      { key: "season", label: "الموسم" },
+      { key: "includes", label: "تشمل الباقة (افصل بفواصل)", type: "list" },
+      { key: "tips", label: "نصائح (افصل بفواصل)", type: "list" },
+    ],
+  },
+  activities: {
+    id: "activities",
+    title: "إدارة النشاطات",
+    description: "إضافة مسابقات ومهرجانات وأنشطة متنوعة.",
+    listKey: "activities",
+    primaryField: "title",
+    fields: [
+      { key: "title", label: "اسم النشاط" },
+      { key: "location", label: "المدينة" },
+      { key: "category", label: "التصنيف" },
+      { key: "price", label: "السعر" },
+      { key: "image", label: "الصورة" },
+    ],
+  },
+  destinations: {
+    id: "destinations",
+    title: "إدارة الوجهات السياحية",
+    description: "إضافة وجهات جديدة وتحديد الموسم والأسعار.",
+    listKey: "destinations",
+    primaryField: "title",
+    fields: [
+      { key: "title", label: "الوجهة" },
+      { key: "country", label: "الدولة أو المدينة" },
+      {
+        key: "region",
+        label: "التصنيف",
+        type: "select",
+        options: [
+          { label: "داخل السعودية", value: "saudi" },
+          { label: "الشرق الأوسط", value: "middleeast" },
+          { label: "وجهات عالمية", value: "international" },
+        ],
+      },
+      { key: "tag", label: "وسم" },
+      { key: "duration", label: "المدة" },
+      { key: "priceFrom", label: "السعر يبدأ من" },
+      { key: "description", label: "وصف مختصر", type: "textarea" },
+      { key: "image", label: "الصورة" },
+    ],
+  },
+  articles: {
+    id: "articles",
+    title: "إدارة المقالات",
+    description: "إضافة أخبار ومقالات سياحية محدثة.",
+    listKey: "articles",
+    primaryField: "title",
+    fields: [
+      { key: "title", label: "عنوان المقال" },
+      { key: "category", label: "التصنيف" },
+      { key: "date", label: "التاريخ" },
+      { key: "image", label: "الصورة" },
+    ],
+  },
+  affiliate: {
+    id: "affiliate",
+    title: "إدارة الشركاء",
+    description: "الشركات الشريكة ونسب العمولة.",
+    listKey: "partners",
+    primaryField: "name",
+    fields: [
+      { key: "name", label: "اسم الشريك" },
+      { key: "type", label: "النوع" },
+      { key: "website", label: "الموقع" },
+      { key: "commission", label: "نسبة العمولة" },
+    ],
+  },
+  airlines: {
+    id: "airlines",
+    title: "إدارة خطوط الطيران",
+    description: "تحديث بيانات خطوط الطيران ومعلومات التواصل.",
+    listKey: "airlines",
+    primaryField: "name",
+    fields: [
+      { key: "name", label: "اسم الشركة" },
+      { key: "code", label: "الكود" },
+      { key: "website", label: "الموقع" },
+      { key: "phone", label: "رقم التواصل" },
+      { key: "logo", label: "رابط الشعار" },
+    ],
+  },
+  api: {
+    id: "api",
+    title: "مفاتيح API والمدفوعات",
+    description: "إدارة مفاتيح الربط مع Amadeus وGoogle وMoyasar وغير ذلك.",
+    listKey: "apiKeys",
+    primaryField: "name",
+    fields: [
+      { key: "name", label: "اسم المفتاح" },
+      { key: "provider", label: "المزود" },
+      { key: "key", label: "قيمة المفتاح" },
+      { key: "baseUrl", label: "رابط الاستدعاء (API URL)" },
+      {
+        key: "status",
+        label: "الحالة",
+        type: "select",
+        options: [
+          { label: "مفعل", value: "enabled" },
+          { label: "معطل", value: "disabled" },
+        ],
+      },
+    ],
+  },
+  users: {
+    id: "users",
+    title: "إدارة المستخدمين",
+    description: "قائمة المستخدمين وحالة الحساب.",
+    listKey: "users",
+    primaryField: "name",
+    fields: [
+      { key: "name", label: "الاسم" },
+      { key: "email", label: "البريد الإلكتروني" },
+      {
+        key: "role",
+        label: "الصلاحية",
+        type: "select",
+        options: [
+          { label: "مستخدم", value: "user" },
+          { label: "مدير", value: "admin" },
+        ],
+      },
+      {
+        key: "status",
+        label: "الحالة",
+        type: "select",
+        options: [
+          { label: "نشط", value: "active" },
+          { label: "موقوف", value: "suspended" },
+        ],
+      },
+    ],
+  },
+  pages: {
+    id: "pages",
+    title: "إدارة الصفحات",
+    description: "صفحات تعريفية وسياسات الخدمة.",
+    listKey: "pages",
+    primaryField: "title",
+    fields: [
+      { key: "title", label: "عنوان الصفحة" },
+      { key: "slug", label: "المسار" },
+      { key: "summary", label: "ملخص الصفحة", type: "textarea" },
+    ],
+  },
+};
+
+const parseList = (value: string) =>
+  value
+    .split(/[,\n]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+const parsePairs = (value: string) =>
+  value
+    .split(/\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [name, distance] = line.split("|").map((part) => part.trim());
+      return { name: name || "", distance: distance || "" };
+    })
+    .filter((pair) => pair.name || pair.distance);
+
+const formatPairs = (pairs: { name: string; distance: string }[] | undefined) =>
+  (pairs || []).map((pair) => `${pair.name} | ${pair.distance}`).join("\n");
+
+const parseNumber = (value: string) => {
+  const cleaned = value.replace(/[^0-9.]/g, "");
+  if (!cleaned) return 0;
+  return Number.parseFloat(cleaned) || 0;
+};
+
+const asAdminItem = <K extends SectionKey>(item: Record<string, unknown>, _key: K) =>
+  item as AdminData[K][number];
+
+type FlightBooking = {
+  id?: string;
+  booking_reference?: string | null;
+  provider_order_id?: string | null;
+  total?: number | null;
+  currency?: string | null;
+  trip_type?: string | null;
+  summary?: { outbound?: string; inbound?: string } | null;
+  email?: string | null;
+  travelers_count?: number | null;
+  created_at?: string | null;
+};
+
+export default function Admin() {
+  const navigate = useNavigate();
+  const { isAdmin, loading: authLoading, user, profile, session } = useAuth();
+  const [activeSection, setActiveSection] = useState("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const {
+    data: adminData,
+    loading: adminLoading,
+    upsertItem,
+    deleteItem,
+    updatePromoVideoUrl,
+    updateAdminSettings,
+  } = useAdminData();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Record<string, string>>({});
+  const [promoDraft, setPromoDraft] = useState("");
+  const [appDownloadImageDraft, setAppDownloadImageDraft] = useState("");
+  const [appDownloadLinkDraft, setAppDownloadLinkDraft] = useState("");
+  const [featuredImageDraft, setFeaturedImageDraft] = useState("");
+  const [featuredTitleDraft, setFeaturedTitleDraft] = useState("");
+  const [featuredDescriptionDraft, setFeaturedDescriptionDraft] = useState("");
+  const [featuredLinkDraft, setFeaturedLinkDraft] = useState("");
+  const [contactPhoneDraft, setContactPhoneDraft] = useState("");
+  const [contactEmailDraft, setContactEmailDraft] = useState("");
+  const [contactWhatsappDraft, setContactWhatsappDraft] = useState("");
+  const [contactAddressDraft, setContactAddressDraft] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [authFailed, setAuthFailed] = useState(false);
+  const [flightBookings, setFlightBookings] = useState<FlightBooking[]>([]);
+  const [flightBookingsLoading, setFlightBookingsLoading] = useState(false);
+  const [flightBookingsError, setFlightBookingsError] = useState("");
+  const [revealedKeyId, setRevealedKeyId] = useState<string | null>(null);
+  const isPageLoading = authLoading || adminLoading;
+  const paymentProvider = (import.meta.env.VITE_PAYMENT_PROVIDER || "").toLowerCase();
+  const apiKeysList = adminData?.apiKeys || [];
+  const findApiKey = (provider: string, name: string) =>
+    apiKeysList.find(
+      (item) =>
+        item.provider?.toLowerCase() === provider.toLowerCase() &&
+        item.name?.toLowerCase() === name.toLowerCase() &&
+        item.status === "enabled"
+    )?.key || "";
+  const stripePublicKey =
+    import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || findApiKey("stripe", "publishable_key");
+  const moyasarPublicKey =
+    import.meta.env.VITE_MOYASAR_PUBLISHABLE_KEY || findApiKey("moyasar", "publishable_key");
+  const flightApiBaseUrl =
+    (import.meta.env.VITE_FLIGHT_API_URL as string | undefined) ||
+    "https://jubilant-hope-production-a334.up.railway.app";
+  const promoMediaType = getMediaTypeFromUrl(promoDraft);
+  const isPromoVideo = promoMediaType === "video";
+  const isPromoImage = promoMediaType === "image" || promoMediaType === "unknown";
+  const formatStorageError = (error?: { message?: string }) => {
+    const message = String(error?.message || "").trim();
+    if (message.toLowerCase().includes("bucket") && message.toLowerCase().includes("not found")) {
+      return "فشل الرفع: لم يتم إنشاء Buckets التخزين. أنشئ buckets باسم public و promo في Supabase Storage.";
+    }
+    return `فشل الرفع: ${message || "خطأ غير معروف"}`;
+  };
+
+  const activeConfig = sectionConfigs[activeSection];
+
+  useEffect(() => {
+    if (!activeConfig) return;
+    const nextDraft = activeConfig.fields.reduce<Record<string, string>>((acc, field) => {
+      acc[field.key] = "";
+      return acc;
+    }, {});
+    setDraft(nextDraft);
+    setEditingId(null);
+    setSearchTerm("");
+  }, [activeSection]);
+
+  const loadFlightBookings = async () => {
+    setFlightBookingsLoading(true);
+    setFlightBookingsError("");
+    try {
+      if (!session?.access_token) {
+        throw new Error("missing_session");
+      }
+      const res = await fetch(`${flightApiBaseUrl.replace(/\/$/, "")}/api/flight-bookings`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.error || "failed_to_load");
+      }
+      const data = await res.json();
+      setFlightBookings(Array.isArray(data.items) ? data.items : []);
+    } catch (err) {
+      const code = err instanceof Error ? err.message : "failed_to_load";
+      setFlightBookingsError(
+        code === "missing_session"
+          ? "لا توجد جلسة صالحة. يرجى إعادة تسجيل الدخول."
+          : "تعذر تحميل الحجوزات من الخادم."
+      );
+    } finally {
+      setFlightBookingsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeSection !== "bookings") return;
+    loadFlightBookings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSection]);
+
+  useEffect(() => {
+    setPromoDraft(adminData.promoVideoUrl || "");
+    setAppDownloadImageDraft(adminData.appDownloadImageUrl || "");
+    setAppDownloadLinkDraft(adminData.appDownloadLink || "");
+    setFeaturedImageDraft(adminData.featuredImageUrl || "");
+    setFeaturedTitleDraft(adminData.featuredTitle || "");
+    setFeaturedDescriptionDraft(adminData.featuredDescription || "");
+    setFeaturedLinkDraft(adminData.featuredLink || "");
+    setContactPhoneDraft(adminData.contactPhone || "");
+    setContactEmailDraft(adminData.contactEmail || "");
+    setContactWhatsappDraft(adminData.contactWhatsapp || "");
+    setContactAddressDraft(adminData.contactAddress || "");
+  }, [
+    adminData.promoVideoUrl,
+    adminData.appDownloadImageUrl,
+    adminData.appDownloadLink,
+    adminData.featuredImageUrl,
+    adminData.featuredTitle,
+    adminData.featuredDescription,
+    adminData.featuredLink,
+    adminData.contactPhone,
+    adminData.contactEmail,
+    adminData.contactWhatsapp,
+    adminData.contactAddress,
+  ]);
+
+  const stats = useMemo(
+    () => [
+      { name: "العروض النشطة", value: adminData.offers.length.toString() },
+      { name: "الفنادق", value: adminData.hotels.length.toString() },
+      { name: "الوجهات", value: adminData.destinations.length.toString() },
+      { name: "المقالات", value: adminData.articles.length.toString() },
+      { name: "الحجوزات", value: flightBookings.length.toString() },
+      { name: "مفاتيح API", value: apiKeysList.length.toString() },
+    ],
+    [adminData, flightBookings, apiKeysList]
+  );
+
+  const integrationStatus = useMemo(() => {
+    const check = (provider: string, ...names: string[]) =>
+      names.every((name) =>
+        apiKeysList.some(
+          (k) =>
+            k.provider?.toLowerCase() === provider.toLowerCase() &&
+            k.name?.toLowerCase() === name.toLowerCase() &&
+            k.status === "enabled" &&
+            k.key
+        )
+      );
+    return [
+      { name: "Amadeus (طيران + فنادق)", ready: check("amadeus", "client_id", "client_secret") },
+      { name: "Moyasar (مدفوعات)", ready: check("moyasar", "secret_key") || !!moyasarPublicKey },
+      { name: "Admitad (عمولات)", ready: check("admitad", "campaign_code") },
+      { name: "تأجير سيارات", ready: check("car_rental", "api_key") || check("car_rental", "client_id") },
+      { name: "جولات سياحية", ready: check("tours", "api_key") || check("tours", "client_id") },
+      { name: "نقل خاص", ready: check("transfers", "api_key") || check("transfers", "client_id") },
+      { name: "Railway (خادم)", ready: !!flightApiBaseUrl },
+      { name: "Supabase (قاعدة بيانات)", ready: !!import.meta.env.VITE_SUPABASE_URL },
+    ];
+  }, [apiKeysList, moyasarPublicKey, flightApiBaseUrl]);
+
+  const handleDraftChange = (key: string, value: string) => {
+    setDraft((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleSaveAppDownload = async () => {
+    await updateAdminSettings(
+      {
+        appDownloadImageUrl: appDownloadImageDraft,
+        appDownloadLink: appDownloadLinkDraft,
+      },
+      user?.id
+    );
+  };
+
+  const handleSaveFeatured = async () => {
+    await updateAdminSettings(
+      {
+        featuredImageUrl: featuredImageDraft,
+        featuredTitle: featuredTitleDraft,
+        featuredDescription: featuredDescriptionDraft,
+        featuredLink: featuredLinkDraft,
+      },
+      user?.id
+    );
+  };
+
+  const handleSaveContact = async () => {
+    await updateAdminSettings(
+      {
+        contactPhone: contactPhoneDraft,
+        contactEmail: contactEmailDraft,
+        contactWhatsapp: contactWhatsappDraft,
+        contactAddress: contactAddressDraft,
+      },
+      user?.id
+    );
+  };
+
+  const buildItemFromDraft = () => {
+    if (!activeConfig) return null;
+    const nextItem: Record<string, unknown> = {
+      id: editingId ?? `${activeConfig.id}-${Date.now()}`,
+    };
+
+    activeConfig.fields.forEach((field) => {
+      const raw = draft[field.key] ?? "";
+      if (field.type === "list") {
+        nextItem[field.key] = parseList(raw);
+        return;
+      }
+      if (field.type === "pairlist") {
+        nextItem[field.key] = parsePairs(raw);
+        return;
+      }
+      if (field.type === "number") {
+        nextItem[field.key] = parseNumber(raw);
+        return;
+      }
+      nextItem[field.key] = raw;
+    });
+
+    return nextItem;
+  };
+
+  const handleSaveItem = async () => {
+    if (!activeConfig) return;
+    const nextItem = buildItemFromDraft();
+    if (!nextItem) return;
+    const saved = await upsertItem(activeConfig.listKey, asAdminItem(nextItem, activeConfig.listKey));
+    if (!saved) return;
+
+    const resetDraft = activeConfig.fields.reduce<Record<string, string>>((acc, field) => {
+      acc[field.key] = "";
+      return acc;
+    }, {});
+    setDraft(resetDraft);
+    setEditingId(null);
+  };
+
+  const handleEditItem = (item: Record<string, unknown>) => {
+    if (!activeConfig) return;
+    const nextDraft = activeConfig.fields.reduce<Record<string, string>>((acc, field) => {
+      const value = item[field.key];
+      if (field.type === "list") {
+        acc[field.key] = Array.isArray(value) ? value.join(", ") : "";
+        return acc;
+      }
+      if (field.type === "pairlist") {
+        acc[field.key] = formatPairs(value as { name: string; distance: string }[] | undefined);
+        return acc;
+      }
+      acc[field.key] = value ? String(value) : "";
+      return acc;
+    }, {});
+    setDraft(nextDraft);
+    setEditingId(String(item.id ?? ""));
+  };
+
+  const handleDeleteItem = async (id: string) => {
+    if (!activeConfig) return;
+    await deleteItem(activeConfig.listKey, id);
+  };
+
+  const filteredItems = useMemo(() => {
+    if (!activeConfig) return [];
+    const items = adminData[activeConfig.listKey] as Record<string, unknown>[];
+    if (!searchTerm) return items;
+    const term = searchTerm.toLowerCase();
+    return items.filter((item) =>
+      activeConfig.fields.some((field) =>
+        String(item[field.key] ?? "").toLowerCase().includes(term)
+      )
+    );
+  }, [adminData, activeConfig, searchTerm]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!authLoading && !isAdmin) {
+        setAuthFailed(true);
+      }
+    }, 8000);
+    return () => clearTimeout(timeout);
+  }, [authLoading, isAdmin]);
+
+  if (isPageLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted px-4">
+        <div className="bg-card rounded-2xl p-10 shadow-card text-center max-w-lg">
+          <h2 className="text-2xl font-bold mb-3">جاري التحقق من الصلاحيات</h2>
+          <p className="text-muted-foreground">يرجى الانتظار لحظات...</p>
+          <div className="mt-6 flex justify-center gap-3">
+            <Button variant="outline" onClick={() => window.location.reload()}>
+              إعادة المحاولة
+            </Button>
+            {authFailed && (
+              <Button variant="ghost" onClick={() => navigate("/auth")}>
+                تسجيل الدخول
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted px-4">
+        <div className="bg-card rounded-2xl p-10 shadow-card text-center max-w-lg">
+          <h2 className="text-2xl font-bold mb-3">الوصول مقيّد</h2>
+          <p className="text-muted-foreground mb-6">
+            هذه الصفحة مخصّصة لحسابات الإدارة فقط. تأكد من تسجيل الدخول بحساب يمتلك صلاحيات الإدارة.
+          </p>
+          <a href="/auth" className="inline-flex items-center justify-center h-12 px-6 rounded-xl hero-gradient text-primary-foreground">
+            تسجيل الدخول
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-muted flex overflow-x-hidden" dir="rtl">
+      <div
+        className={`fixed inset-0 z-40 lg:hidden transition-opacity duration-300 ${
+          mobileSidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <div
+          className="absolute inset-0 bg-foreground/30 backdrop-blur-sm"
+          onClick={() => setMobileSidebarOpen(false)}
+        />
+        <aside
+          className={`absolute top-0 right-0 h-full w-64 max-w-[80vw] bg-card shadow-2xl transform transition-transform duration-300 ease-out flex flex-col ${
+            mobileSidebarOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
+          <div className="p-4 border-b border-border flex items-center justify-between">
+              <div className="flex items-center gap-3">
+              <ImageWithFallback src="/logo.png" alt="مشروك" className="w-10 h-10 object-contain" fallbackSrc="/logo.png" fallbackQuery="Mashrouk logo" />
+              <span className="text-xl font-bold text-gradient">مشروك</span>
+            </div>
+            <button onClick={() => setMobileSidebarOpen(false)} className="p-2 hover:bg-muted rounded-lg">
+              <ChevronLeft className="w-5 h-5 rotate-180" />
+            </button>
+          </div>
+
+          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+            {sidebarItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeSection === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveSection(item.id);
+                    setMobileSidebarOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                    isActive
+                      ? "hero-gradient text-primary-foreground shadow-soft"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <span>{item.name}</span>
+                </button>
+              );
+            })}
+          </nav>
+
+          <div className="p-4 border-t border-border">
+            <a href="/">
+              <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all">
+                <LogOut className="w-5 h-5 flex-shrink-0" />
+                <span>العودة للموقع</span>
+              </button>
+            </a>
+          </div>
+        </aside>
+      </div>
+
+      <aside className={`hidden lg:flex ${sidebarOpen ? "w-64" : "w-20"} bg-card border-l border-border transition-all duration-300 flex-col`}>
+        <div className="p-4 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <ImageWithFallback src="/logo.png" alt="مشروك" className="w-10 h-10 object-contain" fallbackSrc="/logo.png" fallbackQuery="Mashrouk logo" />
+            {sidebarOpen && <span className="text-xl font-bold text-gradient">مشروك</span>}
+          </div>
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1 hover:bg-muted rounded">
+            <ChevronLeft className={`w-5 h-5 transition-transform ${!sidebarOpen ? "rotate-180" : ""}`} />
+          </button>
+        </div>
+
+        <nav className="flex-1 p-4 space-y-2">
+          {sidebarItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeSection === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveSection(item.id)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  isActive
+                    ? "hero-gradient text-primary-foreground shadow-soft"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                {sidebarOpen && <span>{item.name}</span>}
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="p-4 border-t border-border">
+          <a href="/">
+            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-all">
+              <LogOut className="w-5 h-5 flex-shrink-0" />
+              {sidebarOpen && <span>العودة للموقع</span>}
+            </button>
+          </a>
+        </div>
+      </aside>
+
+      <main className="flex-1 flex flex-col">
+        <header className="bg-card border-b border-border px-4 lg:px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              className="lg:hidden p-2 hover:bg-muted rounded-lg"
+              onClick={() => setMobileSidebarOpen(true)}
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <h1 className="text-xl font-bold">
+              {sidebarItems.find((item) => item.id === activeSection)?.name}
+            </h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="hidden md:flex flex-col text-right">
+              <span className="text-sm text-muted-foreground">{user?.email ?? ""}</span>
+              <span className="text-xs text-primary">
+                {isAdmin ? "مدير" : profile?.role ? "مستخدم" : "غير مسجل"}
+              </span>
+            </div>
+            <div className="relative hidden md:block">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Input placeholder="بحث سريع..." className="pr-10 w-64" />
+            </div>
+            <button className="relative p-2 hover:bg-muted rounded-lg">
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
+            </button>
+            <div className="w-10 h-10 hero-gradient rounded-full flex items-center justify-center text-primary-foreground font-bold">
+              أ
+            </div>
+          </div>
+        </header>
+
+        <div className="flex-1 p-6 overflow-auto">
+          {activeSection === "dashboard" && (
+            <div className="space-y-8">
+              <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {stats.map((stat) => (
+                  <div key={stat.name} className="bg-card rounded-2xl p-6 shadow-card">
+                    <p className="text-sm text-muted-foreground">{stat.name}</p>
+                    <p className="text-3xl font-bold mt-2">{stat.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-card rounded-2xl p-8 shadow-card">
+                <div className="flex items-center gap-3 mb-6">
+                  <Link2 className="w-6 h-6 text-secondary" />
+                  <h2 className="text-2xl font-bold">حالة التكاملات (API Integrations)</h2>
+                </div>
+                <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-4">
+                  {integrationStatus.map((svc) => (
+                    <div key={svc.name} className={`rounded-xl p-4 border ${svc.ready ? "border-green-200 bg-green-50 dark:bg-green-900/10 dark:border-green-800" : "border-orange-200 bg-orange-50 dark:bg-orange-900/10 dark:border-orange-800"}`}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`w-2.5 h-2.5 rounded-full ${svc.ready ? "bg-green-500" : "bg-orange-400"}`} />
+                        <span className="text-sm font-semibold">{svc.name}</span>
+                      </div>
+                      <p className={`text-xs ${svc.ready ? "text-green-700 dark:text-green-400" : "text-orange-700 dark:text-orange-400"}`}>
+                        {svc.ready ? "مُهيأ وجاهز" : "يحتاج تهيئة"}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-4">
+                  أضف المفاتيح المفقودة من قسم <button onClick={() => setActiveSection("api")} className="text-primary underline">API Keys</button> لتفعيل الخدمات.
+                </p>
+              </div>
+
+              <div className="bg-card rounded-2xl p-8 shadow-card">
+                <h2 className="text-2xl font-bold mb-4">إدارة محتوى مشروك</h2>
+                <p className="text-muted-foreground">
+                  استخدم القائمة الجانبية لإضافة أو تعديل المحتوى. جميع التعديلات تُحفظ فوراً وتنعكس على صفحات الموقع.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {activeSection === "settings" && (
+            <div className="space-y-6">
+              <div className="bg-card rounded-2xl p-8 shadow-card">
+                <div className="flex items-center gap-3 mb-4">
+                  <PlayCircle className="w-6 h-6 text-secondary" />
+                  <h2 className="text-2xl font-bold">الفيديو التعريفي أو صورة إعلان</h2>
+                </div>
+                <p className="text-sm text-muted-foreground mb-6">
+                  ضع رابط فيديو (MP4) أو صورة إعلان جذابة (JPG/PNG) ليظهر في الصفحة الرئيسية. إذا كانت صورة سيتم ربطها بقسم “مواسم”.
+                </p>
+                <div className="flex flex-col md:flex-row gap-4 mb-4">
+                  <Input
+                    placeholder="https://example.com/promo.mp4"
+                    value={promoDraft}
+                    onChange={(event) => setPromoDraft(event.target.value)}
+                  />
+                  <Button
+                    variant="hero"
+                    onClick={() => updatePromoVideoUrl(promoDraft, user?.id)}
+                  >
+                    حفظ الرابط
+                  </Button>
+                </div>
+                <div className="flex flex-col md:flex-row gap-4 mb-4">
+                  <input
+                    type="file"
+                    accept="image/*,video/*"
+                    onChange={async (event) => {
+                      const file = event.target.files?.[0];
+                      if (!file) return;
+                      // رفع الملف إلى Supabase Storage
+                      const fileName = `promo/${Date.now()}-${file.name}`;
+                      const { data, error } = await supabase.storage.from("promo").upload(fileName, file);
+                      if (error) {
+                        alert(formatStorageError(error));
+                        return;
+                      }
+                      const url = supabase.storage.from("promo").getPublicUrl(fileName).publicUrl;
+                      setPromoDraft(url);
+                      await updatePromoVideoUrl(url, user?.id);
+                    }}
+                  />
+                  <Button
+                    variant="secondary"
+                    onClick={async () => {
+                      setPromoDraft("");
+                      await updateAdminSettings({ promoVideoUrl: "" }, user?.id);
+                    }}
+                  >
+                    مسح الملف
+                  </Button>
+                </div>
+                <div className="mt-6 flex gap-6">
+                  {promoDraft && isPromoImage && (
+                    <ImageWithFallback
+                      src={promoDraft}
+                      alt="صورة إعلان"
+                      className="rounded-xl shadow-card w-64 h-40 object-cover"
+                      fallbackQuery="promo image"
+                    />
+                  )}
+                  {promoDraft && isPromoVideo && (
+                    <video src={promoDraft} controls className="rounded-xl shadow-card w-64 h-40 object-cover" />
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-card rounded-2xl p-8 shadow-card">
+                <div className="flex items-center gap-3 mb-4">
+                  <Smartphone className="w-6 h-6 text-secondary" />
+                  <h2 className="text-2xl font-bold">صورة تحميل التطبيق</h2>
+                </div>
+                <p className="text-sm text-muted-foreground mb-6">
+                  ارفع صورة جذابة للتطبيق واربطها برابط التحميل من المتجر أو الموقع.
+                </p>
+                <div className="grid md:grid-cols-2 gap-4 mb-4">
+                  <Input
+                    placeholder="https://appstore.com/app"
+                    value={appDownloadLinkDraft}
+                    onChange={(event) => setAppDownloadLinkDraft(event.target.value)}
+                  />
+                  <Button variant="hero" onClick={handleSaveAppDownload}>
+                    حفظ الرابط
+                  </Button>
+                </div>
+                <div className="flex flex-col md:flex-row gap-4 mb-4">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (event) => {
+                      const file = event.target.files?.[0];
+                      if (!file) return;
+                      const fileName = `app-download/${Date.now()}-${file.name}`;
+                      const { error } = await supabase.storage.from("public").upload(fileName, file);
+                      if (error) {
+                        alert(formatStorageError(error));
+                        return;
+                      }
+                      const url = supabase.storage.from("public").getPublicUrl(fileName).publicUrl;
+                      setAppDownloadImageDraft(url);
+                      await updateAdminSettings({ appDownloadImageUrl: url }, user?.id);
+                    }}
+                  />
+                  <Button
+                    variant="secondary"
+                    onClick={async () => {
+                      setAppDownloadImageDraft("");
+                      await updateAdminSettings({ appDownloadImageUrl: "" }, user?.id);
+                    }}
+                  >
+                    مسح الصورة
+                  </Button>
+                </div>
+                {appDownloadImageDraft && (
+                  <ImageWithFallback
+                    src={appDownloadImageDraft}
+                    alt="صورة التطبيق"
+                    className="rounded-xl shadow-card w-72 h-44 object-cover"
+                    fallbackQuery="app download image"
+                  />
+                )}
+              </div>
+
+              <div className="bg-card rounded-2xl p-8 shadow-card">
+                <div className="flex items-center gap-3 mb-4">
+                  <Phone className="w-6 h-6 text-secondary" />
+                  <h2 className="text-2xl font-bold">بيانات التواصل</h2>
+                </div>
+                <p className="text-sm text-muted-foreground mb-6">
+                  حدّث رقم الهاتف والبريد والواتساب والعنوان لظهورها في الموقع.
+                </p>
+                <div className="grid md:grid-cols-2 gap-4 mb-4">
+                  <Input
+                    placeholder="رقم التواصل"
+                    value={contactPhoneDraft}
+                    onChange={(event) => setContactPhoneDraft(event.target.value)}
+                    className="phone-field"
+                    dir="ltr"
+                  />
+                  <Input
+                    placeholder="واتساب"
+                    value={contactWhatsappDraft}
+                    onChange={(event) => setContactWhatsappDraft(event.target.value)}
+                    className="phone-field"
+                    dir="ltr"
+                  />
+                </div>
+                <div className="grid md:grid-cols-2 gap-4 mb-4">
+                  <Input
+                    placeholder="البريد الإلكتروني"
+                    value={contactEmailDraft}
+                    onChange={(event) => setContactEmailDraft(event.target.value)}
+                    className="phone-field"
+                    dir="ltr"
+                  />
+                  <div className="flex items-center gap-3 text-muted-foreground text-sm">
+                    <Mail className="w-4 h-4" />
+                    <span>تأكد من البريد الصحيح لاستقبال الرسائل.</span>
+                  </div>
+                </div>
+                <Textarea
+                  placeholder="العنوان"
+                  value={contactAddressDraft}
+                  onChange={(event) => setContactAddressDraft(event.target.value)}
+                  className="mb-4"
+                />
+                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-4">
+                  <MapPin className="w-4 h-4" />
+                  <span>العنوان الظاهر للزوار.</span>
+                </div>
+                <Button variant="hero" onClick={handleSaveContact}>
+                  حفظ بيانات التواصل
+                </Button>
+              </div>
+
+              <div className="bg-card rounded-2xl p-8 shadow-card">
+                <div className="flex items-center gap-3 mb-4">
+                  <Sparkles className="w-6 h-6 text-secondary" />
+                  <h2 className="text-2xl font-bold">العرض المميز أو الحدث الترفيهي</h2>
+                </div>
+                <p className="text-sm text-muted-foreground mb-6">
+                  ارفع صورة لعرض الرحلة الأهم أو لحدث ترفيهي، مع العنوان والوصف والرابط.
+                </p>
+                <div className="grid md:grid-cols-2 gap-4 mb-4">
+                  <Input
+                    placeholder="عنوان العرض أو الحدث"
+                    value={featuredTitleDraft}
+                    onChange={(event) => setFeaturedTitleDraft(event.target.value)}
+                  />
+                  <Input
+                    placeholder="رابط العرض أو الحدث"
+                    value={featuredLinkDraft}
+                    onChange={(event) => setFeaturedLinkDraft(event.target.value)}
+                  />
+                </div>
+                <div className="mb-4">
+                  <Textarea
+                    placeholder="وصف مختصر يجذب العملاء"
+                    value={featuredDescriptionDraft}
+                    onChange={(event) => setFeaturedDescriptionDraft(event.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col md:flex-row gap-4 mb-4">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (event) => {
+                      const file = event.target.files?.[0];
+                      if (!file) return;
+                      const fileName = `featured/${Date.now()}-${file.name}`;
+                      const { error } = await supabase.storage.from("public").upload(fileName, file);
+                      if (error) {
+                        alert(formatStorageError(error));
+                        return;
+                      }
+                      const url = supabase.storage.from("public").getPublicUrl(fileName).publicUrl;
+                      setFeaturedImageDraft(url);
+                      await updateAdminSettings({ featuredImageUrl: url }, user?.id);
+                    }}
+                  />
+                  <div className="flex gap-3">
+                    <Button variant="hero" onClick={handleSaveFeatured}>
+                      حفظ البيانات
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={async () => {
+                        setFeaturedImageDraft("");
+                        await updateAdminSettings({ featuredImageUrl: "" }, user?.id);
+                      }}
+                    >
+                      مسح الصورة
+                    </Button>
+                  </div>
+                </div>
+                {featuredImageDraft && (
+                  <ImageWithFallback
+                    src={featuredImageDraft}
+                    alt="العرض المميز"
+                    className="rounded-xl shadow-card w-full max-w-xl h-56 object-cover"
+                    fallbackQuery="عرض سياحي"
+                  />
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeSection === "payments" && (
+            <div className="space-y-6">
+              <div className="bg-card rounded-2xl p-8 shadow-card">
+                <div className="flex items-center gap-3 mb-4">
+                  <CreditCard className="w-6 h-6 text-primary" />
+                  <h2 className="text-2xl font-bold">لوحة المدفوعات</h2>
+                </div>
+                <p className="text-sm text-muted-foreground mb-6">
+                  إعدادات الدفع المباشر تُدار عبر مزود خارجي. تأكد من تهيئة المفاتيح العامة في ملف البيئة وعدم تخزين المفاتيح السرية في الواجهة.
+                </p>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="bg-muted rounded-2xl p-4">
+                    <p className="text-xs text-muted-foreground">المزود الحالي</p>
+                    <p className="text-lg font-semibold mt-2">
+                      {paymentProvider ? paymentProvider : "غير مهيأ"}
+                    </p>
+                  </div>
+                  <div className="bg-muted rounded-2xl p-4">
+                    <p className="text-xs text-muted-foreground">مفتاح Stripe العام</p>
+                    <p className="text-lg font-semibold mt-2">
+                      {stripePublicKey ? "موجود" : "غير موجود"}
+                    </p>
+                  </div>
+                  <div className="bg-muted rounded-2xl p-4">
+                    <p className="text-xs text-muted-foreground">مفتاح Moyasar العام</p>
+                    <p className="text-lg font-semibold mt-2">
+                      {moyasarPublicKey ? "موجود" : "غير موجود"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-card rounded-2xl p-6 shadow-card">
+                  <div className="flex items-center gap-3 mb-3">
+                    <ShieldCheck className="w-5 h-5 text-secondary" />
+                    <h3 className="text-lg font-bold">جاهزية الأمان</h3>
+                  </div>
+                  <ul className="text-sm text-muted-foreground space-y-2">
+                    <li>تأكد من تفعيل 3D Secure لدى مزود الدفع.</li>
+                    <li>استخدم Webhooks للتحقق من حالة الدفع من الخادم.</li>
+                    <li>لا تحفظ بيانات البطاقة في المتصفح أو قاعدة البيانات.</li>
+                  </ul>
+                </div>
+                <div className="bg-card rounded-2xl p-6 shadow-card">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Key className="w-5 h-5 text-secondary" />
+                    <h3 className="text-lg font-bold">المفاتيح والسرية</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    المفاتيح السرية يجب أن تبقى في الخادم فقط. يمكنك إدارة المفاتيح العامة من ملف البيئة وتحديثها بدون إعادة نشر قاعدة البيانات.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeSection === "bookings" && (
+            <div className="space-y-6">
+              <div className="bg-card rounded-2xl p-8 shadow-card">
+                <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
+                  <div>
+                    <h2 className="text-2xl font-bold">إدارة الحجوزات</h2>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      عرض جميع حجوزات الطيران المسجلة عبر الخادم.
+                    </p>
+                  </div>
+                  <Button variant="outline" className="gap-2" onClick={loadFlightBookings} disabled={flightBookingsLoading}>
+                    {flightBookingsLoading ? "جاري التحميل..." : "تحديث"}
+                  </Button>
+                </div>
+
+                {flightBookingsError && (
+                  <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 text-destructive text-sm mb-4">
+                    {flightBookingsError}
+                  </div>
+                )}
+
+                {flightBookingsLoading ? (
+                  <div className="text-center py-12 text-muted-foreground">جاري تحميل الحجوزات...</div>
+                ) : flightBookings.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">لا توجد حجوزات مسجلة بعد.</div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border text-muted-foreground">
+                          <th className="text-right py-3 px-4 font-semibold">المرجع</th>
+                          <th className="text-right py-3 px-4 font-semibold">البريد</th>
+                          <th className="text-right py-3 px-4 font-semibold">النوع</th>
+                          <th className="text-right py-3 px-4 font-semibold">المسافرون</th>
+                          <th className="text-right py-3 px-4 font-semibold">المبلغ</th>
+                          <th className="text-right py-3 px-4 font-semibold">التاريخ</th>
+                          <th className="text-right py-3 px-4 font-semibold">الرحلة</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {flightBookings.map((bk) => (
+                          <tr key={bk.id || bk.booking_reference} className="border-b border-border/50 hover:bg-muted/50 transition">
+                            <td className="py-3 px-4 font-mono text-xs">{bk.booking_reference || bk.provider_order_id || "—"}</td>
+                            <td className="py-3 px-4">{bk.email || "—"}</td>
+                            <td className="py-3 px-4">
+                              <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs">
+                                {bk.trip_type === "roundTrip" ? "ذهاب وعودة" : bk.trip_type === "oneWay" ? "ذهاب فقط" : bk.trip_type || "طيران"}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-center">{bk.travelers_count ?? "—"}</td>
+                            <td className="py-3 px-4 font-semibold">
+                              {bk.total != null ? `${Number(bk.total).toLocaleString()} ${bk.currency || "SAR"}` : "—"}
+                            </td>
+                            <td className="py-3 px-4 text-xs text-muted-foreground">
+                              {bk.created_at ? new Date(bk.created_at).toLocaleDateString("ar-SA") : "—"}
+                            </td>
+                            <td className="py-3 px-4 text-xs">
+                              {bk.summary?.outbound || "—"}
+                              {bk.summary?.inbound && <><br /><span className="text-muted-foreground">{bk.summary.inbound}</span></>}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeConfig && (
+            <div className="space-y-6">
+              <div className="bg-card rounded-2xl p-8 shadow-card">
+                <div className="flex items-start justify-between flex-wrap gap-4">
+                  <div>
+                    <h2 className="text-2xl font-bold">{activeConfig.title}</h2>
+                    <p className="text-sm text-muted-foreground mt-2">{activeConfig.description}</p>
+                    {activeSection === "api" && (
+                      <div className="mt-3 text-xs text-muted-foreground space-y-1">
+                        <p>Admitad: استخدم provider=admitad و name=campaign_code وضع الكود داخل قيمة المفتاح.</p>
+                        <p>رابط الاستدعاء (API URL): استخدم الحقل المخصص لذلك أو name=base_url إن كنت تخزن الرابط كمفتاح.</p>
+                        <p>مفاتيح المدفوعات: Moyasar → provider=moyasar مع name=secret_key و name=publishable_key.</p>
+                        <p>الفنادق (Amadeus): provider=amadeus مع name=client_id و name=client_secret و baseUrl=https://test.api.amadeus.com.</p>
+                        <p>السيارات: provider=car_rental مع name=api_key أو client_id/client_secret + token_url + base_url.</p>
+                        <p>الجولات: provider=tours مع name=api_key أو client_id/client_secret + token_url + base_url.</p>
+                        <p>النقل الخاص: provider=transfers مع name=api_key أو client_id/client_secret + token_url + base_url.</p>
+                        <p>فعّل الحالة (مفعل) حتى يتم استخدام المفتاح في الواجهة.</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        placeholder="بحث داخل القائمة"
+                        className="pr-9"
+                        value={searchTerm}
+                        onChange={(event) => setSearchTerm(event.target.value)}
+                      />
+                    </div>
+                    <Button variant="hero" className="gap-2" onClick={handleSaveItem}>
+                      <Plus className="w-4 h-4" />
+                      {editingId ? "تحديث" : "إضافة"}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="mt-6 grid md:grid-cols-2 gap-4">
+                  {activeConfig.fields.map((field) => (
+                    <div key={field.key} className={field.type === "textarea" ? "md:col-span-2" : ""}>
+                      <label className="text-sm text-muted-foreground mb-2 block">{field.label}</label>
+                      {(field.key === "image" || field.key === "logo") ? (
+                        <div className="flex flex-col gap-2">
+                          <Input
+                            value={draft[field.key] ?? ""}
+                            placeholder={field.placeholder}
+                            onChange={(event) => handleDraftChange(field.key, event.target.value)}
+                          />
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={async (event) => {
+                              const file = event.target.files?.[0];
+                              if (!file) return;
+                              const fileName = `${field.key}/${Date.now()}-${file.name}`;
+                              const { data, error } = await supabase.storage.from("public").upload(fileName, file);
+                              if (error) {
+                                alert(formatStorageError(error));
+                                return;
+                              }
+                              const url = supabase.storage.from("public").getPublicUrl(fileName).publicUrl;
+                              handleDraftChange(field.key, url);
+                            }}
+                          />
+                          {draft[field.key] && (
+                            <ImageWithFallback
+                              src={draft[field.key]}
+                              alt="صورة"
+                              className="rounded-xl shadow-card w-40 h-24 object-cover mt-2"
+                              fallbackQuery={String(field.label || field.key)}
+                            />
+                          )}
+                        </div>
+                      ) : field.type === "textarea" ? (
+                        <Textarea
+                          value={draft[field.key] ?? ""}
+                          placeholder={field.placeholder}
+                          onChange={(event) => handleDraftChange(field.key, event.target.value)}
+                        />
+                      ) : field.type === "select" ? (
+                        <select
+                          className="h-12 w-full rounded-xl border border-input bg-background px-3 text-sm"
+                          value={draft[field.key] ?? ""}
+                          onChange={(event) => handleDraftChange(field.key, event.target.value)}
+                        >
+                          <option value="">اختر</option>
+                          {field.options?.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      ) : field.type === "list" || field.type === "pairlist" ? (
+                        <Textarea
+                          value={draft[field.key] ?? ""}
+                          placeholder={field.placeholder}
+                          onChange={(event) => handleDraftChange(field.key, event.target.value)}
+                        />
+                      ) : (
+                        <Input
+                          value={draft[field.key] ?? ""}
+                          placeholder={field.placeholder}
+                          onChange={(event) => handleDraftChange(field.key, event.target.value)}
+                        />
+                      )}
+                      {field.type === "list" && (
+                        <p className="text-xs text-muted-foreground mt-1">افصل العناصر بفاصلة أو سطر جديد.</p>
+                      )}
+                      {field.type === "pairlist" && (
+                        <p className="text-xs text-muted-foreground mt-1">مثال: المطار | 20 دقيقة</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                {filteredItems.map((item) => (
+                  <div key={String(item.id)} className="bg-card rounded-2xl p-6 shadow-card">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-bold">
+                        {String(item[activeConfig.primaryField || activeConfig.fields[0].key] ?? "عنصر")}
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleEditItem(item)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleDeleteItem(String(item.id))}
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="mt-4 space-y-2 text-sm text-muted-foreground">
+                      {activeConfig.fields.map((field) => {
+                        const value = item[field.key];
+                        if (!value) return null;
+                        if (field.type === "list" && Array.isArray(value)) {
+                          return (
+                            <p key={field.key}>
+                              <span className="font-semibold text-foreground">{field.label}: </span>
+                              {value.join("، ")}
+                            </p>
+                          );
+                        }
+                        if (field.type === "pairlist" && Array.isArray(value)) {
+                          return (
+                            <p key={field.key}>
+                              <span className="font-semibold text-foreground">{field.label}: </span>
+                              {value.map((pair) => `${pair.name} (${pair.distance})`).join("، ")}
+                            </p>
+                          );
+                        }
+                        // mask sensitive keys in the API Keys list
+                        if (activeConfig.listKey === 'apiKeys' && field.key === 'key') {
+                          const isRevealed = String(item.id) === revealedKeyId;
+                          return (
+                            <p key={field.key}>
+                              <span className="font-semibold text-foreground">{field.label}: </span>
+                              <span className="mr-2">{isRevealed ? String(value) : '••••••••••'}</span>
+                              <button
+                                className="text-sm text-primary underline"
+                                onClick={() => setRevealedKeyId(isRevealed ? null : String(item.id))}
+                              >
+                                {isRevealed ? 'إخفاء' : 'عرض'}
+                              </button>
+                            </p>
+                          );
+                        }
+
+                        return (
+                          <p key={field.key}>
+                            <span className="font-semibold text-foreground">{field.label}: </span>
+                            {String(value)}
+                          </p>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}

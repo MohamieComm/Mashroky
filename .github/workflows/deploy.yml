@@ -1,0 +1,91 @@
+name: Build and Deploy to Railway
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies (app)
+        run: |
+          cd app
+          npm ci
+
+      - name: Lint
+        run: |
+          cd app
+          npm run lint --if-present || true
+
+      - name: Build frontend
+        run: |
+          cd app
+          npm run build
+
+      - name: Install dependencies (backend)
+        run: |
+          cd flight-backend
+          npm ci
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          npm install -g @railway/cli
+          railway deploy --detach --service=api -e production
+
+  health-check:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for deployment
+        run: sleep 30
+
+      - name: Check service health
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          npm install -g @railway/cli
+          URL=$(railway service --json | jq -r '.domains[0]' || echo "")
+          if [ -z "$URL" ]; then
+            echo "Service URL not found, checking logs..."
+            railway logs --limit=50
+            exit 1
+          fi
+          
+          echo "Checking health at: $URL"
+          for i in {1..5}; do
+            if curl -sf "$URL" > /dev/null; then
+              echo "✓ Service is healthy"
+              exit 0
+            fi
+            echo "Attempt $i/5 failed, retrying..."
+            sleep 10
+          done
+          
+          echo "✗ Service health check failed"
+          exit 1
+
+      - name: Notify status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = context.payload.pull_request ? 'pull_request' : 'push'
+            const conclusion = job.status === 'success' ? 'Success' : 'Failed'
+            console.log(`Deployment ${conclusion} for ${status}`)
