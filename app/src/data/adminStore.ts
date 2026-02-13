@@ -936,6 +936,7 @@ const fixMojibake = (value: string) => {
 };
 
 const stripInvalidChars = (value: string) =>
+  // eslint-disable-next-line no-control-regex
   value.replace(/\uFFFD+/g, "").replace(/[\x00-\x1F\x7F]/g, "").trim();
 
 const sanitizeText = (value: string, fallback = "") => {

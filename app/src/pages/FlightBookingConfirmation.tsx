@@ -8,7 +8,12 @@ const BOOKING_KEY = "mashrouk-flight-booking";
 const BOOKING_STATUS_KEY = "mashrouk-flight-booking-status";
 
 // Admitad SALE tracking injection
-function AdmitadSaleScript({ orderNumber, discountCode, items, currency }: any) {
+function AdmitadSaleScript({ orderNumber, discountCode, items, currency }: {
+  orderNumber: string;
+  discountCode: string;
+  items: Array<{ id: string; price: string; quantity: string }>;
+  currency: string;
+}) {
   return (
     <script
       dangerouslySetInnerHTML={{
@@ -20,7 +25,7 @@ ADMITAD.Invoice.category = '1';
 var orderedItem = [];
 ${items
   .map(
-    (item: any) => `orderedItem.push({Product:{productID:'${item.id}',category:'1',price:'${item.price}',priceCurrency:'${currency}'},orderQuantity:'${item.quantity}',additionalType:'sale'});`
+    (item) => `orderedItem.push({Product:{productID:'${item.id}',category:'1',price:'${item.price}',priceCurrency:'${currency}'},orderQuantity:'${item.quantity}',additionalType:'sale'});`
   )
   .join('\n')}
 ADMITAD.Invoice.referencesOrder = ADMITAD.Invoice.referencesOrder || [];

@@ -13,6 +13,7 @@ export function safeText(value?: unknown, fallback = "غير متوفر") {
   const replacementCount = (s.match(/\uFFFD/g) || []).length;
   if (replacementCount > 2) return fallback;
   // Remove any lone replacement chars and control characters
+  // eslint-disable-next-line no-control-regex
   const cleaned = s.replace(/\uFFFD+/g, "").replace(/[\x00-\x1F\x7F]/g, "").trim();
   return cleaned || fallback;
 }

@@ -34,7 +34,7 @@ const TRANSFER_BOOKING_RESULT_KEY = "mashrouk-transfer-booking-result";
 type ServiceBookingState = {
   status: "idle" | "processing" | "success" | "error";
   message?: string;
-  result?: any;
+  result?: unknown;
 };
 
 type StoredOrder = {
@@ -57,7 +57,7 @@ export default function Payments() {
   const [flightBookingState, setFlightBookingState] = useState<{
     status: "idle" | "processing" | "success" | "error";
     message?: string;
-    results?: any[];
+    results?: unknown[];
   }>({ status: "idle" });
   const [hotelBookingState, setHotelBookingState] = useState<ServiceBookingState>({ status: "idle" });
   const [carBookingState, setCarBookingState] = useState<ServiceBookingState>({ status: "idle" });
@@ -87,7 +87,7 @@ export default function Payments() {
     if (sessionStorage.getItem(trackedKey)) return;
     sessionStorage.setItem(trackedKey, "1");
 
-    const w = window as typeof window & { ADMITAD?: any; getSourceCookie?: () => string | undefined; cookie_name?: string };
+    const w = window as typeof window & { ADMITAD?: unknown; getSourceCookie?: () => string | undefined; cookie_name?: string };
     w.ADMITAD = w.ADMITAD || {};
     w.ADMITAD.Invoice = w.ADMITAD.Invoice || {};
 
@@ -98,7 +98,7 @@ export default function Payments() {
         const matches = document.cookie.match(
           new RegExp(
             "(?:^|; )" +
-              cookieName.replace(/([\.$?*|{}\(\)\[\]\\/\+^])/g, "\\$1") +
+              cookieName.replace(/([.$?*|{}()[\\/+^])/g, "\\$1") +
               "=([^;]*)"
           )
         );
@@ -181,9 +181,9 @@ export default function Payments() {
     const runBooking = async () => {
       setFlightBookingState({ status: "processing" });
       try {
-        const results: any[] = [];
+        const results: unknown[] = [];
         const primaryEmail =
-          payload?.travelers?.find((t: any) => t?.contact?.emailAddress)?.contact?.emailAddress ||
+          payload?.travelers?.find((t: unknown) => (t as { contact?: { emailAddress?: string } })?.contact?.emailAddress)?.contact?.emailAddress ||
           payload?.travelers?.[0]?.contact?.emailAddress ||
           "";
         let bookingReference = "";

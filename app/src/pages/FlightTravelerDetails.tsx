@@ -15,7 +15,7 @@ type CheckoutPayload = {
   tripType: "oneway" | "roundtrip";
   passengers: number;
   cabinClass: string;
-  offers: any[];
+  offers: unknown[];
   summary?: { outbound?: string; inbound?: string };
 };
 
@@ -186,7 +186,7 @@ export default function FlightTravelerDetails() {
       if (!priceRes.ok) throw new Error("flight_price_failed");
       const priceData = await priceRes.json();
       const pricedOffers = priceData?.data?.flightOffers || priceData?.flightOffers || checkout.offers;
-      const total = (pricedOffers || []).reduce((sum: number, offer: any) => {
+      const total = (pricedOffers || []).reduce((sum: number, offer: unknown) => {
         const raw = offer?.price?.total;
         const value = Number(String(raw || 0).replace(/[^\d.]/g, "")) || 0;
         return sum + value;

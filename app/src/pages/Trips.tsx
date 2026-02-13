@@ -34,7 +34,7 @@ const FLIGHT_PRICED_OFFER_KEY = "mashrouk-flight-priced-offer";
 const FLIGHT_BOOKING_PAYLOAD_KEY = "mashrouk-flight-checkout";
 const FLIGHT_BOOKING_RESULT_KEY = "mashrouk-flight-booking-result";
 
-async function priceSelectedOffers(offers: any[], apiBaseUrl: string) {
+async function priceSelectedOffers(offers: unknown[], apiBaseUrl: string) {
   const apiUrl = `${apiBaseUrl.replace(/\/$/, "")}/api/flights/price`;
   const res = await fetch(apiUrl, {
     method: "POST",
@@ -56,7 +56,7 @@ async function priceSelectedOffers(offers: any[], apiBaseUrl: string) {
   return priced;
 }
 
-async function bookSelectedOffers(pricedOffers: any[], travelers: any[], apiBaseUrl: string) {
+async function bookSelectedOffers(pricedOffers: unknown[], travelers: unknown[], apiBaseUrl: string) {
   const apiUrl = `${apiBaseUrl.replace(/\/$/, "")}/api/flights/book`;
   const res = await fetch(apiUrl, {
     method: "POST",
@@ -196,7 +196,7 @@ export default function Trips() {
 
   type FlightOffer = {
     providerOfferId?: string;
-    raw?: any;
+    raw?: unknown;
     slices?: FlightSlice[][];
     pricing?: { total?: number | string; currency?: string };
     cabins?: string[];
