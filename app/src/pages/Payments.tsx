@@ -265,6 +265,7 @@ export default function Payments() {
     const runBooking = async () => {
       setHotelBookingState({ status: "processing" });
       try {
+        const hotelEmail = payload?.guest?.email || payload?.guest?.contact?.emailAddress || "";
         const res = await apiPost("/api/hotels/book", {
             offerId,
             hotelId,
@@ -273,6 +274,8 @@ export default function Payments() {
               amount: Number(payload?.offer?.price?.total || payload?.price || 0),
               currency: payload?.offer?.price?.currency || payload?.currency || "SAR",
             },
+            sendEmail: true,
+            customerEmail: hotelEmail,
           });
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));
@@ -321,6 +324,7 @@ export default function Payments() {
     const runBooking = async () => {
       setCarBookingState({ status: "processing" });
       try {
+        const carEmail = payload?.traveler?.email || payload?.traveler?.contact?.emailAddress || "";
         const res = await apiPost("/api/cars/book", {
             carId,
             renter: payload?.traveler || null,
@@ -331,6 +335,8 @@ export default function Payments() {
             pickupDate: payload?.pickupDate || null,
             dropoffDate: payload?.dropoffDate || null,
             notes: payload?.notes || null,
+            sendEmail: true,
+            customerEmail: carEmail,
           });
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));
@@ -379,6 +385,7 @@ export default function Payments() {
     const runBooking = async () => {
       setTourBookingState({ status: "processing" });
       try {
+        const tourEmail = payload?.traveler?.email || payload?.traveler?.contact?.emailAddress || "";
         const res = await apiPost("/api/tours/book", {
             tourId,
             travelers: payload?.traveler || null,
@@ -389,6 +396,8 @@ export default function Payments() {
             date: payload?.date || null,
             people: payload?.people || null,
             notes: payload?.notes || null,
+            sendEmail: true,
+            customerEmail: tourEmail,
           });
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));
@@ -437,6 +446,7 @@ export default function Payments() {
     const runBooking = async () => {
       setTransferBookingState({ status: "processing" });
       try {
+        const transferEmail = payload?.traveler?.email || payload?.traveler?.contact?.emailAddress || "";
         const res = await apiPost("/api/transfers/book", {
             transferId,
             passenger: payload?.traveler || null,
@@ -448,6 +458,8 @@ export default function Payments() {
             dropoffAddress: payload?.dropoffAddress || null,
             date: payload?.date || null,
             notes: payload?.notes || null,
+            sendEmail: true,
+            customerEmail: transferEmail,
           });
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));

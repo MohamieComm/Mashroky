@@ -195,12 +195,112 @@ const buildAuthHeaders = async (config) => {
   return headers;
 };
 
+function getMockTours(params) {
+  const city = params?.city || params?.destination || 'الرياض';
+  return [
+    {
+      id: 'tour-mock-1',
+      name: `جولة مدينة ${city} التراثية`,
+      type: 'cultural',
+      category: 'مغامرة ثقافية',
+      duration: '4 ساعات',
+      maxGroupSize: 15,
+      languages: ['العربية', 'الإنجليزية'],
+      image: null,
+      priceTotal: 280,
+      currency: 'SAR',
+      summary: `اكتشف معالم ${city} التاريخية والثقافية مع مرشد محترف يأخذك في رحلة عبر الزمن`,
+      meetingPoint: `فندق هيلتون - ${city}`,
+      rating: 4.8,
+      reviewsCount: 124,
+    },
+    {
+      id: 'tour-mock-2',
+      name: 'رحلة صحراوية مع عشاء بدوي',
+      type: 'adventure',
+      category: 'مغامرة',
+      duration: '6 ساعات',
+      maxGroupSize: 20,
+      languages: ['العربية', 'الإنجليزية'],
+      image: null,
+      priceTotal: 450,
+      currency: 'SAR',
+      summary: 'استمتع بتجربة الصحراء الحقيقية مع ركوب الجمال والعشاء البدوي تحت النجوم',
+      meetingPoint: 'بوابة المخيم الصحراوي',
+      rating: 4.9,
+      reviewsCount: 256,
+    },
+    {
+      id: 'tour-mock-3',
+      name: 'جولة تسوق الأسواق الشعبية',
+      type: 'shopping',
+      category: 'تسوق وترفيه',
+      duration: '3 ساعات',
+      maxGroupSize: 10,
+      languages: ['العربية'],
+      image: null,
+      priceTotal: 150,
+      currency: 'SAR',
+      summary: 'اكتشف أجمل الأسواق الشعبية والتقليدية مع خبير محلي يعرف أفضل المتاجر والأسعار',
+      meetingPoint: 'سوق الزل - المدخل الرئيسي',
+      rating: 4.5,
+      reviewsCount: 89,
+    },
+    {
+      id: 'tour-mock-4',
+      name: 'رحلة استكشاف الطبيعة والجبال',
+      type: 'nature',
+      category: 'طبيعة',
+      duration: '8 ساعات',
+      maxGroupSize: 12,
+      languages: ['العربية', 'الإنجليزية'],
+      image: null,
+      priceTotal: 550,
+      currency: 'SAR',
+      summary: 'رحلة ليوم كامل لاستكشاف المناظر الطبيعية الخلابة والجبال مع وجبة غداء ومشروبات',
+      meetingPoint: 'مركز الزوار - المنتزه الوطني',
+      rating: 4.7,
+      reviewsCount: 178,
+    },
+    {
+      id: 'tour-mock-5',
+      name: 'جولة طعام وأكلات شعبية',
+      type: 'food',
+      category: 'طعام',
+      duration: '3 ساعات',
+      maxGroupSize: 8,
+      languages: ['العربية'],
+      image: null,
+      priceTotal: 200,
+      currency: 'SAR',
+      summary: 'تذوق أشهر الأكلات الشعبية والمأكولات التقليدية في جولة ممتعة مع خبير الطعام',
+      meetingPoint: 'ساحة المطاعم المركزية',
+      rating: 4.6,
+      reviewsCount: 145,
+    },
+    {
+      id: 'tour-mock-6',
+      name: 'رحلة بحرية مع غوص وسباحة',
+      type: 'water',
+      category: 'بحري',
+      duration: '5 ساعات',
+      maxGroupSize: 16,
+      languages: ['العربية', 'الإنجليزية'],
+      image: null,
+      priceTotal: 380,
+      currency: 'SAR',
+      summary: 'استمتع برحلة بحرية رائعة مع فرصة للغوص والسباحة في المياه الصافية',
+      meetingPoint: 'مرسى القوارب - الكورنيش',
+      rating: 4.8,
+      reviewsCount: 203,
+    },
+  ];
+}
+
 export async function searchTours(params = {}) {
   const config = await resolveConfig();
   if (!config.baseUrl) {
-    const err = new Error('tours_not_configured');
-    err.status = 500;
-    throw err;
+    return { results: getMockTours(params), meta: { source: 'mock', total: 6 } };
   }
   const url = buildUrl(config.baseUrl, config.searchPath);
   const headers = await buildAuthHeaders(config);
@@ -281,7 +381,7 @@ export async function bookTour(_params = {}) {
   };
 
   const saved = await insertBooking(record);
-  const response = { booking: saved };
+  const response = { booking: saved, bookingId: record.id };
   if (payment && payment.amount) response.paymentInfo = createMockMoyasarPayment(payment);
   return response;
 }

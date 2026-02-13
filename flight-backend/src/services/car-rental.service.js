@@ -199,9 +199,13 @@ const buildAuthHeaders = async (config) => {
 export async function searchCars(params = {}) {
   const config = await resolveConfig();
   if (!config.baseUrl) {
-    const err = new Error('car_rental_not_configured');
-    err.status = 500;
-    throw err;
+    // Return rich mock data when API is not configured
+    return {
+      results: getMockCars(params),
+      meta: { source: 'mock', note: 'car_rental_api_not_configured' },
+      warnings: null,
+      raw: null,
+    };
   }
   const url = buildUrl(config.baseUrl, config.searchPath);
   const headers = await buildAuthHeaders(config);
@@ -284,7 +288,26 @@ export async function bookCar(_params = {}) {
   };
 
   const saved = await insertBooking(record);
-  const response = { booking: saved };
+  const response = { booking: saved, bookingId: record.id };
   if (payment && payment.amount) response.paymentInfo = createMockMoyasarPayment(payment);
   return response;
+}
+
+function getMockCars(params = {}) {
+  const location = String(params.pickupLocation || params.location || '').toLowerCase();
+  const cars = [
+    { id: 'car-m1', name: 'Toyota Camry 2025', category: 'Sedan', transmission: 'Automatic', fuel: 'بنزين', seats: 5, doors: 4, vendor: 'Budget', image: null, priceTotal: 180, currency: 'SAR', pickup: 'مطار الملك عبدالعزيز - جدة', dropoff: 'مطار الملك عبدالعزيز - جدة' },
+    { id: 'car-m2', name: 'Hyundai Tucson 2025', category: 'SUV', transmission: 'Automatic', fuel: 'بنزين', seats: 5, doors: 4, vendor: 'Hertz', image: null, priceTotal: 250, currency: 'SAR', pickup: 'مطار الملك خالد - الرياض', dropoff: 'مطار الملك خالد - الرياض' },
+    { id: 'car-m3', name: 'Kia K5 2025', category: 'Sedan', transmission: 'Automatic', fuel: 'بنزين', seats: 5, doors: 4, vendor: 'Avis', image: null, priceTotal: 165, currency: 'SAR', pickup: 'مطار الملك فهد - الدمام', dropoff: 'مطار الملك فهد - الدمام' },
+    { id: 'car-m4', name: 'Toyota Land Cruiser 2025', category: 'SUV', transmission: 'Automatic', fuel: 'بنزين', seats: 7, doors: 4, vendor: 'Enterprise', image: null, priceTotal: 450, currency: 'SAR', pickup: 'مطار الملك عبدالعزيز - جدة', dropoff: 'مطار الملك عبدالعزيز - جدة' },
+    { id: 'car-m5', name: 'Nissan Sunny 2025', category: 'Economy', transmission: 'Automatic', fuel: 'بنزين', seats: 5, doors: 4, vendor: 'Budget', image: null, priceTotal: 120, currency: 'SAR', pickup: 'وسط المدينة - جدة', dropoff: 'وسط المدينة - جدة' },
+    { id: 'car-m6', name: 'Mercedes E-Class 2025', category: 'Luxury', transmission: 'Automatic', fuel: 'بنزين', seats: 5, doors: 4, vendor: 'Sixt', image: null, priceTotal: 550, currency: 'SAR', pickup: 'مطار الملك خالد - الرياض', dropoff: 'مطار الملك خالد - الرياض' },
+    { id: 'car-m7', name: 'GMC Yukon 2025', category: 'SUV', transmission: 'Automatic', fuel: 'بنزين', seats: 8, doors: 4, vendor: 'Hertz', image: null, priceTotal: 600, currency: 'SAR', pickup: 'مطار الملك خالد - الرياض', dropoff: 'فندق الفيصلية - الرياض' },
+    { id: 'car-m8', name: 'Hyundai Accent 2025', category: 'Economy', transmission: 'Automatic', fuel: 'بنزين', seats: 5, doors: 4, vendor: 'Lumi', image: null, priceTotal: 110, currency: 'SAR', pickup: 'مطار الأمير محمد بن عبدالعزيز - المدينة', dropoff: 'مطار الأمير محمد بن عبدالعزيز - المدينة' },
+  ];
+  if (location) {
+    const filtered = cars.filter(c => (c.pickup || '').toLowerCase().includes(location) || (c.dropoff || '').toLowerCase().includes(location));
+    return filtered.length ? filtered : cars;
+  }
+  return cars;
 }

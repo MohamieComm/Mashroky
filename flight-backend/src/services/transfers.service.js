@@ -198,12 +198,107 @@ const buildAuthHeaders = async (config) => {
   return headers;
 };
 
+function getMockTransfers(params) {
+  const from = params?.from || params?.pickup || 'مطار الملك خالد الدولي';
+  const to = params?.to || params?.dropoff || 'وسط المدينة';
+  return [
+    {
+      id: 'transfer-mock-1',
+      name: 'سيدان اقتصادي',
+      type: 'sedan',
+      category: 'اقتصادي',
+      capacity: 3,
+      luggage: 2,
+      vendor: 'مشروك ترانسفير',
+      image: null,
+      priceTotal: 120,
+      currency: 'SAR',
+      pickup: from,
+      dropoff: to,
+      duration: '35 دقيقة',
+    },
+    {
+      id: 'transfer-mock-2',
+      name: 'سيدان بزنس',
+      type: 'sedan',
+      category: 'بزنس',
+      capacity: 3,
+      luggage: 3,
+      vendor: 'مشروك ترانسفير',
+      image: null,
+      priceTotal: 200,
+      currency: 'SAR',
+      pickup: from,
+      dropoff: to,
+      duration: '35 دقيقة',
+    },
+    {
+      id: 'transfer-mock-3',
+      name: 'SUV عائلي',
+      type: 'suv',
+      category: 'عائلي',
+      capacity: 6,
+      luggage: 4,
+      vendor: 'مشروك ترانسفير',
+      image: null,
+      priceTotal: 280,
+      currency: 'SAR',
+      pickup: from,
+      dropoff: to,
+      duration: '35 دقيقة',
+    },
+    {
+      id: 'transfer-mock-4',
+      name: 'فان VIP',
+      type: 'van',
+      category: 'VIP',
+      capacity: 7,
+      luggage: 6,
+      vendor: 'مشروك ترانسفير',
+      image: null,
+      priceTotal: 350,
+      currency: 'SAR',
+      pickup: from,
+      dropoff: to,
+      duration: '35 دقيقة',
+    },
+    {
+      id: 'transfer-mock-5',
+      name: 'ليموزين فاخر',
+      type: 'limousine',
+      category: 'فاخر',
+      capacity: 3,
+      luggage: 3,
+      vendor: 'مشروك ترانسفير',
+      image: null,
+      priceTotal: 500,
+      currency: 'SAR',
+      pickup: from,
+      dropoff: to,
+      duration: '35 دقيقة',
+    },
+    {
+      id: 'transfer-mock-6',
+      name: 'حافلة صغيرة',
+      type: 'minibus',
+      category: 'مجموعات',
+      capacity: 16,
+      luggage: 16,
+      vendor: 'مشروك ترانسفير',
+      image: null,
+      priceTotal: 600,
+      currency: 'SAR',
+      pickup: from,
+      dropoff: to,
+      duration: '40 دقيقة',
+    },
+  ];
+}
+
 export async function searchTransfers(params = {}) {
   const config = await resolveConfig();
   if (!config.baseUrl) {
-    const err = new Error('transfers_not_configured');
-    err.status = 500;
-    throw err;
+    return { results: getMockTransfers(params), meta: { source: 'mock', total: 6 } };
   }
   const url = buildUrl(config.baseUrl, config.searchPath);
   const headers = await buildAuthHeaders(config);
@@ -284,7 +379,7 @@ export async function bookTransfer(_params = {}) {
   };
 
   const saved = await insertBooking(record);
-  const response = { booking: saved };
+  const response = { booking: saved, bookingId: record.id };
   if (payment && payment.amount) response.paymentInfo = createMockMoyasarPayment(payment);
   return response;
 }

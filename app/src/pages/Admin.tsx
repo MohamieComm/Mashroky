@@ -389,6 +389,9 @@ export default function Admin() {
   const [flightBookings, setFlightBookings] = useState<FlightBooking[]>([]);
   const [flightBookingsLoading, setFlightBookingsLoading] = useState(false);
   const [flightBookingsError, setFlightBookingsError] = useState("");
+  const [serviceBookings, setServiceBookings] = useState<any[]>([]);
+  const [serviceBookingsLoading, setServiceBookingsLoading] = useState(false);
+  const [serviceBookingsError, setServiceBookingsError] = useState("");
   const [revealedKeyId, setRevealedKeyId] = useState<string | null>(null);
   const isPageLoading = authLoading || adminLoading;
   const paymentProvider = (import.meta.env.VITE_PAYMENT_PROVIDER || "").toLowerCase();
@@ -462,8 +465,35 @@ export default function Admin() {
   useEffect(() => {
     if (activeSection !== "bookings") return;
     loadFlightBookings();
+    loadServiceBookings();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSection]);
+
+  const loadServiceBookings = async () => {
+    setServiceBookingsLoading(true);
+    setServiceBookingsError("");
+    try {
+      if (!session?.access_token) throw new Error("missing_session");
+      const res = await fetch(`${flightApiBaseUrl.replace(/\/$/, "")}/api/bookings`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.error || "failed_to_load");
+      }
+      const data = await res.json();
+      setServiceBookings(Array.isArray(data.items) ? data.items : []);
+    } catch (err) {
+      const code = err instanceof Error ? err.message : "failed_to_load";
+      setServiceBookingsError(
+        code === "missing_session"
+          ? "لا توجد جلسة صالحة."
+          : "تعذر تحميل حجوزات الخدمات."
+      );
+    } finally {
+      setServiceBookingsLoading(false);
+    }
+  };
 
   useEffect(() => {
     setPromoDraft(adminData.promoVideoUrl || "");
@@ -497,10 +527,11 @@ export default function Admin() {
       { name: "الفنادق", value: adminData.hotels.length.toString() },
       { name: "الوجهات", value: adminData.destinations.length.toString() },
       { name: "المقالات", value: adminData.articles.length.toString() },
-      { name: "الحجوزات", value: flightBookings.length.toString() },
+      { name: "حجوزات الطيران", value: flightBookings.length.toString() },
+      { name: "حجوزات الخدمات", value: serviceBookings.length.toString() },
       { name: "مفاتيح API", value: apiKeysList.length.toString() },
     ],
-    [adminData, flightBookings, apiKeysList]
+    [adminData, flightBookings, serviceBookings, apiKeysList]
   );
 
   const integrationStatus = useMemo(() => {
@@ -1177,9 +1208,9 @@ export default function Admin() {
               <div className="bg-card rounded-2xl p-8 shadow-card">
                 <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
                   <div>
-                    <h2 className="text-2xl font-bold">إدارة الحجوزات</h2>
+                    <h2 className="text-2xl font-bold">حجوزات الطيران</h2>
                     <p className="text-sm text-muted-foreground mt-2">
-                      عرض جميع حجوزات الطيران المسجلة عبر الخادم.
+                      جميع حجوزات الطيران المسجلة عبر Amadeus.
                     </p>
                   </div>
                   <Button variant="outline" className="gap-2" onClick={loadFlightBookings} disabled={flightBookingsLoading}>
@@ -1196,7 +1227,7 @@ export default function Admin() {
                 {flightBookingsLoading ? (
                   <div className="text-center py-12 text-muted-foreground">جاري تحميل الحجوزات...</div>
                 ) : flightBookings.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">لا توجد حجوزات مسجلة بعد.</div>
+                  <div className="text-center py-12 text-muted-foreground">لا توجد حجوزات طيران مسجلة بعد.</div>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
@@ -1234,6 +1265,81 @@ export default function Admin() {
                             </td>
                           </tr>
                         ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-card rounded-2xl p-8 shadow-card">
+                <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
+                  <div>
+                    <h2 className="text-2xl font-bold">حجوزات الخدمات</h2>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      حجوزات الفنادق والسيارات والجولات والنقل الخاص.
+                    </p>
+                  </div>
+                  <Button variant="outline" className="gap-2" onClick={loadServiceBookings} disabled={serviceBookingsLoading}>
+                    {serviceBookingsLoading ? "جاري التحميل..." : "تحديث"}
+                  </Button>
+                </div>
+
+                {serviceBookingsError && (
+                  <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 text-destructive text-sm mb-4">
+                    {serviceBookingsError}
+                  </div>
+                )}
+
+                {serviceBookingsLoading ? (
+                  <div className="text-center py-12 text-muted-foreground">جاري تحميل حجوزات الخدمات...</div>
+                ) : serviceBookings.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">لا توجد حجوزات خدمات مسجلة بعد.</div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border text-muted-foreground">
+                          <th className="text-right py-3 px-4 font-semibold">المعرف</th>
+                          <th className="text-right py-3 px-4 font-semibold">الخدمة</th>
+                          <th className="text-right py-3 px-4 font-semibold">المزود</th>
+                          <th className="text-right py-3 px-4 font-semibold">الحالة</th>
+                          <th className="text-right py-3 px-4 font-semibold">التاريخ</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {serviceBookings.map((bk: any) => {
+                          const typeLabels: Record<string, string> = {
+                            hotel: "فندق",
+                            car: "سيارة",
+                            tour: "جولة",
+                            transfer: "نقل خاص",
+                          };
+                          const typeColors: Record<string, string> = {
+                            hotel: "bg-blue-500/10 text-blue-600",
+                            car: "bg-orange-500/10 text-orange-600",
+                            tour: "bg-green-500/10 text-green-600",
+                            transfer: "bg-purple-500/10 text-purple-600",
+                          };
+                          return (
+                            <tr key={bk.id} className="border-b border-border/50 hover:bg-muted/50 transition">
+                              <td className="py-3 px-4 font-mono text-xs">{bk.id?.slice(0, 8) || "—"}</td>
+                              <td className="py-3 px-4">
+                                <span className={`px-2 py-0.5 rounded-full text-xs ${typeColors[bk.type] || "bg-muted text-foreground"}`}>
+                                  {typeLabels[bk.type] || bk.type || "—"}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 text-xs">{bk.provider || "—"}</td>
+                              <td className="py-3 px-4">
+                                <span className={`px-2 py-0.5 rounded-full text-xs ${bk.status === "created" ? "bg-yellow-500/10 text-yellow-600" : bk.status === "confirmed" ? "bg-green-500/10 text-green-600" : "bg-muted text-foreground"}`}>
+                                  {bk.status === "created" ? "تم الإنشاء" : bk.status === "confirmed" ? "مؤكد" : bk.status || "—"}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 text-xs text-muted-foreground">
+                                {bk.created_at ? new Date(bk.created_at).toLocaleDateString("ar-SA") : "—"}
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
