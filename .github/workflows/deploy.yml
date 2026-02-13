@@ -47,7 +47,7 @@ jobs:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
           npm install -g @railway/cli
-          railway deploy --detach --service=api -e production
+          railway up --service=api --environment production
 
   health-check:
     needs: deploy
