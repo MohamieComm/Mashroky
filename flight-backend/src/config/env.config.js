@@ -39,6 +39,10 @@ export const supabaseEnv = {
   jwtSecret: process.env.SUPABASE_JWT_SECRET || '',
 };
 
+export const admitadEnv = {
+  affiliateUrl: process.env.ADMITAD_AFFILIATE_URL || 'https://yknhc.com/g/5ccvmzh8c6b7e16523940c80bdb8b4/',
+};
+
 export const allowedOrigins = [
   'https://www.mashrok.online',
   'https://mashrok.online',

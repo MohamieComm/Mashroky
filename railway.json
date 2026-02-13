@@ -1,12 +1,12 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "builder": "dockerfile"
+    "builder": "nixpacks"
   },
   "deploy": {
     "restartPolicyMaxRetries": 10,
     "restartPolicyWindowSeconds": 600,
-    "startCommand": "npm run build && npm run start",
+    "startCommand": "npx vite preview --host --port ${PORT:-8080}",
     "healthchecks": {
       "liveness": {
         "initialDelaySeconds": 30,
