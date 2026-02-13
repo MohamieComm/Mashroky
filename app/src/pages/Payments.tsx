@@ -178,14 +178,20 @@ export default function Payments() {
     const travelers = Array.isArray(payload?.travelers) ? payload.travelers : [];
     if (!offers.length || !travelers.length) return;
 
+// Helper type guard to extract email from traveler object
+const getTravelerEmail = (traveler: unknown): string | undefined => {
+  const t = traveler as { contact?: { emailAddress?: string } };
+  return t?.contact?.emailAddress;
+};
+
     const runBooking = async () => {
       setFlightBookingState({ status: "processing" });
       try {
         const results: unknown[] = [];
         const primaryEmail =
-          payload?.travelers?.find((t: unknown) => (t as { contact?: { emailAddress?: string } })?.contact?.emailAddress)?.contact?.emailAddress ||
-          payload?.travelers?.[0]?.contact?.emailAddress ||
-          "";
+          payload?.travelers?.find((t: unknown) => getTravelerEmail(t))
+            ? getTravelerEmail(payload.travelers.find((t: unknown) => getTravelerEmail(t)))
+            : payload?.travelers?.[0]?.contact?.emailAddress || "";
         let bookingReference = "";
         let providerOrderId = "";
         for (let idx = 0; idx < offers.length; idx += 1) {

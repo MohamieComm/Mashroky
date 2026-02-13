@@ -7,13 +7,21 @@ const BOOKING_RESULT_KEY = "mashrouk-flight-booking-result";
 const BOOKING_KEY = "mashrouk-flight-booking";
 const BOOKING_STATUS_KEY = "mashrouk-flight-booking-status";
 
-// Admitad SALE tracking injection
-function AdmitadSaleScript({ orderNumber, discountCode, items, currency }: {
+type AdmitadSaleItem = {
+  id: string;
+  price: string;
+  quantity: string;
+};
+
+type AdmitadSaleScriptProps = {
   orderNumber: string;
   discountCode: string;
-  items: Array<{ id: string; price: string; quantity: string }>;
+  items: AdmitadSaleItem[];
   currency: string;
-}) {
+};
+
+// Admitad SALE tracking injection
+function AdmitadSaleScript({ orderNumber, discountCode, items, currency }: AdmitadSaleScriptProps) {
   return (
     <script
       dangerouslySetInnerHTML={{
