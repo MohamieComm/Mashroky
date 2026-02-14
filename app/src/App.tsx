@@ -13,6 +13,7 @@ import HotelDetails from "./pages/HotelDetails";
 import HotelBooking from "./pages/HotelBooking";
 import HotelConfirmation from "./pages/HotelConfirmation";
 import Offers from "./pages/Offers";
+import OfferDetails from "./pages/OfferDetails";
 import Seasons from "./pages/Seasons";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
@@ -97,6 +98,7 @@ const App = () => (
               <Route path="/transfers/:transferId/booking" element={<TransferBooking />} />
               <Route path="/transfers/confirmation" element={<TransferConfirmation />} />
               <Route path="/offers" element={<Offers />} />
+              <Route path="/offers/:offerId" element={<OfferDetails />} />
               <Route path="/seasons" element={<Seasons />} />
               <Route path="/activities" element={<Navigate to="/tours" replace />} />
               <Route path="/transport" element={<Navigate to="/transfers" replace />} />

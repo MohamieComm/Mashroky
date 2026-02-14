@@ -8,7 +8,8 @@ import {
   AlertCircle,
   Check,
   CreditCard,
-  Calendar
+  Calendar,
+  Eye
 } from "lucide-react";
 import { defaultOffers, useAdminCollection } from "@/data/adminStore";
 import { useNavigate } from "react-router-dom";
@@ -156,6 +157,15 @@ export default function Offers() {
                         onClick={() => handleBook(offer)}
                       >
                         احجز الآن
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="gap-2"
+                        onClick={() => navigate(`/offers/${offer.id}`)}
+                      >
+                        <Eye className="w-5 h-5" />
+                        التفاصيل
                       </Button>
                     </div>
                   </div>

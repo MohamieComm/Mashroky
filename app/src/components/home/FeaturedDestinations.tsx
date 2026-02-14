@@ -1,4 +1,4 @@
-import { MapPin, ArrowLeft } from "lucide-react";
+import { MapPin, ArrowLeft, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { Link, useNavigate } from "react-router-dom";
@@ -139,13 +139,23 @@ export function FeaturedDestinations() {
                   ))}
                 </div>
 
-                <Button
-                  variant="hero"
-                  className="w-full mt-5"
-                  onClick={() => handleBook(offer)}
-                >
-                  احجز الآن
-                </Button>
+                <div className="flex gap-2 mt-5">
+                  <Button
+                    variant="hero"
+                    className="flex-1"
+                    onClick={() => handleBook(offer)}
+                  >
+                    احجز الآن
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="gap-1.5"
+                    onClick={() => navigate(`/offers/${offer.id}`)}
+                  >
+                    <Eye className="w-4 h-4" />
+                    التفاصيل
+                  </Button>
+                </div>
               </div>
             </div>
           ))}
