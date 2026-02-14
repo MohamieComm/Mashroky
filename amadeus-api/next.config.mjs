@@ -11,7 +11,12 @@ const nextConfig = {
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3000'],
+      allowedOrigins: [
+        'localhost:3000',
+        'mashroky-production.up.railway.app',
+        'www.mashrok.online',
+        'mashrok.online',
+      ],
     },
   },
 };
