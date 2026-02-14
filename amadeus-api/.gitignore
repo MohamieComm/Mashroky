@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# build
+.next/
+out/
+build/
+
+# env files (IMPORTANT: never commit real secrets)
+.env
+.env.local
+.env.production
+.env.*.local
+
+# misc
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
