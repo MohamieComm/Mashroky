@@ -22,9 +22,10 @@ END;
 $$;
 
 -- Fix: seasons table id column should accept TEXT (admin generates text ids)
--- Change from UUID to TEXT for flexibility
-ALTER TABLE public.seasons ALTER COLUMN id SET DEFAULT gen_random_uuid()::text;
+-- Must drop default first, change type, then set new default
+ALTER TABLE public.seasons ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE public.seasons ALTER COLUMN id TYPE TEXT USING id::text;
+ALTER TABLE public.seasons ALTER COLUMN id SET DEFAULT gen_random_uuid()::text;
 
 -- Fix: admin_settings should allow INSERT for authenticated admin users
 -- The existing "Admins can manage admin settings" FOR ALL covers this,
