@@ -48,6 +48,7 @@ import Refund from "./pages/Refund";
 import FlightTravelerDetails from "./pages/FlightTravelerDetails";
 import FlightBookingConfirmation from "./pages/FlightBookingConfirmation";
 import BookingConfirmation from "./pages/BookingConfirmation";
+import Checkout from "./pages/Checkout";
 
 const queryClient = new QueryClient();
 
@@ -108,6 +109,7 @@ const App = () => (
               <Route path="/articles" element={<Articles />} />
               <Route path="/destinations" element={<Destinations />} />
               <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
               <Route path="/register" element={<Register />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/profile" element={<Profile />} />

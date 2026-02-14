@@ -9,9 +9,12 @@ import {
   Waves, ChevronLeft, ChevronRight, Phone,
   Clock, ShieldCheck, Ban, Check, Coffee,
   Maximize2, Info, Building2, Sparkles,
+  Heart, Share2, ArrowRight, Gift, Utensils,
+  ThumbsUp, Award, Shield, ChevronDown,
 } from "lucide-react";
 import { apiPost } from "@/lib/api";
 import { defaultHotels, useAdminCollection } from "@/data/adminStore";
+import { useCart } from "@/hooks/useCart";
 
 const HOTEL_SELECTION_KEY = "mashrouk-hotel-selection";
 
@@ -51,6 +54,7 @@ const parsePrice = (value: unknown) => {
 // Amenity icon mapping
 const amenityIcons: Record<string, typeof Wifi> = {
   "واي فاي": Wifi,
+  "واي فاي مجاني": Wifi,
   "مسبح": Waves,
   "موقف سيارات": Car,
   "مطعم": UtensilsCrossed,
@@ -58,14 +62,17 @@ const amenityIcons: Record<string, typeof Wifi> = {
   "صالة رياضية": Dumbbell,
   "سبا": Sparkles,
   "خدمة الغرف": Coffee,
-  "WIFI": Wifi,
-  "SWIMMING_POOL": Waves,
-  "PARKING": Car,
-  "RESTAURANT": UtensilsCrossed,
-  "AIR_CONDITIONING": Wind,
-  "FITNESS_CENTER": Dumbbell,
-  "SPA": Sparkles,
-  "ROOM_SERVICE": Coffee,
+  "خدمة غرف": Coffee,
+  "إفطار": Coffee,
+  "إفطار مجاني": Coffee,
+  WIFI: Wifi,
+  SWIMMING_POOL: Waves,
+  PARKING: Car,
+  RESTAURANT: UtensilsCrossed,
+  AIR_CONDITIONING: Wind,
+  FITNESS_CENTER: Dumbbell,
+  SPA: Sparkles,
+  ROOM_SERVICE: Coffee,
 };
 
 export default function HotelDetails() {
@@ -73,6 +80,7 @@ export default function HotelDetails() {
   const { hotelId } = useParams();
   const location = useLocation();
   const hotels = useAdminCollection("hotels", defaultHotels);
+  const { addItem } = useCart();
   const [hotel, setHotel] = useState<HotelResult | null>(() => {
     const stateHotel = (location.state as { hotel?: HotelResult } | null)?.hotel;
     return stateHotel || null;
@@ -81,6 +89,8 @@ export default function HotelDetails() {
   const [error, setError] = useState("");
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [selectedRoomType, setSelectedRoomType] = useState<string | null>(null);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [showAllAmenities, setShowAllAmenities] = useState(false);
 
   // Find matching admin hotel for enriched data
   const adminHotel = useMemo(() => {
@@ -90,7 +100,6 @@ export default function HotelDetails() {
 
   useEffect(() => {
     if (hotel || !hotelId) return;
-    // Check admin hotels first
     if (adminHotel) {
       setHotel({
         id: adminHotel.id,
@@ -111,7 +120,6 @@ export default function HotelDetails() {
       });
       return;
     }
-    // Fetch from API
     const load = async () => {
       setLoading(true);
       setError("");
@@ -142,6 +150,18 @@ export default function HotelDetails() {
     navigate(`/hotels/${hotel.id}/booking`, { state: payload });
   };
 
+  const handleAddToCart = (roomName: string, price: number) => {
+    addItem({
+      id: `hotel-${hotel?.id}-room-${Date.now()}`,
+      title: `${hotel?.name || "فندق"} - ${roomName}`,
+      price,
+      details: `${adminHotel?.location || hotel?.address?.cityName || ""} • غرفة ${roomName}`,
+      image: hotel?.media?.[0]?.uri || null,
+      type: "hotel",
+    });
+    navigate("/cart");
+  };
+
   // Gallery images
   const galleryImages = useMemo(() => {
     const images: string[] = [];
@@ -165,216 +185,506 @@ export default function HotelDetails() {
       {Array.from({ length: 5 }, (_, i) => (
         <Star
           key={i}
-          className={`w-4 h-4 ${i < count ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+          className={`w-4 h-4 ${i < count ? "fill-amber-400 text-amber-400" : "fill-gray-200 dark:fill-gray-700 text-gray-200 dark:text-gray-700"}`}
         />
       ))}
     </div>
   );
 
-  // Rating badge
-  const getRatingBadge = (rating: number) => {
-    if (rating >= 4.5) return { label: "ممتاز", color: "bg-emerald-600" };
-    if (rating >= 4) return { label: "جيد جداً", color: "bg-emerald-500" };
-    if (rating >= 3.5) return { label: "جيد", color: "bg-blue-500" };
-    return { label: "مقبول", color: "bg-yellow-500" };
+  // Rating info (Trip.com style - 10-scale)
+  const ratingValue = hotel?.rating || adminHotel?.rating || 0;
+  const ratingScore = ratingValue ? (Math.round(ratingValue * 20) / 10).toFixed(1) : null;
+  const getRatingLabel = (score: number) => {
+    if (score >= 9) return "ممتاز";
+    if (score >= 8) return "جيد جداً";
+    if (score >= 7) return "جيد";
+    return "مقبول";
+  };
+  const getRatingColor = (score: number) => {
+    if (score >= 9) return "bg-emerald-600";
+    if (score >= 8) return "bg-emerald-500";
+    if (score >= 7) return "bg-blue-500";
+    return "bg-yellow-500";
   };
 
-  const ratingValue = hotel?.rating || adminHotel?.rating || 0;
-  const ratingBadge = ratingValue ? getRatingBadge(ratingValue) : null;
   const amenities = hotel?.amenities || adminHotel?.amenities || [];
   const fallbackQuery = `${hotel?.name || adminHotel?.name || "hotel"} ${hotel?.address?.cityName || adminHotel?.location || ""}`.trim();
+  const reviewCount = adminHotel?.reviews || 0;
 
   return (
     <Layout>
-      {/* Hero Header */}
-      <section className="hero-gradient py-12">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            {renderStars(starCount)}
-            <span className="text-primary-foreground/70 text-sm mr-2">
-              {starCount > 0 ? `${starCount} نجوم` : ""}
-            </span>
+      {/* ────────── Breadcrumb ────────── */}
+      <div className="bg-muted/50 border-b border-border">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <button onClick={() => navigate("/hotels")} className="hover:text-primary transition-colors">الفنادق</button>
+            <ArrowRight className="w-3 h-3 rotate-180" />
+            <span className="text-foreground font-medium line-clamp-1">{hotel?.name || adminHotel?.name || "تفاصيل الفندق"}</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-primary-foreground mt-2">
-            {hotel?.name || adminHotel?.name || "فندق غير محدد"}
-          </h1>
-          <div className="flex items-center justify-center gap-2 text-primary-foreground/80 mt-3">
-            <MapPin className="w-4 h-4" />
-            <span>{hotel?.address?.cityName || adminHotel?.location || "مدينة غير محددة"}</span>
-          </div>
-          {ratingBadge && (
-            <div className="flex items-center justify-center gap-3 mt-4">
-              <span className={`${ratingBadge.color} text-white px-3 py-1 rounded-lg text-sm font-bold`}>
-                {ratingValue}
-              </span>
-              <span className="text-primary-foreground/80 text-sm">{ratingBadge.label}</span>
-              {adminHotel?.reviews ? (
-                <span className="text-primary-foreground/60 text-xs">({adminHotel.reviews} تقييم)</span>
-              ) : null}
-            </div>
-          )}
         </div>
-      </section>
+      </div>
 
-      <section className="py-8">
-        <div className="container mx-auto px-4">
-
-          {/* Image Gallery */}
-          {galleryImages.length > 0 && (
-            <div className="mb-8">
-              <div className="relative rounded-2xl overflow-hidden shadow-xl group">
-                <div className="aspect-[16/7] md:aspect-[16/6]">
+      {/* ────────── Image Gallery - Trip.com Grid Style ────────── */}
+      {galleryImages.length > 0 && (
+        <section className="bg-background">
+          <div className="container mx-auto px-4 py-4">
+            <div className="relative rounded-2xl overflow-hidden shadow-xl">
+              {/* Main Gallery with Grid Layout */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-1 h-[300px] md:h-[420px]">
+                {/* Main Image */}
+                <div className="md:col-span-2 md:row-span-2 relative group cursor-pointer" onClick={() => {}}>
                   <ImageWithFallback
                     src={galleryImages[galleryIndex]}
                     alt={hotel?.name || adminHotel?.name || ""}
                     className="w-full h-full object-cover"
                     fallbackQuery={fallbackQuery}
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                  {/* Navigation arrows */}
+                  {galleryImages.length > 1 && (
+                    <>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                        title="السابق"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 dark:bg-black/50 text-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                      >
+                        <ChevronRight className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                        title="التالي"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 dark:bg-black/50 text-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                      >
+                        <ChevronLeft className="w-5 h-5" />
+                      </button>
+                    </>
+                  )}
+                  {/* Image counter */}
+                  <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-3 py-1.5 rounded-full backdrop-blur-sm">
+                    {galleryIndex + 1} / {galleryImages.length}
+                  </div>
                 </div>
-                {galleryImages.length > 1 && (
-                  <>
-                    <button
-                      onClick={prevImage}
-                      title="الصورة السابقة"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
-                    >
-                      <ChevronRight className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={nextImage}
-                      title="الصورة التالية"
-                      className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
-                    >
-                      <ChevronLeft className="w-5 h-5" />
-                    </button>
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2">
-                      {galleryImages.map((_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setGalleryIndex(i)}
-                          title={`الصورة ${i + 1}`}
-                          className={`w-2.5 h-2.5 rounded-full transition-all ${
-                            i === galleryIndex ? "bg-white w-6" : "bg-white/50"
-                          }`}
-                        />
-                      ))}
+                {/* Thumbnails Grid */}
+                {galleryImages.slice(1, 5).map((img, i) => (
+                  <div
+                    key={i}
+                    className="hidden md:block relative cursor-pointer overflow-hidden group/thumb"
+                    onClick={() => setGalleryIndex(i + 1)}
+                  >
+                    <img
+                      src={img}
+                      alt=""
+                      className="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform duration-300"
+                    />
+                    {/* "Show all photos" overlay on last visible thumb */}
+                    {i === 3 && galleryImages.length > 5 && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <span className="text-white text-sm font-bold">+{galleryImages.length - 5} صورة</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Action buttons on gallery */}
+              <div className="absolute top-4 left-4 flex items-center gap-2 z-10">
+                <button
+                  onClick={() => setIsFavorite(!isFavorite)}
+                  className="w-10 h-10 rounded-full bg-white/80 dark:bg-black/50 backdrop-blur-sm flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                >
+                  <Heart className={`w-5 h-5 ${isFavorite ? "fill-red-500 text-red-500" : "text-gray-600"}`} />
+                </button>
+                <button className="w-10 h-10 rounded-full bg-white/80 dark:bg-black/50 backdrop-blur-sm flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
+                  <Share2 className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+            </div>
+
+            {/* Thumbnail strip below */}
+            {galleryImages.length > 1 && (
+              <div className="flex gap-2 mt-3 overflow-x-auto pb-2 scrollbar-hide">
+                {galleryImages.map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setGalleryIndex(i)}
+                    title={`صورة ${i + 1}`}
+                    className={`shrink-0 w-20 h-14 rounded-xl overflow-hidden border-2 transition-all ${
+                      i === galleryIndex ? "border-primary ring-2 ring-primary/30 scale-105" : "border-transparent opacity-60 hover:opacity-100"
+                    }`}
+                  >
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ────────── Hotel Info Header ────────── */}
+      <section className="bg-background border-b border-border">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+            {/* Left: Hotel Name + Stars + Location */}
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                {starCount > 0 && renderStars(starCount)}
+                {starCount > 0 && (
+                  <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-lg">
+                    فندق {starCount} نجوم
+                  </span>
+                )}
+                {adminHotel?.tag && (
+                  <span className="text-xs bg-primary/10 text-primary px-2.5 py-0.5 rounded-full font-medium">
+                    {adminHotel.tag}
+                  </span>
+                )}
+              </div>
+              <h1 className="text-2xl md:text-3xl font-bold mb-2">
+                {hotel?.name || adminHotel?.name || "فندق غير محدد"}
+              </h1>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <MapPin className="w-4 h-4 text-primary" />
+                <span>{hotel?.address?.cityName || adminHotel?.location || "مدينة غير محددة"}</span>
+              </div>
+            </div>
+
+            {/* Right: Rating Widget (Trip.com style) */}
+            {ratingScore && (
+              <div className="flex items-center gap-4 bg-card rounded-2xl p-4 border border-border shadow-sm">
+                <div className="text-right">
+                  <p className="text-lg font-bold">{getRatingLabel(parseFloat(ratingScore))}</p>
+                  {reviewCount > 0 && (
+                    <p className="text-xs text-muted-foreground">{reviewCount.toLocaleString()} تقييم من نزلاء</p>
+                  )}
+                  <div className="flex items-center gap-1 mt-1">
+                    <ThumbsUp className="w-3 h-3 text-emerald-500" />
+                    <span className="text-[11px] text-emerald-600 font-medium">موصى به</span>
+                  </div>
+                </div>
+                <div className={`${getRatingColor(parseFloat(ratingScore))} text-white text-xl font-bold rounded-2xl w-14 h-14 flex items-center justify-center shadow-md`}>
+                  {ratingScore}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ────────── Main Content ────────── */}
+      <section className="py-6 bg-muted/20">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-[1fr_340px] gap-6">
+            {/* Left Column - Details */}
+            <div className="space-y-5">
+
+              {/* Quick Info Cards Row */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {adminHotel?.checkInTime && (
+                  <div className="bg-card rounded-2xl p-4 shadow-sm border border-border text-center">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-2">
+                      <Clock className="w-5 h-5 text-primary" />
                     </div>
-                    <div className="absolute top-4 left-4 bg-black/50 text-white text-xs px-3 py-1 rounded-full">
-                      {galleryIndex + 1} / {galleryImages.length}
+                    <p className="text-[11px] text-muted-foreground">تسجيل الدخول</p>
+                    <p className="text-sm font-bold mt-0.5">{adminHotel.checkInTime}</p>
+                  </div>
+                )}
+                {adminHotel?.checkOutTime && (
+                  <div className="bg-card rounded-2xl p-4 shadow-sm border border-border text-center">
+                    <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center mx-auto mb-2">
+                      <Clock className="w-5 h-5 text-orange-500" />
                     </div>
-                  </>
+                    <p className="text-[11px] text-muted-foreground">تسجيل الخروج</p>
+                    <p className="text-sm font-bold mt-0.5">{adminHotel.checkOutTime}</p>
+                  </div>
+                )}
+                {adminHotel?.phone && (
+                  <div className="bg-card rounded-2xl p-4 shadow-sm border border-border text-center">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-2">
+                      <Phone className="w-5 h-5 text-emerald-500" />
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">الهاتف</p>
+                    <p className="text-sm font-bold mt-0.5" dir="ltr">{adminHotel.phone}</p>
+                  </div>
+                )}
+                {adminHotel?.cancellationPolicy && (
+                  <div className="bg-card rounded-2xl p-4 shadow-sm border border-border text-center">
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center mx-auto mb-2">
+                      <ShieldCheck className="w-5 h-5 text-blue-500" />
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">الإلغاء</p>
+                    <p className="text-sm font-bold text-emerald-600 mt-0.5">مجاني</p>
+                  </div>
                 )}
               </div>
 
-              {/* Gallery Thumbnails */}
-              {galleryImages.length > 1 && (
-                <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
-                  {galleryImages.map((img, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setGalleryIndex(i)}
-                      title={`عرض الصورة ${i + 1}`}
-                      className={`shrink-0 w-20 h-14 rounded-lg overflow-hidden border-2 transition-all ${
-                        i === galleryIndex ? "border-primary ring-2 ring-primary/30" : "border-transparent opacity-70 hover:opacity-100"
-                      }`}
-                    >
-                      <img src={img} alt="" className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-8">
-            {/* Left Column - Details */}
-            <div className="space-y-6">
-
-              {/* Quick Info Bar */}
-              <div className="bg-card rounded-2xl p-5 shadow-card">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {adminHotel?.checkInTime && (
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <Clock className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">تسجيل الدخول</p>
-                        <p className="text-sm font-semibold">{adminHotel.checkInTime}</p>
-                      </div>
-                    </div>
-                  )}
-                  {adminHotel?.checkOutTime && (
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                        <Clock className="w-5 h-5 text-orange-500" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">تسجيل الخروج</p>
-                        <p className="text-sm font-semibold">{adminHotel.checkOutTime}</p>
-                      </div>
-                    </div>
-                  )}
-                  {adminHotel?.phone && (
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                        <Phone className="w-5 h-5 text-emerald-500" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">الهاتف</p>
-                        <p className="text-sm font-semibold" dir="ltr">{adminHotel.phone}</p>
-                      </div>
-                    </div>
-                  )}
-                  {adminHotel?.cancellationPolicy && (
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                        <ShieldCheck className="w-5 h-5 text-blue-500" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">الإلغاء</p>
-                        <p className="text-sm font-semibold text-emerald-600">{adminHotel.cancellationPolicy}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* About */}
-              <div className="bg-card rounded-2xl p-6 shadow-card">
-                <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
+              {/* About Section */}
+              <div className="bg-card rounded-2xl p-6 shadow-sm border border-border">
+                <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
                   <Info className="w-5 h-5 text-primary" />
                   عن الفندق
                 </h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed text-sm">
                   {adminHotel?.description ||
-                    (hotel?.address?.lines?.length ? hotel.address.lines.join(" ") : "تفاصيل العنوان غير متوفرة حاليًا.")}
+                    (hotel?.address?.lines?.length ? hotel.address.lines.join(" ") : "تفاصيل الفندق غير متوفرة حاليًا.")}
                 </p>
                 {adminHotel?.cuisine && (
-                  <div className="mt-3 flex items-center gap-2 text-sm">
-                    <UtensilsCrossed className="w-4 h-4 text-primary" />
+                  <div className="mt-3 flex items-center gap-2 text-sm bg-muted/50 rounded-xl p-3">
+                    <Utensils className="w-4 h-4 text-primary" />
                     <span className="font-medium">المأكولات:</span>
                     <span className="text-muted-foreground">{adminHotel.cuisine}</span>
                   </div>
                 )}
               </div>
 
-              {/* Amenities */}
+              {/* Services & Amenities - Icon Grid */}
               {amenities.length > 0 && (
-                <div className="bg-card rounded-2xl p-6 shadow-card">
-                  <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <div className="bg-card rounded-2xl p-6 shadow-sm border border-border">
+                  <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-primary" />
                     المرافق والخدمات
                   </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {amenities.map((amenity, i) => {
+                  <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    {(showAllAmenities ? amenities : amenities.slice(0, 10)).map((amenity, i) => {
                       const Icon = amenityIcons[amenity] || Check;
                       return (
-                        <div key={i} className="flex items-center gap-3 bg-muted rounded-xl p-3">
-                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                            <Icon className="w-4 h-4 text-primary" />
+                        <div key={i} className="flex flex-col items-center gap-2 bg-muted/50 rounded-xl p-3 hover:bg-muted transition-colors">
+                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <Icon className="w-5 h-5 text-primary" />
                           </div>
-                          <span className="text-sm font-medium">{amenity}</span>
+                          <span className="text-[11px] font-medium text-center leading-tight">{amenity}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {amenities.length > 10 && (
+                    <button
+                      onClick={() => setShowAllAmenities(!showAllAmenities)}
+                      className="flex items-center gap-1 text-primary text-sm font-medium mt-4 hover:underline mx-auto"
+                    >
+                      {showAllAmenities ? "عرض أقل" : `عرض كل المرافق (${amenities.length})`}
+                      <ChevronDown className={`w-4 h-4 transition-transform ${showAllAmenities ? "rotate-180" : ""}`} />
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* Nearby Landmarks */}
+              {adminHotel?.distances && adminHotel.distances.length > 0 && (
+                <div className="bg-card rounded-2xl p-6 shadow-sm border border-border">
+                  <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-primary" />
+                    المعالم القريبة
+                  </h3>
+                  <div className="space-y-2">
+                    {adminHotel.distances.map((d, i) => (
+                      <div key={i} className="flex items-center justify-between bg-muted/30 rounded-xl p-3 hover:bg-muted/50 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                            <Building2 className="w-4 h-4 text-primary" />
+                          </div>
+                          <span className="text-sm font-medium">{d.name}</span>
+                        </div>
+                        <span className="text-sm font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">{d.distance}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ────────── Room Types TABLE (Trip.com Style) ────────── */}
+              {adminHotel?.roomTypes && adminHotel.roomTypes.length > 0 && (
+                <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden" id="rooms">
+                  <div className="p-6 pb-4 border-b border-border">
+                    <h3 className="text-xl font-bold flex items-center gap-2">
+                      <BedDouble className="w-5 h-5 text-primary" />
+                      الغرف المتاحة
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">اختر الغرفة المناسبة لك واحجز بأفضل سعر</p>
+                  </div>
+
+                  {/* Room Table Header */}
+                  <div className="hidden md:grid grid-cols-[2fr_1.5fr_0.8fr_0.8fr_1fr] gap-0 bg-muted/50 text-xs font-bold text-muted-foreground px-4 py-3 border-b border-border">
+                    <span>نوع الغرفة</span>
+                    <span>المزايا</span>
+                    <span className="text-center">السعة</span>
+                    <span className="text-center">السعر / ليلة</span>
+                    <span className="text-center">الحجز</span>
+                  </div>
+
+                  {/* Room Rows */}
+                  <div className="divide-y divide-border">
+                    {adminHotel.roomTypes.map((room, i) => {
+                      const roomPrice = parsePrice(room.price);
+                      const isSelected = selectedRoomType === room.name;
+                      return (
+                        <div
+                          key={i}
+                          className={`group transition-all ${isSelected ? "bg-primary/5 ring-1 ring-primary/20" : "hover:bg-muted/30"}`}
+                        >
+                          {/* Mobile Layout */}
+                          <div className="md:hidden p-4 space-y-3">
+                            <div className="flex gap-3">
+                              {room.image && (
+                                <div className="w-24 h-20 rounded-xl overflow-hidden shrink-0">
+                                  <img src={room.image} alt={room.name} className="w-full h-full object-cover" />
+                                </div>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-bold text-sm mb-1">{room.name}</h4>
+                                <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                                  <BedDouble className="w-3 h-3" />
+                                  <span>{room.bedType}</span>
+                                  <span>•</span>
+                                  <Users className="w-3 h-3" />
+                                  <span>{room.capacity}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {room.breakfast && (
+                                <span className="inline-flex items-center gap-1 text-[10px] bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-1 rounded-full">
+                                  <Coffee className="w-3 h-3" /> إفطار مجاني
+                                </span>
+                              )}
+                              {room.refundable && (
+                                <span className="inline-flex items-center gap-1 text-[10px] bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded-full">
+                                  <Shield className="w-3 h-3" /> إلغاء مجاني
+                                </span>
+                              )}
+                              {room.size && (
+                                <span className="inline-flex items-center gap-1 text-[10px] bg-muted text-muted-foreground px-2 py-1 rounded-full">
+                                  <Maximize2 className="w-3 h-3" /> {room.size}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center justify-between pt-2">
+                              <div>
+                                <span className="text-xl font-extrabold text-primary">{roomPrice.toLocaleString()}</span>
+                                <span className="text-xs text-muted-foreground mr-1">ر.س / ليلة</span>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="rounded-xl text-xs"
+                                  onClick={() => handleAddToCart(room.name, roomPrice)}
+                                >
+                                  أضف للسلة
+                                </Button>
+                                <Button
+                                  variant="hero"
+                                  size="sm"
+                                  className="rounded-xl"
+                                  onClick={() => {
+                                    setSelectedRoomType(room.name);
+                                    handleSelectOffer({
+                                      id: `room-${i}`,
+                                      room: { typeEstimated: { category: room.name, beds: 1, bedType: room.bedType } },
+                                      guests: { adults: parseInt(room.capacity) || 2 },
+                                      price: { total: room.price, currency: "SAR" },
+                                    });
+                                  }}
+                                >
+                                  احجز
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Desktop Table Row */}
+                          <div className="hidden md:grid grid-cols-[2fr_1.5fr_0.8fr_0.8fr_1fr] gap-0 items-center px-4 py-4">
+                            {/* Room Type + Image */}
+                            <div className="flex gap-3 items-start pr-3">
+                              {room.image && (
+                                <div className="w-24 h-18 rounded-xl overflow-hidden shrink-0 shadow-sm">
+                                  <img src={room.image} alt={room.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                </div>
+                              )}
+                              <div className="min-w-0">
+                                <h4 className="font-bold text-sm mb-1 line-clamp-1">{room.name}</h4>
+                                {room.description && (
+                                  <p className="text-[11px] text-muted-foreground line-clamp-2 mb-1.5">{room.description}</p>
+                                )}
+                                <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+                                  <span className="flex items-center gap-1">
+                                    <BedDouble className="w-3 h-3" /> {room.bedType}
+                                  </span>
+                                  {room.size && (
+                                    <span className="flex items-center gap-1">
+                                      <Maximize2 className="w-3 h-3" /> {room.size}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Benefits */}
+                            <div className="flex flex-col gap-1.5 px-3">
+                              {room.breakfast && (
+                                <span className="inline-flex items-center gap-1.5 text-[11px] text-emerald-700 dark:text-emerald-400">
+                                  <Coffee className="w-3.5 h-3.5" /> إفطار مجاني
+                                </span>
+                              )}
+                              {room.refundable && (
+                                <span className="inline-flex items-center gap-1.5 text-[11px] text-blue-700 dark:text-blue-400">
+                                  <ShieldCheck className="w-3.5 h-3.5" /> إلغاء مجاني
+                                </span>
+                              )}
+                              {room.refundable === false && (
+                                <span className="inline-flex items-center gap-1.5 text-[11px] text-red-500">
+                                  <Ban className="w-3.5 h-3.5" /> غير قابل للإلغاء
+                                </span>
+                              )}
+                              {room.amenities && room.amenities.slice(0, 3).map((a, j) => (
+                                <span key={j} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                                  <Check className="w-3.5 h-3.5 text-emerald-500" /> {a}
+                                </span>
+                              ))}
+                            </div>
+
+                            {/* Capacity */}
+                            <div className="text-center">
+                              <div className="flex items-center justify-center gap-0.5">
+                                {Array.from({ length: Math.min(parseInt(room.capacity) || 2, 4) }, (_, k) => (
+                                  <Users key={k} className="w-3.5 h-3.5 text-muted-foreground" />
+                                ))}
+                              </div>
+                              <p className="text-[10px] text-muted-foreground mt-1">{room.capacity}</p>
+                            </div>
+
+                            {/* Price */}
+                            <div className="text-center">
+                              <p className="text-lg font-extrabold text-primary">{roomPrice.toLocaleString()}</p>
+                              <p className="text-[10px] text-muted-foreground">ر.س / ليلة</p>
+                            </div>
+
+                            {/* Book Button */}
+                            <div className="flex flex-col items-center gap-2 pl-3">
+                              <Button
+                                variant="hero"
+                                size="sm"
+                                className="w-full rounded-xl font-bold shadow-md"
+                                onClick={() => {
+                                  setSelectedRoomType(room.name);
+                                  handleSelectOffer({
+                                    id: `room-${i}`,
+                                    room: { typeEstimated: { category: room.name, beds: 1, bedType: room.bedType } },
+                                    guests: { adults: parseInt(room.capacity) || 2 },
+                                    price: { total: room.price, currency: "SAR" },
+                                  });
+                                }}
+                              >
+                                احجز الآن
+                              </Button>
+                              <button
+                                onClick={() => handleAddToCart(room.name, roomPrice)}
+                                className="text-[11px] text-primary hover:underline font-medium"
+                              >
+                                أضف للسلة
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       );
                     })}
@@ -382,182 +692,59 @@ export default function HotelDetails() {
                 </div>
               )}
 
-              {/* Distances */}
-              {adminHotel?.distances && adminHotel.distances.length > 0 && (
-                <div className="bg-card rounded-2xl p-6 shadow-card">
-                  <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-primary" />
-                    المسافات من المعالم
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {adminHotel.distances.map((d, i) => (
-                      <div key={i} className="flex items-center justify-between bg-muted rounded-xl p-3">
-                        <div className="flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm">{d.name}</span>
-                        </div>
-                        <span className="text-sm font-semibold text-primary">{d.distance}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Room Types */}
-              {adminHotel?.roomTypes && adminHotel.roomTypes.length > 0 && (
-                <div className="bg-card rounded-2xl p-6 shadow-card">
-                  <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <BedDouble className="w-5 h-5 text-primary" />
-                    أنواع الغرف المتاحة
-                  </h3>
-                  <div className="space-y-4">
-                    {adminHotel.roomTypes.map((room, i) => (
-                      <div
-                        key={i}
-                        className={`border rounded-2xl overflow-hidden transition-all ${
-                          selectedRoomType === room.name ? "border-primary ring-2 ring-primary/20" : "border-border"
-                        }`}
-                      >
-                        <div className="flex flex-col md:flex-row">
-                          {/* Room Image */}
-                          {room.image && (
-                            <div className="md:w-56 h-44 md:h-auto shrink-0">
-                              <img src={room.image} alt={room.name} className="w-full h-full object-cover" />
-                            </div>
-                          )}
-                          {/* Room Details */}
-                          <div className="flex-1 p-4">
-                            <div className="flex items-start justify-between mb-2">
-                              <div>
-                                <h4 className="text-lg font-bold">{room.name}</h4>
-                                {room.description && (
-                                  <p className="text-sm text-muted-foreground mt-1">{room.description}</p>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex flex-wrap gap-3 mt-3 text-xs">
-                              <div className="flex items-center gap-1.5 bg-muted px-3 py-1.5 rounded-full">
-                                <BedDouble className="w-3.5 h-3.5" />
-                                <span>{room.bedType}</span>
-                              </div>
-                              <div className="flex items-center gap-1.5 bg-muted px-3 py-1.5 rounded-full">
-                                <Users className="w-3.5 h-3.5" />
-                                <span>{room.capacity}</span>
-                              </div>
-                              {room.size && (
-                                <div className="flex items-center gap-1.5 bg-muted px-3 py-1.5 rounded-full">
-                                  <Maximize2 className="w-3.5 h-3.5" />
-                                  <span>{room.size}</span>
-                                </div>
-                              )}
-                              {room.breakfast && (
-                                <div className="flex items-center gap-1.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-3 py-1.5 rounded-full">
-                                  <Coffee className="w-3.5 h-3.5" />
-                                  <span>إفطار مجاني</span>
-                                </div>
-                              )}
-                              {room.refundable && (
-                                <div className="flex items-center gap-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1.5 rounded-full">
-                                  <ShieldCheck className="w-3.5 h-3.5" />
-                                  <span>قابل للاسترداد</span>
-                                </div>
-                              )}
-                              {room.refundable === false && (
-                                <div className="flex items-center gap-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-3 py-1.5 rounded-full">
-                                  <Ban className="w-3.5 h-3.5" />
-                                  <span>غير قابل للاسترداد</span>
-                                </div>
-                              )}
-                            </div>
-                            {/* Room Amenities */}
-                            {room.amenities && room.amenities.length > 0 && (
-                              <div className="flex flex-wrap gap-2 mt-3">
-                                {room.amenities.map((a, j) => (
-                                  <span key={j} className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
-                                    {a}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                          {/* Price & Action */}
-                          <div className="md:w-44 p-4 flex flex-col items-center justify-center border-t md:border-t-0 md:border-r border-border bg-muted/30">
-                            <p className="text-xs text-muted-foreground">لليلة الواحدة</p>
-                            <p className="text-2xl font-bold text-primary mt-1">
-                              {room.price} <span className="text-xs">ر.س</span>
-                            </p>
-                            <Button
-                              variant="hero"
-                              size="sm"
-                              className="w-full mt-3"
-                              onClick={() => {
-                                setSelectedRoomType(room.name);
-                                handleSelectOffer({
-                                  id: `room-${i}`,
-                                  room: { typeEstimated: { category: room.name, beds: 1, bedType: room.bedType } },
-                                  guests: { adults: parseInt(room.capacity) || 2 },
-                                  price: { total: room.price, currency: "SAR" },
-                                });
-                              }}
-                            >
-                              احجز الآن
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* API Offers (from Amadeus) */}
               {offers.length > 0 && !adminHotel?.roomTypes?.length && (
-                <div className="bg-card rounded-2xl p-6 shadow-card">
-                  <h3 className="text-xl font-bold mb-4">العروض المتاحة</h3>
-                  {loading && <p className="text-muted-foreground">جاري تحميل العروض...</p>}
-                  {error && <p className="text-destructive">{error}</p>}
-                  <div className="space-y-4">
+                <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
+                  <div className="p-6 pb-4 border-b border-border">
+                    <h3 className="text-xl font-bold flex items-center gap-2">
+                      <Gift className="w-5 h-5 text-primary" />
+                      العروض المتاحة
+                    </h3>
+                  </div>
+                  {loading && <p className="text-muted-foreground p-6">جاري تحميل العروض...</p>}
+                  {error && <p className="text-destructive p-6">{error}</p>}
+                  <div className="divide-y divide-border">
                     {offers.map((offer, index) => {
                       const roomInfo = offer?.room?.typeEstimated;
                       const price = parsePrice(offer?.price?.total);
                       const currency = offer?.price?.currency || "SAR";
                       const cancellations = offer?.policies?.cancellations;
                       return (
-                        <div key={offer?.id || index} className="bg-muted rounded-2xl p-5 border border-border hover:border-primary/30 transition-all">
+                        <div key={offer?.id || index} className="p-5 hover:bg-muted/30 transition-colors">
                           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                             <div className="flex-1">
-                              <h4 className="font-bold text-lg">{roomInfo?.category || "غرفة قياسية"}</h4>
+                              <h4 className="font-bold text-base">{roomInfo?.category || "غرفة قياسية"}</h4>
                               <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mt-2">
-                                <div className="flex items-center gap-2">
+                                <span className="flex items-center gap-2">
                                   <BedDouble className="w-4 h-4" />
                                   {roomInfo?.beds || 1} {roomInfo?.bedType || "سرير"}
-                                </div>
-                                <div className="flex items-center gap-2">
+                                </span>
+                                <span className="flex items-center gap-2">
                                   <Users className="w-4 h-4" />
                                   {offer?.guests?.adults || 2} نزيل
-                                </div>
+                                </span>
                                 {offer?.checkInDate && (
-                                  <div className="flex items-center gap-2">
+                                  <span className="flex items-center gap-2">
                                     <Calendar className="w-4 h-4" />
                                     {offer.checkInDate} - {offer.checkOutDate || ""}
-                                  </div>
+                                  </span>
                                 )}
                               </div>
                               {cancellations && cancellations.length > 0 && (
                                 <div className="mt-2 flex items-center gap-2 text-xs text-emerald-600">
                                   <ShieldCheck className="w-3.5 h-3.5" />
-                                  <span>
-                                    إلغاء مجاني حتى {cancellations[0]?.deadline || "تاريخ الوصول"}
-                                  </span>
+                                  <span>إلغاء مجاني حتى {cancellations[0]?.deadline || "تاريخ الوصول"}</span>
                                 </div>
                               )}
                             </div>
-                            <div className="text-center md:text-right">
-                              <div className="text-2xl font-bold text-primary">
-                                {price ? price.toLocaleString() : "—"} <span className="text-sm">{currency}</span>
+                            <div className="text-center md:text-right flex items-center gap-4">
+                              <div>
+                                <p className="text-2xl font-extrabold text-primary">
+                                  {price ? price.toLocaleString() : "—"} <span className="text-xs">{currency}</span>
+                                </p>
+                                <p className="text-[10px] text-muted-foreground">لليلة الواحدة</p>
                               </div>
-                              <p className="text-xs text-muted-foreground">لليلة الواحدة</p>
-                              <Button variant="hero" size="sm" className="mt-2" onClick={() => handleSelectOffer(offer)}>
+                              <Button variant="hero" size="sm" className="rounded-xl" onClick={() => handleSelectOffer(offer)}>
                                 احجز الآن
                               </Button>
                             </div>
@@ -570,68 +757,71 @@ export default function HotelDetails() {
               )}
             </div>
 
-            {/* Right Column - Sidebar */}
-            <div className="space-y-6">
+            {/* ────────── Right Sidebar ────────── */}
+            <div className="space-y-5">
               {/* Price Summary Card */}
-              <div className="bg-card rounded-2xl p-6 shadow-card border border-primary/20 sticky top-4">
-                <div className="text-center mb-4">
-                  <p className="text-sm text-muted-foreground">يبدأ من</p>
-                  <p className="text-3xl font-bold text-primary mt-1">
+              <div className="bg-card rounded-2xl p-6 shadow-sm border border-primary/20 sticky top-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Award className="w-5 h-5 text-primary" />
+                  <span className="text-sm font-bold text-primary">أفضل سعر مضمون</span>
+                </div>
+                <div className="text-center mb-5 bg-muted/30 rounded-xl p-4">
+                  <p className="text-xs text-muted-foreground">يبدأ من</p>
+                  <p className="text-4xl font-extrabold text-primary mt-1 tracking-tight">
                     {adminHotel?.price || (offers[0] ? parsePrice(offers[0]?.price?.total).toLocaleString() : "—")}
-                    <span className="text-sm mr-1">ر.س</span>
+                    <span className="text-sm font-bold mr-1">ر.س</span>
                   </p>
                   {adminHotel?.priceNote && (
-                    <p className="text-xs text-muted-foreground mt-1">{adminHotel.priceNote}</p>
+                    <p className="text-[11px] text-muted-foreground mt-1">{adminHotel.priceNote} • لليلة الواحدة</p>
                   )}
                 </div>
-                <Button variant="hero" className="w-full" onClick={() => handleSelectOffer(null)}>
-                  احجز بأفضل سعر
+                <Button
+                  variant="hero"
+                  className="w-full rounded-xl font-bold text-base h-12 shadow-lg hover:shadow-xl transition-all"
+                  onClick={() => {
+                    const roomsSection = document.getElementById("rooms");
+                    if (roomsSection) roomsSection.scrollIntoView({ behavior: "smooth" });
+                    else handleSelectOffer(null);
+                  }}
+                >
+                  اختر الغرفة واحجز
                 </Button>
-                {adminHotel?.tag && (
-                  <div className="mt-3 text-center">
-                    <span className="inline-block bg-secondary/10 text-secondary text-xs font-semibold px-3 py-1 rounded-full">
-                      {adminHotel.tag}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Tips */}
-              <div className="bg-muted rounded-2xl p-6 shadow-card">
-                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                  <Info className="w-5 h-5 text-primary" />
-                  نصائح قبل الحجز
-                </h3>
-                <ul className="space-y-3 text-sm text-muted-foreground">
-                  <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
-                    <span>راجع سياسة الإلغاء قبل تأكيد الحجز.</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
-                    <span>تحقق من تفاصيل الغرفة وعدد النزلاء.</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
-                    <span>يمكنك التواصل معنا لأي استفسار قبل الدفع.</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
-                    <span>أسعار الغرف تشمل الضريبة والخدمة.</span>
-                  </li>
-                </ul>
+                <p className="text-[10px] text-center text-muted-foreground mt-3">
+                  شامل الضرائب والرسوم • دفع آمن
+                </p>
               </div>
 
               {/* Cancellation Policy Card */}
               {adminHotel?.cancellationPolicy && (
-                <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl p-6 border border-emerald-200 dark:border-emerald-800">
-                  <div className="flex items-center gap-2 mb-3">
+                <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl p-5 border border-emerald-200 dark:border-emerald-800">
+                  <div className="flex items-center gap-2 mb-2">
                     <ShieldCheck className="w-5 h-5 text-emerald-600" />
-                    <h3 className="text-lg font-bold text-emerald-700 dark:text-emerald-400">سياسة الإلغاء</h3>
+                    <h3 className="text-sm font-bold text-emerald-700 dark:text-emerald-400">سياسة الإلغاء</h3>
                   </div>
-                  <p className="text-sm text-emerald-600 dark:text-emerald-400">{adminHotel.cancellationPolicy}</p>
+                  <p className="text-sm text-emerald-600 dark:text-emerald-400 leading-relaxed">{adminHotel.cancellationPolicy}</p>
                 </div>
               )}
+
+              {/* Tips */}
+              <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
+                <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
+                  <Info className="w-4 h-4 text-primary" />
+                  نصائح قبل الحجز
+                </h3>
+                <ul className="space-y-2.5 text-[12px] text-muted-foreground">
+                  {[
+                    "راجع سياسة الإلغاء قبل تأكيد الحجز.",
+                    "تحقق من تفاصيل الغرفة وعدد النزلاء.",
+                    "يمكنك التواصل معنا لأي استفسار.",
+                    "الأسعار شاملة الضريبة والخدمة.",
+                  ].map((tip, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <Check className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" />
+                      <span>{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
         </div>
