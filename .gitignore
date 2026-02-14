@@ -12,13 +12,6 @@ node_modules/
 **/dist-ssr/
 **/*.local
 
-# Gradle/Android
-.gradle/
-build/
-**/build/
-local.properties
-*.iml
-
 # Logs
 logs/
 *.log
@@ -32,11 +25,3 @@ pnpm-debug.log*
 
 # Coverage
 coverage/
-Payy/
-# Node backend for payments (placeholder)
-/server
-/server/node_modules
-
-# Android release binaries
-NewAppMoh/*.apk
-NewAppMoh/*.aab
