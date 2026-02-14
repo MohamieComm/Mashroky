@@ -56,6 +56,29 @@ export type Flight = {
   stops: string;
   rating: number;
   image: string;
+  flightNumber?: string;
+  aircraft?: string;
+  seatClass?: string;
+  baggage?: { cabin: string; checked: string };
+  departTerminal?: string;
+  arriveTerminal?: string;
+  departAirport?: string;
+  arriveAirport?: string;
+  fareType?: string;
+  refundable?: boolean;
+};
+
+export type RoomType = {
+  name: string;
+  description: string;
+  price: string;
+  capacity: string;
+  bedType: string;
+  size?: string;
+  image?: string;
+  amenities?: string[];
+  refundable?: boolean;
+  breakfast?: boolean;
 };
 
 export type HotelItem = {
@@ -72,6 +95,13 @@ export type HotelItem = {
   distances: { name: string; distance: string }[];
   cuisine: string;
   tag: string;
+  starCategory?: number;
+  gallery?: string[];
+  checkInTime?: string;
+  checkOutTime?: string;
+  phone?: string;
+  cancellationPolicy?: string;
+  roomTypes?: RoomType[];
 };
 
 export type OfferItem = {
@@ -95,6 +125,16 @@ export type ActivityItem = {
   category: string;
   price: string;
   image: string;
+  duration?: string;
+  description?: string;
+  rating?: number;
+  reviews?: number;
+  difficulty?: string;
+  ageRange?: string;
+  includes?: string[];
+  schedule?: string;
+  maxGroup?: number;
+  languages?: string[];
 };
 
 export type ArticleItem = {
@@ -207,10 +247,20 @@ export const defaultFlights: Flight[] = [
     departTime: "08:00",
     arriveTime: "09:30",
     duration: "1 ساعة و30 دقيقة",
-    price: "650",
+    price: "292",
     stops: "مباشر",
     rating: 4.8,
-    image: "https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1436491865332-7a61a109db56?auto=format&fit=crop&w=800&q=80",
+    flightNumber: "SV 1024",
+    aircraft: "Airbus A320",
+    seatClass: "سياحية",
+    baggage: { cabin: "7 كغ", checked: "23 كغ" },
+    departTerminal: "مبنى الركاب 1",
+    arriveTerminal: "مبنى الركاب 5",
+    departAirport: "مطار الملك عبدالعزيز الدولي (JED)",
+    arriveAirport: "مطار الملك خالد الدولي (RUH)",
+    fareType: "اقتصادي مرن",
+    refundable: true,
   },
   {
     id: "flight-2",
@@ -220,10 +270,20 @@ export const defaultFlights: Flight[] = [
     departTime: "14:30",
     arriveTime: "15:40",
     duration: "1 ساعة و10 دقائق",
-    price: "430",
+    price: "326",
     stops: "مباشر",
     rating: 4.6,
-    image: "https://images.unsplash.com/photo-1578895101408-1a36b834405b?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1436491865332-7a61a109db56?auto=format&fit=crop&w=800&q=80",
+    flightNumber: "XY 1030",
+    aircraft: "Airbus A320neo",
+    seatClass: "سياحية",
+    baggage: { cabin: "7 كغ", checked: "20 كغ" },
+    departTerminal: "مبنى الركاب 5",
+    arriveTerminal: "مبنى الركاب 1",
+    departAirport: "مطار الملك خالد الدولي (RUH)",
+    arriveAirport: "مطار الملك فهد الدولي (DMM)",
+    fareType: "اقتصادي أساسي",
+    refundable: false,
   },
   {
     id: "flight-3",
@@ -233,10 +293,20 @@ export const defaultFlights: Flight[] = [
     departTime: "11:00",
     arriveTime: "12:00",
     duration: "ساعة واحدة",
-    price: "320",
+    price: "199",
     stops: "مباشر",
     rating: 4.5,
-    image: "https://images.unsplash.com/photo-1590076215667-875d4ef2d7de?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1436491865332-7a61a109db56?auto=format&fit=crop&w=800&q=80",
+    flightNumber: "F3 162",
+    aircraft: "Airbus A320",
+    seatClass: "سياحية",
+    baggage: { cabin: "7 كغ", checked: "23 كغ" },
+    departTerminal: "مبنى الركاب 1",
+    arriveTerminal: "مبنى الركاب 1",
+    departAirport: "مطار الملك عبدالعزيز الدولي (JED)",
+    arriveAirport: "مطار الأمير محمد بن عبدالعزيز (MED)",
+    fareType: "اقتصادي",
+    refundable: false,
   },
   {
     id: "flight-4",
@@ -250,6 +320,16 @@ export const defaultFlights: Flight[] = [
     stops: "مباشر",
     rating: 4.7,
     image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=80",
+    flightNumber: "EK 818",
+    aircraft: "Boeing 777-300ER",
+    seatClass: "سياحية ممتازة",
+    baggage: { cabin: "7 كغ", checked: "30 كغ" },
+    departTerminal: "مبنى الركاب 1",
+    arriveTerminal: "مبنى الركاب 3",
+    departAirport: "مطار الملك خالد الدولي (RUH)",
+    arriveAirport: "مطار دبي الدولي (DXB)",
+    fareType: "مرن",
+    refundable: true,
   },
   {
     id: "flight-5",
@@ -263,6 +343,16 @@ export const defaultFlights: Flight[] = [
     stops: "مباشر",
     rating: 4.4,
     image: "https://images.unsplash.com/photo-1572252009286-268acec5ca0a?auto=format&fit=crop&w=800&q=80",
+    flightNumber: "MS 912",
+    aircraft: "Boeing 737-800",
+    seatClass: "سياحية",
+    baggage: { cabin: "8 كغ", checked: "23 كغ" },
+    departTerminal: "مبنى الركاب 1",
+    arriveTerminal: "مبنى الركاب 2",
+    departAirport: "مطار الملك فهد الدولي (DMM)",
+    arriveAirport: "مطار القاهرة الدولي (CAI)",
+    fareType: "اقتصادي",
+    refundable: false,
   },
   {
     id: "flight-6",
@@ -276,6 +366,16 @@ export const defaultFlights: Flight[] = [
     stops: "مباشر",
     rating: 4.3,
     image: "https://images.unsplash.com/photo-1580834341580-8c17a3a630ca?auto=format&fit=crop&w=800&q=80",
+    flightNumber: "RJ 734",
+    aircraft: "Embraer E195",
+    seatClass: "سياحية",
+    baggage: { cabin: "7 كغ", checked: "23 كغ" },
+    departTerminal: "مبنى الركاب 1",
+    arriveTerminal: "المبنى الرئيسي",
+    departAirport: "مطار الملك عبدالعزيز الدولي (JED)",
+    arriveAirport: "مطار الملكة علياء الدولي (AMM)",
+    fareType: "اقتصادي مرن",
+    refundable: true,
   },
 ];
 
@@ -289,7 +389,7 @@ export const defaultHotels: HotelItem[] = [
     reviews: 1890,
     price: "1,800",
     priceNote: "يبدأ من",
-    description: "إقامة راقية بإطلالة بحرية وخدمات عائلية متكاملة.",
+    description: "إقامة راقية بإطلالة بحرية على كورنيش جدة مع خدمات عائلية متكاملة. يتميز بموقعه المثالي بالقرب من واجهة جدة البحرية والأسواق التقليدية في البلد التاريخية.",
     amenities: ["واي فاي مجاني", "مسبح", "موقف سيارات", "إفطار", "صالة رياضية", "خدمة غرف"],
     distances: [
       { name: "واجهة جدة البحرية", distance: "2 كم" },
@@ -298,6 +398,55 @@ export const defaultHotels: HotelItem[] = [
     ],
     cuisine: "مطعم بحري ومقهى",
     tag: "الأكثر طلبا",
+    starCategory: 5,
+    gallery: [
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=1200&q=80",
+    ],
+    checkInTime: "3:00 PM",
+    checkOutTime: "12:00 PM",
+    phone: "+966 12 XXX XXXX",
+    cancellationPolicy: "إلغاء مجاني حتى 24 ساعة قبل تسجيل الوصول. بعد ذلك يتم خصم ليلة واحدة.",
+    roomTypes: [
+      {
+        name: "غرفة ديلوكس بإطلالة بحرية",
+        description: "غرفة واسعة 37 متر مربع مع شرفة خاصة وإطلالة على البحر الأحمر",
+        price: "1,800",
+        capacity: "2 بالغين",
+        bedType: "سرير كينغ",
+        size: "37 م²",
+        image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80",
+        amenities: ["تلفزيون ذكي", "ميني بار", "خزنة", "ماكينة قهوة"],
+        refundable: true,
+        breakfast: true,
+      },
+      {
+        name: "جناح عائلي",
+        description: "جناح فسيح 55 متر مربع مع غرفة معيشة منفصلة ومنطقة جلوس للعائلة",
+        price: "2,800",
+        capacity: "4 بالغين + طفلين",
+        bedType: "سريرين كوين",
+        size: "55 م²",
+        image: "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=800&q=80",
+        amenities: ["غرفة معيشة", "مطبخ صغير", "غسالة", "تلفزيونين"],
+        refundable: true,
+        breakfast: true,
+      },
+      {
+        name: "غرفة قياسية",
+        description: "غرفة مريحة 28 متر مربع مع جميع الأساسيات وإطلالة على المدينة",
+        price: "1,200",
+        capacity: "2 بالغين",
+        bedType: "سرير مزدوج",
+        size: "28 م²",
+        image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
+        amenities: ["تلفزيون", "واي فاي", "مكيف"],
+        refundable: false,
+        breakfast: false,
+      },
+    ],
   },
   {
     id: "hotel-2",
@@ -308,7 +457,7 @@ export const defaultHotels: HotelItem[] = [
     reviews: 1420,
     price: "1,250",
     priceNote: "يبدأ من",
-    description: "موقع مثالي لرجال الأعمال بالقرب من المراكز التجارية.",
+    description: "فندق فاخر في قلب حي العليا التجاري بالرياض. موقع مثالي لرجال الأعمال بالقرب من مركز المملكة وبوليفارد الرياض مع مرافق اجتماعات حديثة.",
     amenities: ["واي فاي عالي السرعة", "مركز أعمال", "صالة رياضية", "موقف سيارات", "خدمة غرف"],
     distances: [
       { name: "بوليفارد الرياض", distance: "5 كم" },
@@ -317,6 +466,54 @@ export const defaultHotels: HotelItem[] = [
     ],
     cuisine: "مطبخ عالمي وعربي",
     tag: "رجال أعمال",
+    starCategory: 5,
+    gallery: [
+      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80",
+    ],
+    checkInTime: "3:00 PM",
+    checkOutTime: "12:00 PM",
+    phone: "+966 11 XXX XXXX",
+    cancellationPolicy: "إلغاء مجاني حتى 48 ساعة قبل تسجيل الوصول. رسوم إلغاء متأخر: ليلة واحدة.",
+    roomTypes: [
+      {
+        name: "غرفة كينغ - رجال أعمال",
+        description: "غرفة أنيقة 37 متر مربع مع مكتب عمل ومنطقة جلوس مريحة",
+        price: "1,250",
+        capacity: "2 بالغين",
+        bedType: "سرير كينغ",
+        size: "37 م²",
+        image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80",
+        amenities: ["مكتب عمل", "واي فاي سريع", "ماكينة إسبريسو", "مكواة"],
+        refundable: true,
+        breakfast: true,
+      },
+      {
+        name: "جناح تنفيذي",
+        description: "جناح فخم 65 متر مربع مع صالة خاصة وغرفة اجتماعات صغيرة",
+        price: "2,400",
+        capacity: "2 بالغين",
+        bedType: "سرير كينغ",
+        size: "65 م²",
+        image: "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=800&q=80",
+        amenities: ["صالة خاصة", "حوض استحمام", "خدمة كونسيرج", "ميني بار"],
+        refundable: true,
+        breakfast: true,
+      },
+      {
+        name: "غرفة قياسية",
+        description: "غرفة عملية 25 متر مربع بتصميم عصري وجميع الأساسيات",
+        price: "792",
+        capacity: "2 بالغين",
+        bedType: "سرير مزدوج",
+        size: "25 م²",
+        image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
+        amenities: ["تلفزيون ذكي", "واي فاي", "مكيف"],
+        refundable: false,
+        breakfast: false,
+      },
+    ],
   },
   {
     id: "hotel-3",
@@ -327,7 +524,7 @@ export const defaultHotels: HotelItem[] = [
     reviews: 980,
     price: "2,900",
     priceNote: "يبدأ من",
-    description: "تجربة فاخرة وسط الصخور الطبيعية مع أنشطة ليلية مميزة.",
+    description: "تجربة إقامة فاخرة واستثنائية وسط الصخور الأثرية في العلا. استمتع بالسماء المرصعة بالنجوم والجولات الخاصة لمدائن صالح مع أنشطة ليلية مميزة.",
     amenities: ["منتجع صحي", "جولات خاصة", "مسبح", "خدمة كونسيرج"],
     distances: [
       { name: "مدائن صالح", distance: "22 كم" },
@@ -335,6 +532,41 @@ export const defaultHotels: HotelItem[] = [
     ],
     cuisine: "مطبخ محلي فاخر",
     tag: "فاخر",
+    starCategory: 5,
+    gallery: [
+      "https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=80",
+    ],
+    checkInTime: "2:00 PM",
+    checkOutTime: "11:00 AM",
+    phone: "+966 14 XXX XXXX",
+    cancellationPolicy: "إلغاء مجاني حتى 72 ساعة قبل الوصول. بعد ذلك يُخصم 50% من قيمة الإقامة.",
+    roomTypes: [
+      {
+        name: "فيلا صحراوية خاصة",
+        description: "فيلا فاخرة 80 متر مربع مع تراس خاص وإطلالة على التكوينات الصخرية",
+        price: "4,500",
+        capacity: "2 بالغين",
+        bedType: "سرير كينغ",
+        size: "80 م²",
+        image: "https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?auto=format&fit=crop&w=800&q=80",
+        amenities: ["تراس خاص", "حوض سباحة صغير", "منتجع صحي خاص"],
+        refundable: true,
+        breakfast: true,
+      },
+      {
+        name: "خيمة فاخرة",
+        description: "تجربة تخييم فاخرة 45 متر مربع بتصميم تراثي عصري",
+        price: "2,900",
+        capacity: "2 بالغين",
+        bedType: "سرير كينغ",
+        size: "45 م²",
+        image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80",
+        amenities: ["تكييف", "حمام خاص", "ميني بار"],
+        refundable: true,
+        breakfast: true,
+      },
+    ],
   },
   {
     id: "hotel-4",
@@ -345,7 +577,7 @@ export const defaultHotels: HotelItem[] = [
     reviews: 2100,
     price: "1,100",
     priceNote: "يبدأ من",
-    description: "موقع قريب من الحرم مع خدمات عائلية مريحة.",
+    description: "موقع استثنائي على بعد دقائق من الحرم النبوي الشريف. فندق مثالي للعائلات والزوار مع خدمات ضيافة مميزة وإفطار عربي أصيل.",
     amenities: ["واي فاي مجاني", "إفطار", "خدمة غرف", "موقف سيارات"],
     distances: [
       { name: "الحرم النبوي", distance: "1 كم" },
@@ -354,6 +586,45 @@ export const defaultHotels: HotelItem[] = [
     ],
     cuisine: "مطعم عربي",
     tag: "عائلي",
+    starCategory: 4,
+    checkInTime: "2:00 PM",
+    checkOutTime: "12:00 PM",
+    cancellationPolicy: "إلغاء مجاني حتى 24 ساعة قبل الوصول.",
+    roomTypes: [
+      {
+        name: "غرفة بإطلالة على الحرم",
+        description: "غرفة مميزة 30 متر مربع مع إطلالة مباشرة على الحرم النبوي",
+        price: "1,800",
+        capacity: "2 بالغين",
+        bedType: "سرير كينغ",
+        size: "30 م²",
+        amenities: ["إطلالة على الحرم", "تلفزيون", "واي فاي"],
+        refundable: true,
+        breakfast: true,
+      },
+      {
+        name: "غرفة عائلية",
+        description: "غرفة واسعة 40 متر مربع مناسبة للعائلات",
+        price: "1,400",
+        capacity: "4 بالغين",
+        bedType: "سريرين مزدوجين",
+        size: "40 م²",
+        amenities: ["واي فاي", "تلفزيون", "ثلاجة صغيرة"],
+        refundable: true,
+        breakfast: true,
+      },
+      {
+        name: "غرفة اقتصادية",
+        description: "غرفة عملية 22 متر مربع بأساسيات مريحة",
+        price: "1,100",
+        capacity: "2 بالغين",
+        bedType: "سرير مزدوج",
+        size: "22 م²",
+        amenities: ["واي فاي", "مكيف"],
+        refundable: false,
+        breakfast: false,
+      },
+    ],
   },
   {
     id: "hotel-5",
@@ -364,7 +635,7 @@ export const defaultHotels: HotelItem[] = [
     reviews: 760,
     price: "1,350",
     priceNote: "يبدأ من",
-    description: "إطلالات جبلية وهواء بارد وأنشطة عائلية متنوعة.",
+    description: "منتجع ساحر في قمم جبال السودة بأبها. استمتع بإطلالات جبلية خلابة وهواء بارد منعش مع أنشطة عائلية متنوعة ومسارات مشي في الطبيعة.",
     amenities: ["مواقف", "كافيه", "جلسات خارجية", "واي فاي"],
     distances: [
       { name: "منتزه السودة", distance: "2 كم" },
@@ -372,6 +643,34 @@ export const defaultHotels: HotelItem[] = [
     ],
     cuisine: "مطبخ محلي",
     tag: "طبيعة",
+    starCategory: 4,
+    checkInTime: "3:00 PM",
+    checkOutTime: "11:00 AM",
+    cancellationPolicy: "إلغاء مجاني حتى 48 ساعة قبل الوصول.",
+    roomTypes: [
+      {
+        name: "شاليه جبلي",
+        description: "شاليه مستقل 50 متر مربع بإطلالة بانورامية على الجبال والضباب",
+        price: "1,800",
+        capacity: "4 بالغين",
+        bedType: "سریر كينغ + أريكة سرير",
+        size: "50 م²",
+        amenities: ["تراس خاص", "مدفأة", "مطبخ صغير"],
+        refundable: true,
+        breakfast: true,
+      },
+      {
+        name: "غرفة بإطلالة جبلية",
+        description: "غرفة أنيقة 30 متر مربع مع نافذة كبيرة على المنظر الجبلي",
+        price: "1,350",
+        capacity: "2 بالغين",
+        bedType: "سرير كينغ",
+        size: "30 م²",
+        amenities: ["تلفزيون", "واي فاي", "ميني بار"],
+        refundable: true,
+        breakfast: true,
+      },
+    ],
   },
   {
     id: "hotel-6",
@@ -382,7 +681,7 @@ export const defaultHotels: HotelItem[] = [
     reviews: 640,
     price: "950",
     priceNote: "يبدأ من",
-    description: "خيار اقتصادي بإطلالة بحرية وموقع قريب من المقاهي.",
+    description: "خيار اقتصادي ممتاز على كورنيش الخبر. إطلالة بحرية جميلة وموقع قريب من المقاهي والمطاعم ومراكز التسوق في المنطقة الشرقية.",
     amenities: ["واي فاي", "موقف سيارات", "غرف عائلية"],
     distances: [
       { name: "كورنيش الخبر", distance: "1 كم" },
@@ -390,6 +689,34 @@ export const defaultHotels: HotelItem[] = [
     ],
     cuisine: "مقهى وحلويات",
     tag: "اقتصادي",
+    starCategory: 3,
+    checkInTime: "2:00 PM",
+    checkOutTime: "12:00 PM",
+    cancellationPolicy: "إلغاء مجاني حتى 24 ساعة قبل الوصول. غير قابل للاسترداد بعد ذلك.",
+    roomTypes: [
+      {
+        name: "غرفة بإطلالة بحرية",
+        description: "غرفة مريحة 26 متر مربع مع إطلالة على الخليج العربي",
+        price: "1,200",
+        capacity: "2 بالغين",
+        bedType: "سرير مزدوج",
+        size: "26 م²",
+        amenities: ["إطلالة بحرية", "تلفزيون", "واي فاي"],
+        refundable: true,
+        breakfast: true,
+      },
+      {
+        name: "غرفة اقتصادية",
+        description: "غرفة بسيطة 20 متر مربع بأسعار مناسبة",
+        price: "950",
+        capacity: "2 بالغين",
+        bedType: "سرير مزدوج",
+        size: "20 م²",
+        amenities: ["واي فاي", "مكيف"],
+        refundable: false,
+        breakfast: false,
+      },
+    ],
   },
 ];
 
@@ -411,7 +738,7 @@ export const defaultOffers: OfferItem[] = [
     id: "offer-2",
     title: "باقة جدة البحرية",
     description: "إقامة على الكورنيش مع رحلة بحرية وأنشطة مائية.",
-    image: "https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?auto=format&fit=crop&w=1200&q=80",
+    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
     discount: 25,
     validUntil: "2026-04-15",
     originalPrice: "3,100",
@@ -424,7 +751,7 @@ export const defaultOffers: OfferItem[] = [
     id: "offer-3",
     title: "عطلة الرياض العائلية",
     description: "باقة عائلية قريبة من الفعاليات والترفيه.",
-    image: "https://images.unsplash.com/photo-1578895101408-1a36b834405b?auto=format&fit=crop&w=1200&q=80",
+    image: "https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?auto=format&fit=crop&w=1200&q=80",
     discount: 20,
     validUntil: "2026-05-01",
     originalPrice: "2,400",
@@ -482,6 +809,16 @@ export const defaultActivities: ActivityItem[] = [
     category: "بحرية",
     price: "180",
     image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80",
+    duration: "3 ساعات",
+    description: "جولة ممتعة في البحر الأحمر على متن يخت فاخر مع مشاهدة الشعاب المرجانية والأسماك الاستوائية. تشمل وجبة غداء بحرية ومعدات الغوص السطحي.",
+    rating: 4.7,
+    reviews: 342,
+    difficulty: "سهل",
+    ageRange: "جميع الأعمار",
+    includes: ["يخت خاص", "وجبة غداء بحرية", "معدات غوص سطحي", "مرشد بحري"],
+    schedule: "يومياً: 9:00 ص - 12:00 م | 2:00 م - 5:00 م",
+    maxGroup: 12,
+    languages: ["العربية", "الإنجليزية"],
   },
   {
     id: "activity-2",
@@ -490,6 +827,16 @@ export const defaultActivities: ActivityItem[] = [
     category: "ثقافية",
     price: "120",
     image: "https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?auto=format&fit=crop&w=1200&q=80",
+    duration: "4 ساعات",
+    description: "جولة مميزة في حي الطريف التاريخي بالدرعية - موقع التراث العالمي لليونسكو. استكشف القصور الطينية والأزقة القديمة مع مرشد متخصص في التاريخ السعودي.",
+    rating: 4.5,
+    reviews: 218,
+    difficulty: "سهل",
+    ageRange: "6 سنوات فما فوق",
+    includes: ["مرشد سياحي معتمد", "دخول المتاحف", "مشروبات ترحيبية", "نقل داخلي"],
+    schedule: "السبت - الخميس: 8:00 ص - 12:00 م",
+    maxGroup: 20,
+    languages: ["العربية", "الإنجليزية"],
   },
   {
     id: "activity-3",
@@ -498,6 +845,16 @@ export const defaultActivities: ActivityItem[] = [
     category: "طبيعة",
     price: "260",
     image: "https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?auto=format&fit=crop&w=1200&q=80",
+    duration: "6 ساعات",
+    description: "مغامرة استكشافية فريدة بين التكوينات الصخرية المذهلة في العلا. تشمل زيارة مدائن صالح وصخرة الفيل مع تجربة شاي في قلب الصحراء.",
+    rating: 4.9,
+    reviews: 567,
+    difficulty: "متوسط",
+    ageRange: "10 سنوات فما فوق",
+    includes: ["سيارة دفع رباعي", "مرشد محلي", "وجبة غداء صحراوية", "شاي وقهوة", "تصوير فوتوغرافي"],
+    schedule: "يومياً: 7:00 ص - 1:00 م | 3:00 م - غروب الشمس",
+    maxGroup: 8,
+    languages: ["العربية", "الإنجليزية", "الفرنسية"],
   },
   {
     id: "activity-4",
@@ -506,6 +863,16 @@ export const defaultActivities: ActivityItem[] = [
     category: "تسوق",
     price: "90",
     image: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80",
+    duration: "3 ساعات",
+    description: "جولة في أشهر أسواق الطائف التقليدية بما فيها سوق الورد وسوق العقيقية. تعرف على صناعة العطور والورد الطائفي الشهير.",
+    rating: 4.3,
+    reviews: 156,
+    difficulty: "سهل",
+    ageRange: "جميع الأعمار",
+    includes: ["مرشد محلي", "عينات عطور", "شاي تقليدي"],
+    schedule: "يومياً: 9:00 ص - 12:00 م | 4:00 م - 7:00 م",
+    maxGroup: 15,
+    languages: ["العربية"],
   },
   {
     id: "activity-5",
@@ -514,6 +881,16 @@ export const defaultActivities: ActivityItem[] = [
     category: "مغامرة",
     price: "210",
     image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=80",
+    duration: "5 ساعات",
+    description: "مسار مشي مثير في جبال السودة وأبها - أعلى قمة في المملكة. استمتع بالضباب والمناظر الخلابة مع مرشد مغامرات محترف.",
+    rating: 4.6,
+    reviews: 289,
+    difficulty: "متقدم",
+    ageRange: "12 سنة فما فوق",
+    includes: ["معدات هايكنق", "مرشد مغامرات", "وجبة خفيفة", "مياه", "تأمين"],
+    schedule: "الجمعة والسبت: 6:00 ص - 11:00 ص",
+    maxGroup: 10,
+    languages: ["العربية", "الإنجليزية"],
   },
   {
     id: "activity-6",
@@ -522,6 +899,16 @@ export const defaultActivities: ActivityItem[] = [
     category: "ثقافة",
     price: "110",
     image: "https://images.unsplash.com/photo-1590076215667-875d4ef2d7de?auto=format&fit=crop&w=1200&q=80",
+    duration: "4 ساعات",
+    description: "جولة ثقافية شاملة تزور أهم متاحف المدينة المنورة بما فيها متحف دار المدينة ومتحف سكة حديد الحجاز. تعرف على تاريخ المدينة العريق.",
+    rating: 4.4,
+    reviews: 198,
+    difficulty: "سهل",
+    ageRange: "جميع الأعمار",
+    includes: ["مرشد ثقافي", "دخول المتاحف", "نقل مكيف", "كتيب تعريفي"],
+    schedule: "السبت - الأربعاء: 9:00 ص - 1:00 م",
+    maxGroup: 20,
+    languages: ["العربية", "الإنجليزية"],
   },
 ];
 
@@ -538,7 +925,7 @@ export const defaultArticles: ArticleItem[] = [
     title: "أفضل الأنشطة في جدة البحرية",
     category: "تجارب",
     date: "2026-01-20",
-    image: "https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?auto=format&fit=crop&w=1200&q=80",
+    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: "article-3",
@@ -580,7 +967,7 @@ export const defaultDestinations: DestinationItem[] = [
     duration: "3 أيام",
     priceFrom: "2,600",
     description: "واجهة بحرية وأسواق قديمة وتجارب طعام متنوعة.",
-    image: "https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?auto=format&fit=crop&w=1200&q=80",
+    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: "destination-2",

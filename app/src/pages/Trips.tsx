@@ -21,6 +21,9 @@ import {
   ChevronDown,
   ChevronUp,
   X,
+  Luggage,
+  Briefcase,
+  Building2,
 } from "lucide-react";
 import {
   defaultAirlines,
@@ -279,6 +282,11 @@ export default function Trips() {
     const stopsCount = firstSlice.length > 1 ? firstSlice.length - 1 : 0;
     const departureTime = firstSegment.departureTime || "";
     const arrivalTime = lastSegment.arrivalTime || "";
+    const flightNumber = (firstSegment as any).flightNumber || (firstSegment as any).number || "";
+    const aircraft = (firstSegment as any).aircraft || "";
+    const baggage = (firstSegment as any).baggage || null;
+    const departTerminal = (firstSegment as any).departTerminal || (firstSegment as any).terminal || "";
+    const arriveTerminal = (lastSegment as any).arriveTerminal || (lastSegment as any).terminal || "";
     return {
       origin,
       destination,
@@ -292,6 +300,11 @@ export default function Trips() {
       currency: offer.pricing?.currency || "SAR",
       priceLabel: offer.pricing?.total,
       cabins: offer.cabins?.join("، "),
+      flightNumber,
+      aircraft,
+      baggage,
+      departTerminal,
+      arriveTerminal,
     };
   };
 
@@ -654,6 +667,9 @@ export default function Trips() {
             <div>
               <p className="text-sm font-semibold">{summary.carrierName || summary.carrier}</p>
               <p className="text-xs text-muted-foreground">{summary.carrier}</p>
+              {summary.flightNumber && (
+                <p className="text-xs text-primary font-medium mt-0.5">{summary.flightNumber}</p>
+              )}
               {summary.cabins && (
                 <span className="inline-block mt-1 text-[10px] bg-muted px-2 py-0.5 rounded-full text-muted-foreground">
                   {summary.cabins}
@@ -663,12 +679,15 @@ export default function Trips() {
           </div>
 
           {/* Flight Times & Duration */}
-          <div className="flex-1 p-4 flex items-center">
+          <div className="flex-1 p-4 flex flex-col justify-center">
             <div className="flex items-center w-full gap-3">
               {/* Departure */}
               <div className="text-center min-w-[60px]">
                 <p className="text-xl font-bold">{summary.departureTime || "--:--"}</p>
                 <p className="text-xs text-muted-foreground font-medium">{summary.origin}</p>
+                {summary.departTerminal && (
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{summary.departTerminal}</p>
+                )}
               </div>
 
               {/* Duration Line */}
@@ -694,8 +713,35 @@ export default function Trips() {
               <div className="text-center min-w-[60px]">
                 <p className="text-xl font-bold">{summary.arrivalTime || "--:--"}</p>
                 <p className="text-xs text-muted-foreground font-medium">{summary.destination}</p>
+                {summary.arriveTerminal && (
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{summary.arriveTerminal}</p>
+                )}
               </div>
             </div>
+
+            {/* Baggage & Extra Info Row */}
+            {(summary.baggage || summary.aircraft) && (
+              <div className="flex items-center gap-4 mt-2 pt-2 border-t border-border/50">
+                {summary.baggage?.cabin && (
+                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                    <Briefcase className="w-3 h-3" />
+                    <span>يد: {summary.baggage.cabin}</span>
+                  </div>
+                )}
+                {summary.baggage?.checked && (
+                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                    <Luggage className="w-3 h-3" />
+                    <span>شحن: {summary.baggage.checked}</span>
+                  </div>
+                )}
+                {summary.aircraft && (
+                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                    <Plane className="w-3 h-3" />
+                    <span>{summary.aircraft}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Price & Action */}
@@ -1055,6 +1101,9 @@ export default function Trips() {
                     </div>
                     <div>
                       <p className="text-sm font-semibold">{flight.airline}</p>
+                      {flight.flightNumber && (
+                        <p className="text-xs text-primary font-medium mt-0.5">{flight.flightNumber}</p>
+                      )}
                       <div className="flex items-center gap-1 mt-0.5">
                         <Star className="w-3 h-3 fill-secondary text-secondary" />
                         <span className="text-xs text-muted-foreground">{flight.rating}</span>
@@ -1063,11 +1112,14 @@ export default function Trips() {
                   </div>
 
                   {/* Flight Times */}
-                  <div className="flex-1 p-4 flex items-center">
+                  <div className="flex-1 p-4 flex flex-col justify-center">
                     <div className="flex items-center w-full gap-3">
                       <div className="text-center min-w-[60px]">
                         <p className="text-xl font-bold">{flight.departTime}</p>
                         <p className="text-xs text-muted-foreground">{flight.from}</p>
+                        {flight.departTerminal && (
+                          <p className="text-[10px] text-muted-foreground">{flight.departTerminal}</p>
+                        )}
                       </div>
                       <div className="flex-1 flex flex-col items-center">
                         <span className="text-xs text-muted-foreground mb-1">{flight.duration}</span>
@@ -1085,8 +1137,45 @@ export default function Trips() {
                       <div className="text-center min-w-[60px]">
                         <p className="text-xl font-bold">{flight.arriveTime}</p>
                         <p className="text-xs text-muted-foreground">{flight.to}</p>
+                        {flight.arriveTerminal && (
+                          <p className="text-[10px] text-muted-foreground">{flight.arriveTerminal}</p>
+                        )}
                       </div>
                     </div>
+
+                    {/* Baggage & Extra Info */}
+                    {(flight.baggage || flight.aircraft || flight.fareType) && (
+                      <div className="flex items-center gap-4 mt-2 pt-2 border-t border-border/50">
+                        {flight.baggage?.cabin && (
+                          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                            <Briefcase className="w-3 h-3" />
+                            <span>يد: {flight.baggage.cabin}</span>
+                          </div>
+                        )}
+                        {flight.baggage?.checked && (
+                          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                            <Luggage className="w-3 h-3" />
+                            <span>شحن: {flight.baggage.checked}</span>
+                          </div>
+                        )}
+                        {flight.aircraft && (
+                          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                            <Plane className="w-3 h-3" />
+                            <span>{flight.aircraft}</span>
+                          </div>
+                        )}
+                        {flight.fareType && (
+                          <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+                            {flight.fareType}
+                          </span>
+                        )}
+                        {flight.refundable && (
+                          <span className="text-[10px] bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 px-2 py-0.5 rounded-full font-medium">
+                            قابل للاسترداد
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Price */}

@@ -302,8 +302,8 @@ INSERT INTO public.hotels (id, name, location, image, rating, reviews, price, "p
 -- العروض
 INSERT INTO public.offers (id, title, description, image, discount, "validUntil", "originalPrice", "newPrice", season, includes, tips) VALUES
 ('offer-1', 'عرض شتاء العلا', 'تجربة صحراوية فاخرة مع جولات تاريخية وإقامة مميزة.', 'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?auto=format&fit=crop&w=1200&q=80', 35, '2026-03-31', '4,200', '2,730', 'winter', ARRAY['إقامة 3 ليال','جولة مدائن صالح','تنقلات داخلية'], ARRAY['احجز قبل أسبوعين','أفضل وقت مساء']),
-('offer-2', 'باقة جدة البحرية', 'إقامة على الكورنيش مع رحلة بحرية وأنشطة مائية.', 'https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?auto=format&fit=crop&w=1200&q=80', 25, '2026-04-15', '3,100', '2,325', 'spring', ARRAY['إقامة ليلتين','رحلة بحرية','تذاكر نشاط بحري'], ARRAY['اختر الصباح المبكر','أضف وجبة بحرية']),
-('offer-3', 'عطلة الرياض العائلية', 'باقة عائلية قريبة من الفعاليات والترفيه.', 'https://images.unsplash.com/photo-1578895101408-1a36b834405b?auto=format&fit=crop&w=1200&q=80', 20, '2026-05-01', '2,400', '1,920', 'spring', ARRAY['إقامة 2 ليال','تذاكر فعالية','تنقلات'], ARRAY['احجز عطلة نهاية الأسبوع','تحقق من العروض العائلية']),
+('offer-2', 'باقة جدة البحرية', 'إقامة على الكورنيش مع رحلة بحرية وأنشطة مائية.', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80', 25, '2026-04-15', '3,100', '2,325', 'spring', ARRAY['إقامة ليلتين','رحلة بحرية','تذاكر نشاط بحري'], ARRAY['اختر الصباح المبكر','أضف وجبة بحرية']),
+('offer-3', 'عطلة الرياض العائلية', 'باقة عائلية قريبة من الفعاليات والترفيه.', 'https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?auto=format&fit=crop&w=1200&q=80', 20, '2026-05-01', '2,400', '1,920', 'spring', ARRAY['إقامة 2 ليال','تذاكر فعالية','تنقلات'], ARRAY['احجز عطلة نهاية الأسبوع','تحقق من العروض العائلية']),
 ('offer-4', 'جولة الطائف الباردة', 'أجواء لطيفة وزيارات للمرتفعات والأسواق التراثية.', 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80', 18, '2026-06-10', '2,000', '1,640', 'summer', ARRAY['إقامة ليلة','جولة مرتفعات','مرشد محلي'], ARRAY['خذ ملابس خفيفة','أفضل وقت عصرًا']),
 ('offer-5', 'رحلة أبها الجبلية', 'باقة طبيعة لعشاق الضباب والمناظر الخلابة.', 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=80', 22, '2026-07-15', '2,800', '2,184', 'summer', ARRAY['إقامة 3 ليال','جولات طبيعية','تنقلات'], ARRAY['احجز باكرًا','استمتع بجلسات المساء']),
 ('offer-6', 'زيارة المدينة المنورة', 'إقامة قريبة من الحرم النبوي مع خدمات مريحة.', 'https://images.unsplash.com/photo-1590076215667-875d4ef2d7de?auto=format&fit=crop&w=1200&q=80', 15, '2026-03-20', '1,900', '1,615', 'ramadan', ARRAY['إقامة ليلتين','خدمة نقل','إفطار'], ARRAY['اختر الغرف القريبة','تحقق من مواقيت الدخول']);
@@ -320,7 +320,7 @@ INSERT INTO public.activities (id, title, location, category, price, image) VALU
 -- المقالات
 INSERT INTO public.articles (id, title, category, date, image) VALUES
 ('article-1', 'دليل السفر إلى العلا', 'وجهات', '2026-02-01', 'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?auto=format&fit=crop&w=1200&q=80'),
-('article-2', 'أفضل الأنشطة في جدة البحرية', 'تجارب', '2026-01-20', 'https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?auto=format&fit=crop&w=1200&q=80'),
+('article-2', 'أفضل الأنشطة في جدة البحرية', 'تجارب', '2026-01-20', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80'),
 ('article-3', 'الرياض الحديثة: ماذا تزور؟', 'مدن', '2026-01-10', 'https://images.unsplash.com/photo-1578895101408-1a36b834405b?auto=format&fit=crop&w=1200&q=80'),
 ('article-4', 'شتاء أبها وكيف تستمتع به', 'مواسم', '2025-12-22', 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=80'),
 ('article-5', 'دليل زيارة المدينة المنورة', 'روحانيات', '2025-12-05', 'https://images.unsplash.com/photo-1590076215667-875d4ef2d7de?auto=format&fit=crop&w=1200&q=80'),
@@ -328,7 +328,7 @@ INSERT INTO public.articles (id, title, category, date, image) VALUES
 
 -- الوجهات
 INSERT INTO public.destinations (id, title, country, region, tag, duration, "priceFrom", description, image) VALUES
-('destination-1', 'جدة', 'السعودية', 'الغربية', 'بحرية', '3 أيام', '2,600', 'واجهة بحرية وأسواق قديمة وتجارب طعام متنوعة.', 'https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?auto=format&fit=crop&w=1200&q=80'),
+('destination-1', 'جدة', 'السعودية', 'الغربية', 'بحرية', '3 أيام', '2,600', 'واجهة بحرية وأسواق قديمة وتجارب طعام متنوعة.', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80'),
 ('destination-2', 'الرياض', 'السعودية', 'الوسطى', 'مدينة', '3 أيام', '2,300', 'عاصمة نابضة بالحياة مع فعاليات ومراكز تسوق.', 'https://images.unsplash.com/photo-1578895101408-1a36b834405b?auto=format&fit=crop&w=1200&q=80'),
 ('destination-3', 'العلا', 'السعودية', 'الشمالية', 'تراث', '2 أيام', '3,100', 'وجهة تاريخية فريدة بمواقع أثرية ومناظر صحراوية.', 'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?auto=format&fit=crop&w=1200&q=80'),
 ('destination-4', 'المدينة المنورة', 'السعودية', 'الغربية', 'روحاني', '4 أيام', '3,600', 'رحلة روحانية مع خدمات مريحة وقريبة من الحرم.', 'https://images.unsplash.com/photo-1590076215667-875d4ef2d7de?auto=format&fit=crop&w=1200&q=80'),
