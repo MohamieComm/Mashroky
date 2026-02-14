@@ -2,9 +2,22 @@ import { getServiceClient } from '../services/supabase.service.js';
 
 const ALLOWED_MIME_TYPES = new Set([
   'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
-  'application/pdf',
+  'application/pdf', 'video/mp4',
 ]);
-const ALLOWED_BUCKETS = new Set(['public', 'avatars', 'media']);
+const ALLOWED_BUCKETS = new Set(['public', 'avatars', 'media', 'promo']);
+
+const ensureBucketExists = async (client, bucketName) => {
+  try {
+    const { error } = await client.storage.getBucket(bucketName);
+    if (error && (error.message || '').toLowerCase().includes('not found')) {
+      await client.storage.createBucket(bucketName, { public: true, fileSizeLimit: 52428800 });
+    }
+  } catch {
+    try {
+      await client.storage.createBucket(bucketName, { public: true, fileSizeLimit: 52428800 });
+    } catch { /* bucket may already exist */ }
+  }
+};
 
 export const upload = async (req, res, next) => {
   try {
@@ -16,6 +29,7 @@ export const upload = async (req, res, next) => {
       return res.status(400).json({ error: 'unsupported_file_type' });
     }
     const bucket = ALLOWED_BUCKETS.has(req.body?.bucket) ? req.body.bucket : 'public';
+    await ensureBucketExists(client, bucket);
     const filename = req.body?.path || `${Date.now()}-${file.originalname}`.replace(/\s+/g, '-');
     const { data, error } = await client.storage.from(bucket).upload(filename, file.buffer, {
       contentType: file.mimetype,

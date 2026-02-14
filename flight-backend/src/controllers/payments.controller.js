@@ -68,6 +68,45 @@ export async function createPayment(req, res, next) {
       return res.status(500).json({ error: 'backend_base_url_not_configured' });
     }
 
+    // Resolve secret key to check if we're in test mode
+    const { getApiKeyValue } = await import('../services/api-keys.service.js');
+    let secretKey = moyasarEnv.secretKey || '';
+    try {
+      if (!secretKey) secretKey = await getApiKeyValue('moyasar', 'secret_key');
+    } catch { /* ignore */ }
+
+    const isTestMode = secretKey && (secretKey.startsWith('sk_test_') || secretKey.startsWith('pk_test_'));
+
+    // In test mode, skip Moyasar redirect (avoids 3DS ACS Emulator page)
+    if (isTestMode) {
+      const mockPaymentId = `pay_test_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      // Store a test payment record
+      try {
+        await upsertPaymentStatus({
+          provider: 'moyasar',
+          provider_payment_id: mockPaymentId,
+          provider_event_id: null,
+          event_type: 'payment_paid',
+          status: 'paid',
+          amount: Math.round(rawAmount * 100),
+          currency: currency || 'SAR',
+          live: false,
+          account_name: 'test',
+          metadata: bookingId ? { bookingId } : null,
+          raw: { test_mode: true, description },
+          event_created_at: new Date().toISOString(),
+        });
+      } catch { /* ignore storage errors in test mode */ }
+
+      return res.json({
+        provider: 'moyasar',
+        testMode: true,
+        paymentId: mockPaymentId,
+        paymentUrl: null,
+        successRedirect: `${baseUrl}/payments?payment=success`,
+      });
+    }
+
     const invoice = await createMoyasarInvoice({
       amount: rawAmount,
       currency,
@@ -80,6 +119,7 @@ export async function createPayment(req, res, next) {
 
     res.json({
       provider: 'moyasar',
+      testMode: false,
       invoice,
       paymentUrl: invoice?.url || invoice?.payment_url || null,
     });

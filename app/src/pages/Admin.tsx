@@ -421,6 +421,19 @@ export default function Admin() {
     return `فشل الرفع: ${message || "خطأ غير معروف"}`;
   };
 
+  const ensureBucket = async (bucketName: string) => {
+    try {
+      const { error } = await supabase.storage.getBucket(bucketName);
+      if (error && (error.message || "").toLowerCase().includes("not found")) {
+        await supabase.storage.createBucket(bucketName, { public: true, fileSizeLimit: 52428800 });
+      }
+    } catch {
+      try {
+        await supabase.storage.createBucket(bucketName, { public: true, fileSizeLimit: 52428800 });
+      } catch { /* may already exist */ }
+    }
+  };
+
   const activeConfig = sectionConfigs[activeSection];
 
   useEffect(() => {
@@ -880,7 +893,11 @@ export default function Admin() {
                         <span className="text-sm font-semibold">{svc.name}</span>
                       </div>
                       <p className={`text-xs ${svc.ready ? "text-green-700 dark:text-green-400" : "text-orange-700 dark:text-orange-400"}`}>
-                        {svc.ready ? "مُهيأ وجاهز" : "يحتاج تهيئة"}
+                        {svc.ready ? "مُهيأ وجاهز" : (
+                          <button onClick={() => setActiveSection("api")} className="underline cursor-pointer">
+                            يحتاج تهيئة — أضف المفاتيح
+                          </button>
+                        )}
                       </p>
                     </div>
                   ))}
@@ -931,6 +948,7 @@ export default function Admin() {
                       if (!file) return;
                       // رفع الملف إلى Supabase Storage
                       const fileName = `promo/${Date.now()}-${file.name}`;
+                      await ensureBucket("promo");
                       const { data, error } = await supabase.storage.from("promo").upload(fileName, file);
                       if (error) {
                         alert(formatStorageError(error));
@@ -992,6 +1010,7 @@ export default function Admin() {
                       const file = event.target.files?.[0];
                       if (!file) return;
                       const fileName = `app-download/${Date.now()}-${file.name}`;
+                      await ensureBucket("public");
                       const { error } = await supabase.storage.from("public").upload(fileName, file);
                       if (error) {
                         alert(formatStorageError(error));
@@ -1109,6 +1128,7 @@ export default function Admin() {
                       const file = event.target.files?.[0];
                       if (!file) return;
                       const fileName = `featured/${Date.now()}-${file.name}`;
+                      await ensureBucket("public");
                       const { error } = await supabase.storage.from("public").upload(fileName, file);
                       if (error) {
                         alert(formatStorageError(error));
@@ -1403,6 +1423,7 @@ export default function Admin() {
                               const file = event.target.files?.[0];
                               if (!file) return;
                               const fileName = `${field.key}/${Date.now()}-${file.name}`;
+                              await ensureBucket("public");
                               const { data, error } = await supabase.storage.from("public").upload(fileName, file);
                               if (error) {
                                 alert(formatStorageError(error));

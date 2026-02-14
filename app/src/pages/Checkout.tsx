@@ -96,6 +96,13 @@ export default function Checkout() {
         throw new Error(body?.error || "payment_failed");
       }
       const data = await res.json();
+
+      // Test mode: Moyasar test keys detected — skip redirect to avoid 3DS ACS Emulator
+      if (data.testMode && data.successRedirect) {
+        window.location.href = data.successRedirect;
+        return;
+      }
+
       if (data.paymentUrl) {
         window.location.href = data.paymentUrl;
         return;

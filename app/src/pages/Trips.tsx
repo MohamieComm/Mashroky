@@ -282,6 +282,34 @@ export default function Trips() {
     const stopsCount = firstSlice.length > 1 ? firstSlice.length - 1 : 0;
     const departureTime = firstSegment.departureTime || "";
     const arrivalTime = lastSegment.arrivalTime || "";
+
+    const formatFlightTime = (isoStr: string) => {
+      if (!isoStr) return "--:--";
+      try {
+        const d = new Date(isoStr);
+        if (isNaN(d.getTime())) {
+          const m = isoStr.match(/T(\d{2}):(\d{2})/);
+          return m ? `${m[1]}:${m[2]}` : isoStr;
+        }
+        return d.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit", hour12: false });
+      } catch { return isoStr; }
+    };
+
+    const formatFlightDate = (isoStr: string) => {
+      if (!isoStr) return "";
+      try {
+        const d = new Date(isoStr);
+        if (isNaN(d.getTime())) return "";
+        return d.toLocaleDateString("ar-SA", { day: "numeric", month: "short" });
+      } catch { return ""; }
+    };
+
+    const eurToSar = 4.05;
+    const rawCurrency = offer.pricing?.currency || "SAR";
+    const rawPrice = Number.isFinite(priceValue) ? priceValue : 0;
+    const convertedPrice = rawCurrency.toUpperCase() === "EUR" ? Math.round(rawPrice * eurToSar) : rawPrice;
+    const displayCurrency = "SAR";
+
     const flightNumber = (firstSegment as any).flightNumber || (firstSegment as any).number || "";
     const aircraft = (firstSegment as any).aircraft || "";
     const baggage = (firstSegment as any).baggage || null;
@@ -294,11 +322,13 @@ export default function Trips() {
       carrierName,
       durationMinutes,
       stopsCount,
-      departureTime,
-      arrivalTime,
-      priceValue: Number.isFinite(priceValue) ? priceValue : 0,
-      currency: offer.pricing?.currency || "SAR",
-      priceLabel: offer.pricing?.total,
+      departureTime: formatFlightTime(departureTime),
+      arrivalTime: formatFlightTime(arrivalTime),
+      departureDate: formatFlightDate(departureTime),
+      arrivalDate: formatFlightDate(arrivalTime),
+      priceValue: convertedPrice,
+      currency: displayCurrency,
+      priceLabel: convertedPrice > 0 ? convertedPrice.toLocaleString() : offer.pricing?.total,
       cabins: offer.cabins?.join("، "),
       flightNumber,
       aircraft,
@@ -685,6 +715,9 @@ export default function Trips() {
               <div className="text-center min-w-[60px]">
                 <p className="text-xl font-bold">{summary.departureTime || "--:--"}</p>
                 <p className="text-xs text-muted-foreground font-medium">{summary.origin}</p>
+                {summary.departureDate && (
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{summary.departureDate}</p>
+                )}
                 {summary.departTerminal && (
                   <p className="text-[10px] text-muted-foreground mt-0.5">{summary.departTerminal}</p>
                 )}
@@ -713,6 +746,9 @@ export default function Trips() {
               <div className="text-center min-w-[60px]">
                 <p className="text-xl font-bold">{summary.arrivalTime || "--:--"}</p>
                 <p className="text-xs text-muted-foreground font-medium">{summary.destination}</p>
+                {summary.arrivalDate && (
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{summary.arrivalDate}</p>
+                )}
                 {summary.arriveTerminal && (
                   <p className="text-[10px] text-muted-foreground mt-0.5">{summary.arriveTerminal}</p>
                 )}
@@ -749,7 +785,7 @@ export default function Trips() {
             <p className="text-2xl font-bold text-primary">
               {summary.priceValue ? summary.priceValue.toLocaleString() : summary.priceLabel}
             </p>
-            <p className="text-xs text-muted-foreground mb-3">{summary.currency}</p>
+            <p className="text-xs text-muted-foreground mb-3">ر.س</p>
 
             {activeTripType === "roundtrip" ? (
               <div className="flex flex-col gap-2 w-full">

@@ -119,7 +119,7 @@ export const studyOffers = [
     location: "المملكة المتحدة",
     duration: "4 أسابيع",
     price: "8,500",
-    image: "https://images.unsplash.com/photo-1516585427167-9f4af9627851?w=1200",
+    image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=1200&q=80",
     includes: ["سكن آمن قريب من المعهد", "اختبار تحديد مستوى", "شهادة دولية معتمدة"],
   },
   {
@@ -128,7 +128,7 @@ export const studyOffers = [
     location: "كندا",
     duration: "6 أسابيع",
     price: "9,200",
-    image: "https://images.unsplash.com/photo-1554995207-c18210917c31?w=1200",
+    image: "https://images.unsplash.com/photo-1517935706615-2717063c2225?auto=format&fit=crop&w=1200&q=80",
     includes: ["سكن عائلي مختار بعناية", "أنشطة طلابية إشرافية", "تأمين صحي شامل"],
   },
   {
@@ -137,7 +137,7 @@ export const studyOffers = [
     location: "أستراليا",
     duration: "8 أسابيع",
     price: "10,400",
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200",
+    image: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=1200&q=80",
     includes: ["قبول معهد معتمد", "استقبال وتوصيل من المطار", "أنشطة ثقافية وترفيهية"],
   },
   {
@@ -146,7 +146,7 @@ export const studyOffers = [
     location: "أيرلندا",
     duration: "4 أسابيع",
     price: "7,600",
-    image: "https://images.unsplash.com/photo-1499856871957-5b8620a32237?w=1200",
+    image: "https://images.unsplash.com/photo-1549918864-48ac978761a4?auto=format&fit=crop&w=1200&q=80",
     includes: ["سكن طلابي مريح", "بطاقة نقل عام", "ورش محادثة تفاعلية"],
   },
   {
@@ -155,7 +155,7 @@ export const studyOffers = [
     location: "ماليزيا",
     duration: "5 أسابيع",
     price: "7,200",
-    image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200",
+    image: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?auto=format&fit=crop&w=1200&q=80",
     includes: ["سكن طلابي مؤمّن", "أنشطة ثقافية متنوعة", "تأمين صحي شامل"],
   },
   {
@@ -164,7 +164,7 @@ export const studyOffers = [
     location: "الولايات المتحدة",
     duration: "8 أسابيع",
     price: "11,300",
-    image: "https://images.unsplash.com/photo-1536376072261-38c75010e6c9?w=1200",
+    image: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=80",
     includes: ["قبول جامعي مضمون", "استقبال وتوجيه في المطار", "دعم كامل في التأشيرة"],
   },
 ];

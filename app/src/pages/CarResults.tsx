@@ -46,6 +46,7 @@ const fallbackCars: CarResult[] = [
     seats: 5,
     doors: 4,
     vendor: "Hertz",
+    image: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=800&q=80",
     priceTotal: 180,
     currency: "SAR",
   },
@@ -58,6 +59,7 @@ const fallbackCars: CarResult[] = [
     seats: 5,
     doors: 4,
     vendor: "Avis",
+    image: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80",
     priceTotal: 220,
     currency: "SAR",
   },
@@ -70,7 +72,47 @@ const fallbackCars: CarResult[] = [
     seats: 5,
     doors: 4,
     vendor: "Budget",
+    image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0afa?auto=format&fit=crop&w=800&q=80",
     priceTotal: 165,
+    currency: "SAR",
+  },
+  {
+    id: "car-4",
+    name: "Toyota Land Cruiser",
+    category: "SUV",
+    transmission: "Automatic",
+    fuel: "Gasoline",
+    seats: 7,
+    doors: 4,
+    vendor: "Hertz",
+    image: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=800&q=80",
+    priceTotal: 450,
+    currency: "SAR",
+  },
+  {
+    id: "car-5",
+    name: "Nissan Sunny",
+    category: "Economy",
+    transmission: "Automatic",
+    fuel: "Gasoline",
+    seats: 5,
+    doors: 4,
+    vendor: "Budget",
+    image: "https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=800&q=80",
+    priceTotal: 120,
+    currency: "SAR",
+  },
+  {
+    id: "car-6",
+    name: "Mercedes E-Class",
+    category: "Luxury",
+    transmission: "Automatic",
+    fuel: "Gasoline",
+    seats: 5,
+    doors: 4,
+    vendor: "Avis",
+    image: "https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=800&q=80",
+    priceTotal: 550,
     currency: "SAR",
   },
 ];
@@ -214,6 +256,8 @@ export default function CarResults() {
                   <option value="all">كل الفئات</option>
                   <option value="sedan">Sedan</option>
                   <option value="suv">SUV</option>
+                  <option value="economy">Economy</option>
+                  <option value="luxury">Luxury</option>
                 </select>
                 <select
                   value={transmissionFilter}
@@ -253,15 +297,34 @@ export default function CarResults() {
                   </div>
                   <div className="p-5 space-y-3">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-bold">{car.name || ""}</h3>
-                      <span className="text-xs bg-muted rounded-full px-2 py-1">{car.category || ""}</span>
+                      <h3 className="font-bold text-lg">{car.name || ""}</h3>
+                      <span className="text-xs bg-primary/10 text-primary rounded-full px-3 py-1 font-semibold">{car.category || ""}</span>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      {car.transmission || ""}  {car.fuel || ""}  {car.seats || 4} 
+                    <div className="text-sm text-muted-foreground font-medium">{car.vendor || ""}</div>
+                    <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1.5">
+                        <Car className="w-4 h-4" />
+                        <span>{car.transmission || ""}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Users className="w-4 h-4" />
+                        <span>{car.seats || 4} مقاعد</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs">⛽</span>
+                        <span>{car.fuel || "بنزين"}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs">🚪</span>
+                        <span>{car.doors || 4} أبواب</span>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="text-lg font-bold text-primary">
-                        {price ? price.toLocaleString() : ""} {currency}
+                    <div className="flex items-center justify-between pt-2 border-t border-border">
+                      <div>
+                        <p className="text-xs text-muted-foreground">السعر / يوم</p>
+                        <p className="text-xl font-bold text-primary">
+                          {price ? price.toLocaleString() : ""} <span className="text-sm">ر.س</span>
+                        </p>
                       </div>
                       <Button size="sm" variant="hero" onClick={() => handleViewDetails(car)}>
                         عرض التفاصيل
