@@ -42,13 +42,13 @@ export default function Offers() {
           <div className="text-center">
             <div className="inline-flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
               <Sparkles className="w-5 h-5 text-secondary" />
-              <span className="text-primary-foreground font-semibold">عروض حصرية محدودة</span>
+              <span className="text-primary-foreground font-semibold">باقات مختارة بعناية لعملائنا</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4">
-              أفضل عروض رحلات سياحية من السعودية
+              عروض سفر راقية من الخليج إلى العالم
             </h1>
             <p className="text-primary-foreground/80 text-lg max-w-2xl mx-auto">
-              باقات شاملة للطيران والفنادق والأنشطة والمواصلات مع توصيات موسمية لكل وجهة.
+              باقات متكاملة تجمع بين الطيران والإقامة الفاخرة والتجارب الحصرية — صُمّمت لتناسب ذوقك العائلي وتوقعاتك العالية.
             </p>
           </div>
         </div>
@@ -106,7 +106,7 @@ export default function Offers() {
                       <div>
                         <h4 className="font-bold mb-3 flex items-center gap-2">
                           <Sparkles className="w-5 h-5 text-secondary" />
-                          الباقة تشمل:
+                          ما تشمله الباقة:
                         </h4>
                         <ul className="space-y-2">
                           {offer.includes.map((item, i) => (
@@ -122,7 +122,7 @@ export default function Offers() {
                       <div>
                         <h4 className="font-bold mb-3 flex items-center gap-2">
                           <AlertCircle className="w-5 h-5 text-secondary" />
-                          نصائح للرحلة:
+                          قبل رحلتك:
                         </h4>
                         <ul className="space-y-2">
                           {offer.tips.map((tip, i) => (

@@ -7,9 +7,10 @@ import { useCart } from "@/hooks/useCart";
 import { useNavigate } from "react-router-dom";
 
 const seasonHighlights = [
-  "باقات مرنة مع خيارات السكن والمواصلات حسب اختيار العميل.",
-  "تنسيق كامل للطيران الداخلي والدولي ضمن نفس الطلب.",
-  "خدمات إضافية (مرافقة، إرشاد، جولات) عند الطلب.",
+  "باقات مرنة تراعي خصوصية العائلة مع خيارات الإقامة الفاخرة والتنقلات الخاصة.",
+  "تنسيق متكامل للطيران الداخلي والدولي ضمن حجز واحد مريح.",
+  "خدمات إضافية حسب الطلب — مرافقة، إرشاد، وجولات خاصة.",
+  "أسعار شفافة بدون رسوم مخفية — قيمة حقيقية لكل ريال.",
 ];
 
 export default function Seasons() {
@@ -33,12 +34,12 @@ export default function Seasons() {
     <Layout>
       <section className="hero-gradient py-20">
         <div className="container mx-auto px-4 text-center">
-          <span className="text-primary-foreground/80">مواسم مشروك</span>
+          <span className="text-primary-foreground/80">مواسم مشروك المميزة</span>
           <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mt-3">
-            عروض موسمية مصممة لك
+            سافر في الوقت المناسب بأفضل قيمة
           </h1>
           <p className="text-primary-foreground/80 mt-4 max-w-2xl mx-auto">
-            برامج رمضان والحج والإجازة الصيفية مع خيارات سكن ومواصلات وخدمات إضافية تناسب احتياجك.
+            برامج رمضان والحج والإجازة الصيفية وموسم الشتاء — باقات متكاملة للإقامة والتنقل والخدمات تناسب العائلة الخليجية.
           </p>
         </div>
       </section>
@@ -100,7 +101,7 @@ export default function Seasons() {
           <div className="bg-muted rounded-3xl p-8 shadow-card">
             <div className="flex items-center gap-3 mb-4">
               <CalendarCheck className="w-6 h-6 text-secondary" />
-              <h2 className="text-2xl font-bold">ماذا يميز عروض المواسم؟</h2>
+              <h2 className="text-2xl font-bold">لماذا تختار مواسم مشروك؟</h2>
             </div>
             <div className="space-y-3 text-sm text-muted-foreground">
               {seasonHighlights.map((item) => (
@@ -113,14 +114,14 @@ export default function Seasons() {
             <div className="mt-6 bg-card rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 <MapPin className="w-4 h-4 text-primary" />
-                <span className="font-semibold">وجهات مختارة</span>
+                <span className="font-semibold">وجهات الموسم</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                مكة المكرمة (رمضان والحج) وبرامج دراسة اللغة في الخارج خلال الصيف.
+                مكة المكرمة والمدينة المنورة للرحلات الروحانية • أبها والباحة للمصايف العائلية • دبي وجورجيا للإجازة الشتوية.
               </p>
             </div>
             <Button variant="hero" className="mt-6 w-full" onClick={() => navigate("/cart")}>
-              متابعة الحجز
+              ابدأ التخطيط الآن
             </Button>
           </div>
         </div>

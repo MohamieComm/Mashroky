@@ -4,37 +4,37 @@ const features = [
   {
     icon: Shield,
     title: "حجز آمن 100%",
-    description: "حماية بياناتك والتزام بسياسات الخصوصية والأمان",
+    description: "حماية بياناتك الشخصية والمالية بأعلى معايير التشفير",
   },
   {
     icon: Headphones,
-    title: "دعم على مدار الساعة",
-    description: "فريق دعم متخصص متاح 24/7 لمساعدتك",
+    title: "دعم عربي 24/7",
+    description: "فريق متخصص يتحدث لغتك متاح لخدمتك في أي وقت",
   },
   {
     icon: CreditCard,
-    title: "مدفوعات مرنة",
-    description: "Samsung Pay وApple Pay وبطاقات مدى وفيزا وماستركارد",
+    title: "دفع مرن ومريح",
+    description: "مدى، Apple Pay، Samsung Pay، فيزا، ماستركارد والتقسيط",
   },
   {
     icon: Award,
-    title: "عروض شاملة",
-    description: "باقات تتضمن الطيران والفنادق والأنشطة والمواصلات",
+    title: "باقات متكاملة",
+    description: "طيران + فندق + أنشطة + تنقلات بسعر شفاف بدون رسوم خفية",
   },
   {
     icon: Clock,
-    title: "حجز سريع",
-    description: "واجهات حجز سهلة تحاكي منصات شركات الطيران العالمية",
+    title: "حجز في دقائق",
+    description: "واجهة سلسة مصممة لتختار وتحجز وتؤكد بسرعة",
   },
   {
     icon: Bot,
     title: "مساعد ذكي",
-    description: "اقتراح الوجهة المثالية حسب الموسم ومساعدتك في التسجيل",
+    description: "يقترح لك الوجهة المثالية حسب الموسم وميزانيتك",
   },
   {
     icon: Heart,
-    title: "تجربة مميزة",
-    description: "رحلات مصممة لتناسب العائلة، العرسان، والطلاب",
+    title: "تجربة مصممة لك",
+    description: "رحلات مصممة للعائلات والعرسان والطلاب بخصوصية تامة",
   },
 ];
 
@@ -56,7 +56,7 @@ export function WhyChooseUs() {
             لماذا تختار <span className="text-secondary">مشروك</span>؟
           </h2>
           <p className="text-primary-foreground/80 mt-4 max-w-xl mx-auto">
-            نقدم لك تجربة سفر استثنائية مع خدمات متميزة تجعل رحلتك لا تُنسى
+            خدمات مصممة لراحتك وثقتك — من التخطيط إلى العودة
           </p>
         </div>
 

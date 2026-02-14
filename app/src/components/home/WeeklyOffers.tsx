@@ -43,10 +43,10 @@ export function WeeklyOffers() {
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold">
-            أفضل أربع نشاطات لهذا الأسبوع
+            تجارب وأنشطة لا تُفوّت
           </h2>
           <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
-            اختر تجربة مميزة تجمع بين الترفيه والمغامرة والثقافة حسب وجهتك.
+            اختر تجربة تجمع بين المتعة والمغامرة والثقافة حسب وجهتك واهتماماتك.
           </p>
         </div>
 

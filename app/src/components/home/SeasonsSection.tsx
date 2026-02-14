@@ -32,10 +32,10 @@ export function SeasonsSection() {
               <span className="text-secondary font-semibold text-sm">عروض مواسم</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold">
-              مواسم السفر القادمة
+              سافر في الموسم المناسب بأفضل قيمة
             </h2>
             <p className="text-muted-foreground mt-3 max-w-2xl">
-              باقات مخصصة لرمضان والحج والصيف مع خيارات السكن والمواصلات والأنشطة حسب رغبتك.
+              باقات مخصصة لرمضان والحج والصيف مع إقامة مريحة وتنقلات وأنشطة بأسعار شفافة.
             </p>
           </div>
           <Link to="/seasons">

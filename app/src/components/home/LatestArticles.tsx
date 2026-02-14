@@ -16,10 +16,10 @@ export function LatestArticles() {
               الأخبار والمقالات
             </span>
             <h2 className="text-3xl md:text-4xl font-bold mt-2">
-              أحدث المقالات والنصائح
+              دليلك للسفر الذكي
             </h2>
             <p className="text-muted-foreground mt-3 max-w-xl">
-              مقالات متخصصة في السفر والسياحة والترفيه، مع نصائح لاختيار الوجهة حسب الموسم.
+              مقالات متخصصة في السفر والسياحة مع نصائح عملية لاختيار الوجهة والموسم المناسب.
             </p>
           </div>
           <Link to="/articles">

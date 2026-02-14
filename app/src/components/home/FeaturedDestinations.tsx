@@ -72,10 +72,10 @@ export function FeaturedDestinations() {
         <div className="flex items-end justify-between mb-12 flex-wrap gap-6">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold mt-2">
-              أفضل ستة عروض لأكثر الوجهات سياحة
+              باقات مختارة لأكثر الوجهات طلباً
             </h2>
             <p className="text-muted-foreground mt-3 max-w-xl">
-              باقات شاملة للطيران والفنادق والأنشطة الترفيهية والمواصلات لهذا الموسم.
+              باقات متكاملة تشمل الطيران والإقامة والأنشطة والتنقلات بأسعار شفافة.
             </p>
           </div>
           <Link to="/offers">

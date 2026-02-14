@@ -103,7 +103,7 @@ export function HeroSection() {
             <div className="inline-flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6 animate-fade-up">
               <span className="w-2 h-2 bg-secondary rounded-full animate-pulse" />
               <span className="text-primary-foreground text-sm font-medium">
-                منصة شاملة للسفر والسياحة في السعودية والشرق الأوسط
+                رفيقك الموثوق لكل رحلة من الخليج إلى العالم
               </span>
             </div>
 
@@ -111,7 +111,7 @@ export function HeroSection() {
               className="text-4xl md:text-6xl font-bold text-primary-foreground mb-6 leading-tight animate-fade-up"
               style={{ animationDelay: "0.1s" }}
             >
-              اكتشف العالم مع
+              سافر بثقة مع
               <span className="block mt-2 font-changa text-secondary">مشروك</span>
             </h1>
 
@@ -119,8 +119,8 @@ export function HeroSection() {
               className="text-lg md:text-xl text-primary-foreground/80 mb-8 max-w-xl lg:max-w-none animate-fade-up"
               style={{ animationDelay: "0.2s" }}
             >
-              رحلات مدروسة، عروض موسمية، وحجوزات ذكية في مكان واحد. اختر وجهتك،
-              ونحن نهتم بالتفاصيل.
+              باقات سفر متكاملة بأسعار شفافة، مصممة خصيصاً للعائلات والعرسان والمسافرين
+              من الخليج. اختر وجهتك ونحن نُتقن التفاصيل.
             </p>
 
             <div
@@ -128,7 +128,7 @@ export function HeroSection() {
               style={{ animationDelay: "0.25s" }}
             >
               <Button variant="hero" size="lg" className="gap-2">
-                ابدأ رحلتك الآن
+                ابدأ التخطيط الآن
               </Button>
               <Link to="/seasons">
                 <Button
@@ -136,7 +136,7 @@ export function HeroSection() {
                   size="lg"
                   className="bg-primary-foreground/15 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/25"
                 >
-                  تعرّف على العروض الموسمية
+                  استكشف باقات الموسم
                 </Button>
               </Link>
             </div>
@@ -315,9 +315,9 @@ export function HeroSection() {
           >
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-primary-foreground/70 text-sm">الفيديو التعريفي</p>
+                <p className="text-primary-foreground/70 text-sm">تعرّف علينا</p>
                 <h3 className="text-xl font-semibold text-primary-foreground">
-                  مشروك في دقيقة
+                  مشروك — رحلتك تبدأ هنا
                 </h3>
               </div>
             </div>
@@ -340,9 +340,9 @@ export function HeroSection() {
                   <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent" />
                   <div className="absolute bottom-4 right-4 left-4 flex items-center justify-between">
                     <div className="text-primary-foreground">
-                      <p className="text-sm text-primary-foreground/80">عروض مواسم</p>
+                      <p className="text-sm text-primary-foreground/80">باقات موسمية</p>
                       <p className="text-lg font-semibold">
-                        اكتشف باقات رمضان والحج والصيف
+                        باقات رمضان والحج والصيف بأسعار شفافة
                       </p>
                     </div>
                     <span className="bg-secondary text-secondary-foreground px-4 py-2 rounded-full text-sm font-semibold">
@@ -359,12 +359,12 @@ export function HeroSection() {
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-primary-foreground/80">
               <div className="bg-primary-foreground/10 rounded-xl p-3">
-                <p className="font-semibold">عروض الموسم</p>
-                <p className="text-xs">باقات شاملة للطيران والفندق والأنشطة.</p>
+                <p className="font-semibold">باقات متكاملة</p>
+                <p className="text-xs">طيران + فندق + أنشطة + تنقلات بسعر واحد.</p>
               </div>
               <div className="bg-primary-foreground/10 rounded-xl p-3">
-                <p className="font-semibold">مساعد ذكي</p>
-                <p className="text-xs">يرشدك لأفضل وجهة حسب الموسم.</p>
+                <p className="font-semibold">دعم على مدار الساعة</p>
+                <p className="text-xs">فريق يتحدث العربية متاح لمساعدتك دائماً.</p>
               </div>
             </div>
           </div>

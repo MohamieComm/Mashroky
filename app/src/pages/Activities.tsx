@@ -31,12 +31,12 @@ export default function Activities() {
     <Layout>
       <section className="hero-gradient py-20">
         <div className="container mx-auto px-4 text-center">
-          <span className="text-primary-foreground/80">النشاطات والمهرجانات</span>
+          <span className="text-primary-foreground/80">تجارب وفعاليات مميزة</span>
           <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mt-3">
-            احجز نشاطك المفضل بسهولة
+            اكتشف تجارب لا تُنسى
           </h1>
           <p className="text-primary-foreground/80 mt-4 max-w-2xl mx-auto">
-            اختر المهرجان أو المسابقة أو النشاط، وأضف الطيران والفندق والمواصلات حسب رغبتك.
+            من الفعاليات الثقافية إلى المغامرات الصحراوية والرحلات البحرية — أضف الطيران والإقامة لتجربة متكاملة.
           </p>
         </div>
       </section>
@@ -44,16 +44,16 @@ export default function Activities() {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="bg-card rounded-3xl p-8 shadow-card mb-12">
-            <h2 className="text-2xl font-bold mb-6">نموذج حجز النشاط</h2>
+            <h2 className="text-2xl font-bold mb-6">احجز تجربتك القادمة</h2>
             <div className="grid md:grid-cols-3 gap-4">
-              <input className="h-12 rounded-xl border border-input px-4" placeholder="اختر النشاط أو المهرجان" />
+              <input className="h-12 rounded-xl border border-input px-4" placeholder="التجربة أو الفعالية" />
               <input className="h-12 rounded-xl border border-input px-4" placeholder="فئة التذكرة" />
               <input className="h-12 rounded-xl border border-input px-4" placeholder="عدد الأشخاص" />
             </div>
             <div className="grid md:grid-cols-3 gap-4 mt-4">
               <input className="h-12 rounded-xl border border-input px-4" placeholder="إضافة الطيران" />
-              <input className="h-12 rounded-xl border border-input px-4" placeholder="إضافة الفندق" />
-              <input className="h-12 rounded-xl border border-input px-4" placeholder="إضافة المواصلات" />
+              <input className="h-12 rounded-xl border border-input px-4" placeholder="إضافة الإقامة" />
+              <input className="h-12 rounded-xl border border-input px-4" placeholder="إضافة التنقلات" />
             </div>
             <Button variant="hero" className="mt-6" onClick={handleQuickAdd}>إضافة للسلة</Button>
           </div>
@@ -96,22 +96,22 @@ export default function Activities() {
         <div className="container mx-auto px-4 grid md:grid-cols-3 gap-6">
           <div className="bg-card rounded-2xl p-6 shadow-card text-center">
             <CalendarCheck className="w-8 h-8 text-primary mx-auto mb-3" />
-            <h4 className="font-semibold mb-2">تنبيهات الحضور</h4>
-            <p className="text-sm text-muted-foreground">إشعارات فورية بوقت وموقع الفعالية.</p>
+            <h4 className="font-semibold mb-2">تنبيهات ذكية</h4>
+            <p className="text-sm text-muted-foreground">إشعارات فورية بموعد وموقع الفعالية مع إحداثيات الوصول.</p>
           </div>
           <div className="bg-card rounded-2xl p-6 shadow-card text-center">
             <Ticket className="w-8 h-8 text-primary mx-auto mb-3" />
-            <h4 className="font-semibold mb-2">تذاكر رقمية</h4>
-            <p className="text-sm text-muted-foreground">إرسال التذكرة عبر البريد أو واتساب.</p>
+            <h4 className="font-semibold mb-2">تذاكر إلكترونية</h4>
+            <p className="text-sm text-muted-foreground">تأكيد فوري وإرسال التذكرة عبر البريد أو واتساب.</p>
           </div>
           <div className="bg-card rounded-2xl p-6 shadow-card text-center">
             <Users className="w-8 h-8 text-primary mx-auto mb-3" />
-            <h4 className="font-semibold mb-2">خدمة مخصصة</h4>
-            <p className="text-sm text-muted-foreground">اختيارات للعائلة والمجموعات الخاصة.</p>
+            <h4 className="font-semibold mb-2">تجارب عائلية خاصة</h4>
+            <p className="text-sm text-muted-foreground">خيارات مصممة للعائلات والمجموعات الخاصة مع راحة وخصوصية.</p>
           </div>
         </div>
         <div className="container mx-auto px-4 mt-8 text-center text-sm text-muted-foreground">
-          بعد الدفع سيتم إرسال تفاصيل الموقع وطريقة الوصول مع الإحداثيات عبر البريد أو واتساب.
+          بعد الدفع ستصلك تفاصيل الموقع وإحداثيات الوصول وإرشادات الحضور عبر البريد أو واتساب.
         </div>
       </section>
     </Layout>

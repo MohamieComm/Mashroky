@@ -14,7 +14,7 @@ export function ContactSection() {
           <div className="bg-card rounded-3xl p-8 shadow-card">
             <h2 className="text-3xl font-bold mb-2">تواصل معنا</h2>
             <p className="text-muted-foreground mb-6">
-              اترك رسالتك وسنعود إليك بأقرب وقت. فريق مشروك متاح لخدمتك على مدار الساعة.
+              اترك رسالتك وسنعود إليك بأقرب وقت. فريق مشروك متاح لمساعدتك على مدار الساعة بالعربية.
             </p>
             <div className="grid md:grid-cols-2 gap-4">
               <Input placeholder="الاسم الكامل" />
@@ -78,7 +78,7 @@ export function ContactSection() {
                 <h4 className="text-lg font-semibold">مساعد مشروك الذكي</h4>
               </div>
               <p className="text-primary-foreground/80 mb-5 text-sm">
-                احصل على إجابات فورية حول العروض، التسجيل، واختيار الوجهة المناسبة حسب الموسم.
+                إجابات فورية حول العروض، الحجوزات، واختيار الوجهة المثالية لعائلتك.
               </p>
               <a
                 className="inline-flex items-center gap-2 bg-primary-foreground/15 text-primary-foreground px-4 py-2 rounded-full text-sm font-semibold"

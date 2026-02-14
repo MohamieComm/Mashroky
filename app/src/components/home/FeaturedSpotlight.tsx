@@ -12,10 +12,10 @@ export function FeaturedSpotlight() {
     featuredLink,
   } = useAdminSettings();
 
-  const title = featuredTitle || "أهم عرض رحلة هذا الأسبوع";
+  const title = featuredTitle || "عرض الموسم المميز";
   const description =
     featuredDescription ||
-    "اختر باقتك المميزة واستمتع بتجربة سفر متكاملة مع خيارات مرنة للطيران والسكن والأنشطة.";
+    "اختر باقتك المفضلة واستمتع بتجربة سفر متكاملة بأسعار شفافة وخيارات مرنة.";
   const link = (featuredLink || "/offers").trim();
   const isExternal = /^https?:\/\//.test(link);
 

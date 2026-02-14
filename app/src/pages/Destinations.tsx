@@ -70,14 +70,14 @@ export default function Destinations() {
         <div className="container mx-auto px-4 relative z-10 text-center">
           <div className="inline-flex items-center gap-2 bg-white/70 rounded-full px-4 py-2 mb-6 shadow-soft">
             <Sparkles className="w-4 h-4 text-secondary" />
-            <span className="text-sm font-semibold text-secondary">الوجهات السياحية المبهجة</span>
+            <span className="text-sm font-semibold text-secondary">وجهات مختارة بعناية</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            الوجهات السياحية
-            <span className="block mt-2 text-primary">ألوان وتجارب لا تُنسى</span>
+            وجهتك القادمة
+            <span className="block mt-2 text-primary">بين التراث والحداثة والرفاهية</span>
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            اختر وجهتك حسب الموسم، واحصل على باقة شاملة للطيران والإقامة والأنشطة مع تنقلات مريحة.
+            استكشف وجهات تناسب ذوقك وعائلتك — من العطلات اللاذعة إلى المغامرات الثقافية مع باقات شاملة للطيران والإقامة.
           </p>
           <div className="flex flex-wrap justify-center gap-3 mt-8">
             {["شتوية", "صيفية", "رومانسية", "فاخر", "تراث", "عائلي"].map((tag) => (
@@ -93,9 +93,9 @@ export default function Destinations() {
         <div className="container mx-auto px-4">
           <div className="flex items-start justify-between gap-6 flex-wrap mb-10">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold">أشهر الوجهات</h2>
+              <h2 className="text-3xl md:text-4xl font-bold">استكشف الوجهات</h2>
               <p className="text-muted-foreground mt-2">
-                اختر من القوائم المميزة حسب المنطقة لتخطيط رحلتك بسرعة.
+                تصفح الوجهات حسب المنطقة لتخطيط رحلتك بسهولة.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -164,7 +164,7 @@ export default function Destinations() {
             <div>
               <h2 className="text-3xl md:text-4xl font-bold">وجهات موصى بها لهذا الموسم</h2>
               <p className="text-muted-foreground mt-2">
-                باقات مختارة بعناية مع توصيات موسمية ونقاط جذب رئيسية لكل وجهة.
+                باقات منتقاة بعناية مع توصيات خبرائنا ونقاط جذب حصرية لكل وجهة.
               </p>
             </div>
             <Link to="/offers">

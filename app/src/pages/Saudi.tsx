@@ -9,12 +9,12 @@ export default function Saudi() {
     <Layout>
       <section className="hero-gradient py-20">
         <div className="container mx-auto px-4 text-center">
-          <span className="text-primary-foreground/80">السياحة في السعودية</span>
+          <span className="text-primary-foreground/80">اكتشف المملكة</span>
           <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mt-3">
-            اكتشف جمال المملكة
+            السعودية — وجهة العالم القادمة
           </h1>
           <p className="text-primary-foreground/80 mt-4 max-w-2xl mx-auto">
-            وجهات متنوعة تجمع بين التراث العريق والطبيعة الخلابة والمشاريع السياحية الحديثة، مع فعاليات عالمية قادمة.
+            من العُلا إلى البحر الأحمر، ومن الدرعية إلى عسير — تجارب تجمع عراقة التراث وفخامة المشاريع الكبرى ورؤية 2030.
           </p>
         </div>
       </section>
@@ -36,7 +36,7 @@ export default function Saudi() {
               ))}
 
               <div className="bg-card rounded-2xl p-8 shadow-card">
-                <h3 className="text-xl font-bold mb-4">مواقع تراث عالمي في المملكة</h3>
+                <h3 className="text-xl font-bold mb-4">تراث المملكة العالمي</h3>
                 <div className="grid md:grid-cols-2 gap-3 text-sm text-muted-foreground">
                   {saudiHeritage.map((item) => (
                     <div key={item} className="flex items-center gap-2">
@@ -51,7 +51,7 @@ export default function Saudi() {
             <div className="bg-muted rounded-3xl p-8 shadow-card">
               <div className="flex items-center gap-2 mb-4">
                 <CalendarDays className="w-5 h-5 text-secondary" />
-                <h3 className="text-xl font-bold">فعاليات عالمية قادمة</h3>
+                <h3 className="text-xl font-bold">فعاليات عالمية ترسم المستقبل</h3>
               </div>
               <div className="space-y-4 text-sm text-muted-foreground">
                 {saudiMegaEvents.map((event) => (
@@ -63,22 +63,22 @@ export default function Saudi() {
               </div>
 
               <div className="mt-8">
-                <h3 className="text-xl font-bold mb-4">نصائح موسم السفر</h3>
+                <h3 className="text-xl font-bold mb-4">أفضل أوقات الزيارة</h3>
                 <div className="space-y-4 text-sm text-muted-foreground">
                   <div className="bg-card rounded-xl p-4 shadow-soft">
                     <p className="font-semibold text-foreground">الشتاء والربيع</p>
-                    <p>أفضل وقت لزيارة العُلا والدرعية والرياض للاستمتاع بالطقس المعتدل.</p>
+                    <p>الوقت المثالي لزيارة العُلا والدرعية والرياض — طقس معتدل وفعاليات موسمية حصرية.</p>
                   </div>
                   <div className="bg-card rounded-xl p-4 shadow-soft">
                     <p className="font-semibold text-foreground">الصيف</p>
-                    <p>توجه إلى أبها وعسير للأجواء الجبلية الباردة نسبياً.</p>
+                    <p>أبها وعسير تمنحك أجواء جبلية منعشة — المكان المثالي للمصايف العائلية.</p>
                   </div>
                   <div className="bg-card rounded-xl p-4 shadow-soft">
                     <p className="font-semibold text-foreground">على مدار العام</p>
-                    <p>سواحل البحر الأحمر مثالية للغوص والمنتجعات الفاخرة.</p>
+                    <p>سواحل البحر الأحمر ومشاريع المنتجعات الفاخرة تستقبلك طوال السنة.</p>
                   </div>
                 </div>
-                <Button variant="hero" className="mt-6 w-full">خطط لرحلتك داخل السعودية</Button>
+                <Button variant="hero" className="mt-6 w-full">خطط لرحلتك داخل المملكة</Button>
               </div>
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function Saudi() {
       <section className="py-16 bg-muted">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold mb-10 text-center">
-            أفضل الوجهات السعودية لهذا الموسم
+            وجهات سعودية تستحق الزيارة
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {saudiHighlights.map((dest) => (

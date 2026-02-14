@@ -60,10 +60,10 @@ export function FeaturedHotels() {
               <span className="text-secondary font-semibold text-sm">الفنادق المميزة</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mt-2">
-              أفضل أربعة فنادق مختارة بعناية
+              فنادق مختارة بعناية لراحتك
             </h2>
             <p className="text-muted-foreground mt-3 max-w-xl">
-              إقامات موثوقة تناسب الأعمال والعائلات مع مواقع قريبة وخدمات متكاملة.
+              إقامات موثوقة للعائلات ورجال الأعمال مع مواقع مركزية وخدمات متكاملة.
             </p>
           </div>
           <Link to="/hotels">
