@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import {
   Trash2, CreditCard, CheckCircle, XCircle, ShoppingCart,
   Hotel, Plane, Car, MapPin, Tag, Shield, Gift, ArrowRight,
-  Package, Sparkles,
+  Plus, Package, Sparkles,
 } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { useState, useMemo } from "react";
