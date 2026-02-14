@@ -57,14 +57,21 @@ CREATE TABLE IF NOT EXISTS public.amadeus_config (
 
 -- ── Bookings ────────────────────────────────────────────────
 
-CREATE TYPE booking_type AS ENUM ('flight', 'hotel', 'transfer', 'activity');
-CREATE TYPE booking_status AS ENUM ('pending', 'confirmed', 'cancelled', 'failed', 'expired');
+DO $$ BEGIN
+  CREATE TYPE booking_type_enum AS ENUM ('flight', 'hotel', 'transfer', 'activity');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE booking_status_enum AS ENUM ('pending', 'confirmed', 'cancelled', 'failed', 'expired');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 CREATE TABLE IF NOT EXISTS public.bookings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  booking_type booking_type NOT NULL,
-  status booking_status NOT NULL DEFAULT 'pending',
+  booking_type booking_type_enum NOT NULL,
+  status booking_status_enum NOT NULL DEFAULT 'pending',
   -- Amadeus references
   amadeus_order_id TEXT,
   amadeus_confirm_nbr TEXT,
@@ -89,8 +96,15 @@ CREATE INDEX idx_bookings_created ON public.bookings(created_at DESC);
 
 -- ── Payments ────────────────────────────────────────────────
 
-CREATE TYPE payment_status AS ENUM ('pending', 'completed', 'failed', 'refunded');
-CREATE TYPE payment_method AS ENUM ('credit_card', 'debit_card', 'bank_transfer', 'wallet', 'cash');
+DO $$ BEGIN
+  CREATE TYPE payment_status_enum AS ENUM ('pending', 'completed', 'failed', 'refunded');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE payment_method_enum AS ENUM ('credit_card', 'debit_card', 'bank_transfer', 'wallet', 'cash');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 CREATE TABLE IF NOT EXISTS public.payments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -98,8 +112,8 @@ CREATE TABLE IF NOT EXISTS public.payments (
   user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   amount DECIMAL(12,2) NOT NULL,
   currency TEXT NOT NULL DEFAULT 'SAR',
-  status payment_status NOT NULL DEFAULT 'pending',
-  method payment_method NOT NULL DEFAULT 'credit_card',
+  status payment_status_enum NOT NULL DEFAULT 'pending',
+  method payment_method_enum NOT NULL DEFAULT 'credit_card',
   -- Payment provider details
   provider_ref TEXT,
   provider_response JSONB,
