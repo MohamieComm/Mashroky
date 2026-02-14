@@ -4,7 +4,7 @@ import { upload } from '../controllers/media.controller.js';
 import { attachUser, requireAdmin, requireAuth } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
-const uploadMiddleware = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+const uploadMiddleware = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
 router.post('/upload', attachUser, requireAuth, requireAdmin, uploadMiddleware.single('file'), upload);
 

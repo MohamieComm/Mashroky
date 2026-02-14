@@ -611,7 +611,7 @@ export default function Admin() {
   const buildItemFromDraft = () => {
     if (!activeConfig) return null;
     const nextItem: Record<string, unknown> = {
-      id: editingId ?? `${activeConfig.id}-${Date.now()}`,
+      id: editingId ?? (activeConfig.listKey === 'seasons' ? crypto.randomUUID() : `${activeConfig.id}-${Date.now()}`),
     };
 
     activeConfig.fields.forEach((field) => {
